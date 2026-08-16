@@ -1,0 +1,57 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Responsive table: stack rows into card-style layout on small screens.
+   Column labels are injected into each <td> as data-label by the
+   resources/views/components/table.blade.php Alpine init(). */
+@media (max-width: 640px) {
+    .x-table,
+    .x-table tbody {
+        display: block;
+        width: 100%;
+    }
+
+    .x-table thead {
+        display: none;
+    }
+
+    .x-table tbody tr {
+        display: block;
+        padding: 0.9rem 0;
+    }
+
+    .x-table tbody td {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 1rem;
+        padding: 0.35rem 0;
+        border: 0;
+    }
+
+    .x-table tbody td::before {
+        content: attr(data-label);
+        font-size: 0.7rem;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        color: #64748B;
+        flex-shrink: 0;
+    }
+
+    .dark .x-table tbody td::before {
+        color: #94A3B8;
+    }
+}
+
+/* Chart.js theme tokens (consumed by dashboard JS) */
+:root {
+    --chart-grid: rgba(148, 163, 184, 0.15);
+    --chart-text: #64748B;
+}
+
+.dark {
+    --chart-grid: rgba(148, 163, 184, 0.15);
+    --chart-text: #94A3B8;
+}
