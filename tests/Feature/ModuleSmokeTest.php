@@ -353,6 +353,18 @@ class ModuleSmokeTest extends TestCase
         $this->actingAs($registration)->get(route('queue.display.json'))->assertOk();
     }
 
+    public function test_pharmacist_can_view_reorder_recommendations(): void
+    {
+        $user = $this->seedAdmin();
+
+        $medicine = \App\Models\Medicine::firstOrFail();
+        $medicine->update(['minimum_stock' => 9999]);
+
+        $this->actingAs($user)->get(route('medicines.reorder'))
+            ->assertOk()
+            ->assertSee('Rekomendasi Pembelian Stok');
+    }
+
     public function test_lab_queue_display_accessible_to_authenticated_users(): void
     {
         $user = $this->seedAdmin();

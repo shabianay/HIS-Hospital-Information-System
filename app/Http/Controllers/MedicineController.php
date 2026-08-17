@@ -154,4 +154,34 @@ class MedicineController extends Controller
 
         return view('medicines.mutations', compact('mutations', 'medicines'));
     }
+
+    public function reorder()
+    {
+        $this->authorize('viewAny', Medicine::class);
+
+        $lowStock = DB::table('medicines as m')
+            ->leftJoin('medicine_stocks as ms', 'm.id', '=', 'ms.medicine_id')
+            ->select(
+                'm.id',
+                'm.name',
+                'm.unit',
+                'm.minimum_stock',
+                'm.buy_price',
+                DB::raw('COALESCE(SUM(ms.quantity), 0) as total_stock')
+            )
+            ->groupBy('m.id', 'm.name', 'm.unit', 'm.minimum_stock', 'm.buy_price')
+            ->havingRaw('COALESCE(SUM(ms.quantity), 0) <= m.minimum_stock')
+            ->orderByRaw('COALESCE(SUM(ms.quantity), 0) ASC')
+            ->get()
+            ->map(function ($item) {
+                $item->suggested_quantity = max(0, $item->minimum_stock - $item->total_stock) + 10;
+                $item->estimated_cost = (float) $item->suggested_quantity * (float) $item->buy_price;
+
+                return $item;
+            });
+
+        $totalSuggestedCost = $lowStock->sum('estimated_cost');
+
+        return view('medicines.reorder', compact('lowStock', 'totalSuggestedCost'));
+    }
 }

@@ -90,6 +90,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::resource('medicines', MedicineController::class);
     Route::get('medicines-stock', [MedicineController::class, 'stock'])->name('medicines.stock');
     Route::get('medicine-mutations', [MedicineController::class, 'mutations'])->name('medicines.mutations');
+    Route::get('medicine-reorder', [MedicineController::class, 'reorder'])->name('medicines.reorder');
     Route::post('medicine-stocks', [MedicineStockController::class, 'store'])->name('medicine-stocks.store');
     Route::post('medicine-stocks/adjust', [MedicineStockController::class, 'adjust'])->name('medicine-stocks.adjust');
     Route::post('prescriptions/{prescription}/dispense', [MedicineStockController::class, 'dispense'])->name('prescriptions.dispense');
