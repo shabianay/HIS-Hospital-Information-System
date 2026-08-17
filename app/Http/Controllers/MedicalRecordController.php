@@ -251,6 +251,54 @@ class MedicalRecordController extends Controller
         return $pdf->download('rekam-medis-' . str_pad($medicalRecord->id, 4, '0', STR_PAD_LEFT) . '.pdf');
     }
 
+    public function sickNotePdf(MedicalRecord $medicalRecord, Request $request)
+    {
+        $this->authorize('view', $medicalRecord);
+
+        $days = max(1, (int) $request->get('days', 1));
+
+        $medicalRecord->load([
+            'appointment.patient',
+            'appointment.doctor',
+            'appointment.poli',
+            'diagnoses',
+        ]);
+
+        $pdf = Pdf::loadView('medical-records.sick-note', [
+            'medicalRecord' => $medicalRecord,
+            'days' => $days,
+            'daysWord' => $this->numberToIndonesianWords($days),
+            'generatedAt' => now()->format('d/m/Y H:i:s'),
+        ])->setPaper('a4');
+
+        return $pdf->download('surat-keterangan-sakit-' . str_pad($medicalRecord->id, 4, '0', STR_PAD_LEFT) . '.pdf');
+    }
+
+    private function numberToIndonesianWords(int $number): string
+    {
+        $units = ['', 'satu', 'dua', 'tiga', 'empat', 'lima', 'enam', 'tujuh', 'delapan', 'sembilan'];
+        $teens = ['sepuluh', 'sebelas', 'dua belas', 'tiga belas', 'empat belas', 'lima belas', 'enam belas', 'tujuh belas', 'delapan belas', 'sembilan belas'];
+        $tens = ['', '', 'dua puluh', 'tiga puluh', 'empat puluh', 'lima puluh', 'enam puluh', 'tujuh puluh', 'delapan puluh', 'sembilan puluh'];
+
+        if ($number < 10) {
+            return $units[$number];
+        }
+        if ($number < 20) {
+            return $teens[$number - 10];
+        }
+        if ($number < 100) {
+            return trim($tens[intdiv($number, 10)] . ($number % 10 ? ' ' . $units[$number % 10] : ''));
+        }
+        if ($number < 200) {
+            return 'seratus' . ($number % 100 ? ' ' . $this->numberToIndonesianWords($number % 100) : '');
+        }
+        if ($number < 1000) {
+            return $units[intdiv($number, 100)] . ' ratus' . ($number % 100 ? ' ' . $this->numberToIndonesianWords($number % 100) : '');
+        }
+
+        return (string) $number;
+    }
+
     public function historyPdf($patientId)
     {
         $patient = Patient::findOrFail($patientId);

@@ -64,6 +64,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::post('appointments/{appointment}/medical-record', [MedicalRecordController::class, 'store'])->name('medical-records.store');
     Route::get('medical-records/{medicalRecord}', [MedicalRecordController::class, 'show'])->name('medical-records.show');
     Route::get('medical-records/{medicalRecord}/pdf', [MedicalRecordController::class, 'exportPdf'])->name('medical-records.pdf');
+    Route::get('medical-records/{medicalRecord}/sick-note', [MedicalRecordController::class, 'sickNotePdf'])->name('medical-records.sick-note');
     Route::get('medical-records/{medicalRecord}/edit', [MedicalRecordController::class, 'edit'])->name('medical-records.edit');
     Route::put('medical-records/{medicalRecord}', [MedicalRecordController::class, 'update'])->name('medical-records.update');
 

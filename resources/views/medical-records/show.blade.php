@@ -15,6 +15,9 @@
                     <x-secondary-button href="{{ route('medical-records.edit', $medicalRecord) }}">Edit</x-secondary-button>
                 @endif
                 <a href="{{ route('medical-records.pdf', $medicalRecord) }}" class="inline-flex items-center gap-2 rounded-xl border border-primary-300 dark:border-primary-700 bg-primary-50 dark:bg-primary-900/20 px-5 py-2.5 text-sm font-semibold text-primary-700 dark:text-primary-300 hover:bg-primary-100 dark:hover:bg-primary-900/40 transition-all duration-200">Cetak PDF</a>
+                @if($medicalRecord->status === 'finalized')
+                    <a href="{{ route('medical-records.sick-note', $medicalRecord) }}" class="inline-flex items-center gap-2 rounded-xl border border-primary-300 dark:border-primary-700 bg-primary-50 dark:bg-primary-900/20 px-5 py-2.5 text-sm font-semibold text-primary-700 dark:text-primary-300 hover:bg-primary-100 dark:hover:bg-primary-900/40 transition-all duration-200">Surat Sakit</a>
+                @endif
                 @if($medicalRecord->appointment && !$medicalRecord->appointment->billing)
                     <a href="{{ route('billings.create', $medicalRecord->appointment) }}" class="inline-flex items-center gap-2 rounded-xl bg-primary-600 px-5 py-2.5 text-sm font-semibold text-white shadow-glass-sm hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 dark:focus:ring-offset-surface-dark transition-all duration-200">Buat Tagihan</a>
                 @endif

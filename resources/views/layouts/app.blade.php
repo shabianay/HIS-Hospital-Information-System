@@ -61,6 +61,11 @@
                                 <span x-show="count > 0" x-cloak class="absolute top-0 right-0 inline-flex h-5 w-5 items-center justify-center rounded-full bg-danger-600 text-[10px] font-bold text-white" x-text="Math.min(count, 99)"></span>
                             </a>
                         </div>
+                        {{-- Dark Mode Toggle --}}
+                        <button @click="darkMode = !darkMode" class="p-2 rounded-lg text-text-secondary-light dark:text-text-secondary-dark hover:bg-primary-50 dark:hover:bg-primary-900 hover:text-primary-500 dark:hover:text-primary-400 transition">
+                            <svg x-show="!darkMode" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.325 3.325l-.707.707M6.318 6.318l-.707-.707m12.728 0l-.707.707M6.318 17.682l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"/></svg>
+                            <svg x-show="darkMode" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"/></svg>
+                        </button>
                         <span class="hidden md:block text-text-secondary-light dark:text-text-secondary-dark">{{ Auth::user()->name }}</span>
                         <form method="POST" action="{{ route('logout') }}" class="inline">
                             @csrf
@@ -69,11 +74,6 @@
                                 Keluar
                             </button>
                         </form>
-                        {{-- Dark Mode Toggle --}}
-                        <button @click="darkMode = !darkMode" class="p-2 rounded-lg text-text-secondary-light dark:text-text-secondary-dark hover:bg-primary-50 dark:hover:bg-primary-900 hover:text-primary-500 dark:hover:text-primary-400 transition">
-                            <svg x-show="!darkMode" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.325 3.325l-.707.707M6.318 6.318l-.707-.707m12.728 0l-.707.707M6.318 17.682l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"/></svg>
-                            <svg x-show="darkMode" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"/></svg>
-                        </button>
                     </div>
                 </header>
 

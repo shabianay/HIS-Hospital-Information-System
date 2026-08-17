@@ -31,13 +31,16 @@
             <div class="flex justify-between"><span>No. Tagihan:</span><strong>{{ $billing->invoice_number }}</strong>
             </div>
             <div class="flex justify-between">
-                <span>Tanggal:</span><span>{{ $billing->created_at?->format('d/m/Y H:i') }}</span></div>
+                <span>Tanggal:</span><span>{{ $billing->created_at?->format('d/m/Y H:i') }}</span>
+            </div>
             <div class="flex justify-between">
-                <span>Pasien:</span><strong>{{ $billing->appointment?->patient?->name }}</strong></div>
+                <span>Pasien:</span><strong>{{ $billing->appointment?->patient?->name }}</strong>
+            </div>
             <div class="flex justify-between"><span>NIK:</span><span>{{ $billing->appointment?->patient?->nik }}</span>
             </div>
             <div class="flex justify-between">
-                <span>Dokter:</span><span>{{ $billing->appointment?->doctor?->name }}</span></div>
+                <span>Dokter:</span><span>{{ $billing->appointment?->doctor?->name }}</span>
+            </div>
             <div class="flex justify-between"><span>No.
                     Antrian:</span><span>{{ $billing->appointment?->queue_number }}</span></div>
         </div>
@@ -91,7 +94,7 @@
 
         <div class="no-print mt-6 flex justify-center gap-2">
             <button onclick="window.print()"
-                class="inline-flex items-center gap-2 rounded-xl bg-primary-600 px-5 py-2.5 text-xs font-semibold text-white shadow hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 transition-all duration-200">Cetak
+                class="inline-flex items-center gap-2 rounded-xl border border-border-light bg-surface-light px-5 py-2.5 text-xs font-semibold text-text-primary-light hover:bg-primary-50 dark:border-border-dark dark:bg-surface-dark dark:text-text-primary-dark dark:hover:bg-primary-900/10 transition-all duration-200">Cetak
                 Kuitansi</button>
             <a href="{{ route('billings.show', $billing) }}"
                 class="inline-flex items-center gap-2 rounded-xl border border-border-light bg-surface-light px-5 py-2.5 text-xs font-semibold text-text-primary-light hover:bg-primary-50 dark:border-border-dark dark:bg-surface-dark dark:text-text-primary-dark dark:hover:bg-primary-900/10 transition-all duration-200">Kembali</a>

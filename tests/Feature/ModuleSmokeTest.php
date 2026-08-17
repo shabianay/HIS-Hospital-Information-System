@@ -915,6 +915,39 @@ class ModuleSmokeTest extends TestCase
             ->assertSee('Abnormal');
     }
 
+    public function test_finalized_medical_record_can_export_sick_note(): void
+    {
+        $user = $this->seedAdmin();
+
+        $appointment = Appointment::first();
+
+        $medicalRecord = $appointment->medicalRecord()->create([
+            'patient_id' => $appointment->patient_id,
+            'doctor_id' => $appointment->doctor_id,
+            'chief_complaint' => 'Demam',
+            'subjective' => 'Demam 3 hari',
+            'objective' => 'Suhu 38C',
+            'assessment' => 'Dengue',
+            'plan' => 'Istirahat',
+            'status' => 'finalized',
+        ]);
+
+        \App\Models\Diagnosis::create([
+            'medical_record_id' => $medicalRecord->id,
+            'icd_code' => 'A90',
+            'description' => 'Dengue',
+            'is_primary' => true,
+        ]);
+
+        $this->actingAs($user)->get(route('medical-records.show', $medicalRecord))
+            ->assertOk()
+            ->assertSee('Surat Sakit');
+
+        $this->actingAs($user)->get(route('medical-records.sick-note', $medicalRecord))
+            ->assertOk()
+            ->assertHeader('Content-Type', 'application/pdf');
+    }
+
     public function test_dispense_fails_gracefully_when_stock_insufficient(): void
     {
         $user = $this->seedAdmin();
