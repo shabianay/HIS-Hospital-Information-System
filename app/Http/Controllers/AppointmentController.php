@@ -7,6 +7,8 @@ use App\Models\Doctor;
 use App\Models\Patient;
 use App\Models\Poli;
 use App\Models\Schedule;
+use App\Models\User;
+use App\Notifications\AppointmentCreated;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cache;
@@ -106,8 +108,23 @@ class AppointmentController extends Controller
         Cache::forget(QueueDisplayController::cacheKey(Carbon::parse($validated['appointment_date'])));
         Cache::forget('dashboard.' . Carbon::parse($validated['appointment_date'])->format('Y-m-d'));
 
+        $this->notifyDoctorOfNewAppointment($appointment);
+
         return redirect()->route('appointments.show', $appointment)
             ->with('success', "Appointment created. Queue number: {$appointment->queue_number}");
+    }
+
+    private function notifyDoctorOfNewAppointment(Appointment $appointment): void
+    {
+        $doctorUser = $appointment->doctor?->user;
+
+        if (! $doctorUser) {
+            return;
+        }
+
+        $appointment->load('patient');
+
+        $doctorUser->notify(new AppointmentCreated($appointment));
     }
 
     public function show(Appointment $appointment)

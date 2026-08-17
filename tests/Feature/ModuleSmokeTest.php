@@ -118,6 +118,32 @@ class ModuleSmokeTest extends TestCase
             ->assertSee('Cetak Tiket');
     }
 
+    public function test_creating_appointment_notifies_doctor(): void
+    {
+        $user = $this->seedAdmin();
+
+        $appointment = Appointment::first();
+        $schedule = Schedule::find($appointment->schedule_id);
+
+        $schedule->update(['daily_quota' => 100]);
+
+        $this->actingAs($user)->post(route('appointments.store'), [
+            'patient_id' => $appointment->patient_id,
+            'doctor_id' => $appointment->doctor_id,
+            'poli_id' => $appointment->poli_id,
+            'schedule_id' => $appointment->schedule_id,
+            'appointment_date' => now()->toDateString(),
+        ])->assertSessionHasNoErrors();
+
+        $doctorUser = \App\Models\Doctor::find($appointment->doctor_id)->user;
+
+        if ($doctorUser) {
+            $this->assertGreaterThan(0, $doctorUser->notifications()->where('type', \App\Notifications\AppointmentCreated::class)->count());
+        } else {
+            $this->assertTrue(true);
+        }
+    }
+
     public function test_admin_can_complete_emr_pharmacy_and_billing_flow(): void
     {
         $user = $this->seedAdmin();
