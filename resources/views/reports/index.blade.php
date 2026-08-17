@@ -101,8 +101,7 @@
     </div>
 
     <div class="bg-surface-light dark:bg-surface-dark p-8 rounded-2xl border border-border-light dark:border-border-dark shadow-glass-sm">
-        <h4 class="mb-4 text-lg font-bold text-text-primary-light dark:text-text-primary-dark">10 Diagnosis Terbanyak</h4>
-        <x-table :searchable="false">
+        <h4 class="mb-4 text-lg font-bold text-text-primary-light dark:text-text-primary-dark">10 Diagnosis Terbanyak</h4>        <x-table :searchable="false">
             <x-slot name="head">
                 <tr class="border-b border-border-light dark:border-border-dark text-xs uppercase tracking-wider text-text-secondary-light dark:text-text-secondary-dark">
                     <th class="pb-3 font-semibold">Kode ICD-10</th>
@@ -118,6 +117,43 @@
             </tr>
             @empty
             <tr><td colspan="3" class="py-6 text-center text-text-secondary-light dark:text-text-secondary-dark">Tidak ada data.</td></tr>
+            @endforelse
+        </x-table>
+    </div>
+
+    <div class="bg-surface-light dark:bg-surface-dark p-8 rounded-2xl border border-border-light dark:border-border-dark shadow-glass-sm">
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4">
+            <h4 class="text-lg font-bold text-text-primary-light dark:text-text-primary-dark">Nilai Stok Obat (Saat Ini)</h4>
+            <div class="flex flex-wrap gap-3 text-sm">
+                <span class="inline-flex items-center gap-2 rounded-full bg-primary-100 dark:bg-primary-900/30 px-4 py-1.5 font-semibold text-primary-800 dark:text-primary-400">
+                    Total Nilai: Rp {{ number_format($stockValuationTotal, 0, ',', '.') }}
+                </span>
+                <span class="inline-flex items-center gap-2 rounded-full bg-warning-100 dark:bg-warning-900/30 px-4 py-1.5 font-semibold text-warning-800 dark:text-warning-400">
+                    Kedaluwarsa ≤60 hari: {{ number_format($expiringStockCount) }}
+                </span>
+                <span class="inline-flex items-center gap-2 rounded-full bg-danger-100 dark:bg-danger-900/30 px-4 py-1.5 font-semibold text-danger-800 dark:text-danger-400">
+                    Stok Kritis: {{ number_format($lowStockCount) }}
+                </span>
+            </div>
+        </div>
+        <x-table :searchable="false">
+            <x-slot name="head">
+                <tr class="border-b border-border-light dark:border-border-dark text-xs uppercase tracking-wider text-text-secondary-light dark:text-text-secondary-dark">
+                    <th class="pb-3 font-semibold">Obat</th>
+                    <th class="pb-3 font-semibold">Stok</th>
+                    <th class="pb-3 font-semibold">Harga Beli</th>
+                    <th class="pb-3 font-semibold text-right">Nilai</th>
+                </tr>
+            </x-slot>
+            @forelse($stockValuation as $row)
+            <tr class="border-b border-border-light dark:border-border-dark hover:bg-primary-50/50 dark:hover:bg-primary-900/10 transition-colors">
+                <td class="py-3 text-text-primary-light dark:text-text-primary-dark">{{ $row->name }}</td>
+                <td class="py-3 text-text-primary-light dark:text-text-primary-dark">{{ number_format($row->total_quantity) }} {{ $row->unit }}</td>
+                <td class="py-3 text-text-primary-light dark:text-text-primary-dark">Rp {{ number_format($row->buy_price, 0, ',', '.') }}</td>
+                <td class="py-3 text-right text-text-primary-light dark:text-text-primary-dark">Rp {{ number_format($row->total_value, 0, ',', '.') }}</td>
+            </tr>
+            @empty
+            <tr><td colspan="4" class="py-6 text-center text-text-secondary-light dark:text-text-secondary-dark">Tidak ada data.</td></tr>
             @endforelse
         </x-table>
     </div>

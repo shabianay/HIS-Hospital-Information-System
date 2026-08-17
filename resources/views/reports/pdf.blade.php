@@ -71,6 +71,21 @@
         </tbody>
     </table>
 
+    <h2>Nilai Stok Obat (Saat Ini)</h2>
+    <table class="data">
+        <thead><tr><th>Obat</th><th>Stok</th><th>Harga Beli</th><th>Nilai</th></tr></thead>
+        <tbody>
+            @forelse($stockValuation as $row)
+            <tr><td>{{ $row->name }}</td><td>{{ number_format($row->total_quantity) }} {{ $row->unit }}</td><td>Rp {{ number_format($row->buy_price, 0, ',', '.') }}</td><td>Rp {{ number_format($row->total_value, 0, ',', '.') }}</td></tr>
+            @empty
+            <tr><td colspan="4">Tidak ada data.</td></tr>
+            @endforelse
+            <tr><td colspan="3"><strong>Total Nilai Stok</strong></td><td><strong>Rp {{ number_format($stockValuationTotal, 0, ',', '.') }}</strong></td></tr>
+            <tr><td colspan="3"><strong>Batch Kedaluwarsa ≤60 hari</strong></td><td><strong>{{ number_format($expiringStockCount) }}</strong></td></tr>
+            <tr><td colspan="3"><strong>Obat Stok Kritis</strong></td><td><strong>{{ number_format($lowStockCount) }}</strong></td></tr>
+        </tbody>
+    </table>
+
     <h2>Konsumsi Obat</h2>
     <table class="data">
         <thead><tr><th>Obat</th><th>Jumlah</th><th>Nilai</th></tr></thead>

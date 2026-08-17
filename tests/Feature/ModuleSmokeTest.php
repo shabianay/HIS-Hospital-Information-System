@@ -323,7 +323,7 @@ class ModuleSmokeTest extends TestCase
     {
         $user = $this->seedAdmin();
 
-        $this->actingAs($user)->get(route('reports.index'))->assertOk();
+        $this->actingAs($user)->get(route('reports.index'))->assertOk()->assertSee('Nilai Stok Obat');
         $this->actingAs($user)->get(route('reports.pdf'))->assertOk();
     }
 

@@ -121,6 +121,42 @@ class ReportController extends Controller
 
         $labTotal = $labWorkload->sum('total');
 
+        // Stock valuation (current, as of end of period)
+        $stockValuation = DB::table('medicine_stocks as ms')
+            ->join('medicines as m', 'ms.medicine_id', '=', 'm.id')
+            ->select(
+                'm.id',
+                'm.name',
+                'm.unit',
+                'm.buy_price',
+                'm.sell_price',
+                'm.minimum_stock',
+                DB::raw('SUM(ms.quantity) as total_quantity'),
+                DB::raw('SUM(ms.quantity * m.buy_price) as total_value')
+            )
+            ->groupBy('m.id', 'm.name', 'm.unit', 'm.buy_price', 'm.sell_price', 'm.minimum_stock')
+            ->orderByDesc('total_value')
+            ->limit(15)
+            ->get();
+
+        $stockValuationTotal = DB::table('medicine_stocks as ms')
+            ->join('medicines as m', 'ms.medicine_id', '=', 'm.id')
+            ->select(DB::raw('COALESCE(SUM(ms.quantity * m.buy_price), 0) as total'))
+            ->value('total');
+
+        $expiringStockCount = DB::table('medicine_stocks')
+            ->where('quantity', '>', 0)
+            ->whereBetween('expiry_date', [Carbon::today()->startOfDay(), Carbon::today()->addDays(60)->endOfDay()])
+            ->count();
+
+        $lowStockCount = DB::table('medicines as m')
+            ->leftJoin('medicine_stocks as ms', 'm.id', '=', 'ms.medicine_id')
+            ->select('m.id', DB::raw('COALESCE(SUM(ms.quantity), 0) as total'))
+            ->groupBy('m.id')
+            ->havingRaw('COALESCE(SUM(ms.quantity), 0) <= m.minimum_stock')
+            ->get()
+            ->count();
+
         return compact(
             'totalRevenue',
             'pendingRevenue',
@@ -134,7 +170,11 @@ class ReportController extends Controller
             'topDiagnoses',
             'medicineConsumption',
             'labWorkload',
-            'labTotal'
+            'labTotal',
+            'stockValuation',
+            'stockValuationTotal',
+            'expiringStockCount',
+            'lowStockCount'
         );
     }
 }
