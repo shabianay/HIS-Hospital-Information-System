@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Appointment;
 use App\Models\LabRequest;
+use App\Models\Prescription;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Cache;
 
@@ -146,6 +147,52 @@ class QueueDisplayController extends Controller
             'in_progress' => $inProgress,
             'waiting' => $waiting,
             'total' => $requests->count(),
+        ];
+    }
+
+    public function pharmacy()
+    {
+        $initial = $this->buildPharmacyQueues();
+
+        return view('queue.pharmacy-display', compact('initial'));
+    }
+
+    public function getPharmacyQueues()
+    {
+        return response()->json($this->buildPharmacyQueues());
+    }
+
+    private function buildPharmacyQueues(): array
+    {
+        $prescriptions = Prescription::with(['medicine', 'medicalRecord.patient'])
+            ->where('is_dispensed', false)
+            ->whereHas('medicalRecord', fn ($q) => $q->whereHas('appointment', fn ($a) => $a->where('status', '!=', 'cancelled')))
+            ->latest()
+            ->get();
+
+        $grouped = $prescriptions->groupBy('medical_record_id');
+
+        $queue = $grouped->map(function ($items, $recordId) {
+            $record = $items->first()->medicalRecord;
+
+            return [
+                'medical_record_id' => (int) $recordId,
+                'patient_name' => $record?->patient?->name ?? '-',
+                'queue_number' => $record?->appointment?->queue_number ?? null,
+                'items' => $items->map(function ($item) {
+                    return [
+                        'name' => $item->medicine?->name ?? '-',
+                        'quantity' => $item->quantity,
+                    ];
+                })->values(),
+                'created_at' => $items->first()?->created_at?->format('H:i') ?? '-',
+            ];
+        })->values();
+
+        return [
+            'queue' => $queue,
+            'total_prescriptions' => $prescriptions->count(),
+            'total_patients' => $grouped->count(),
         ];
     }
 }

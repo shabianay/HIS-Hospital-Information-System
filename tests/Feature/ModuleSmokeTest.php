@@ -369,6 +369,43 @@ class ModuleSmokeTest extends TestCase
             ->assertJson(['total' => 1]);
     }
 
+    public function test_pharmacy_queue_display_accessible_to_authenticated_users(): void
+    {
+        $user = $this->seedAdmin();
+
+        $appointment = Appointment::first();
+        $medicine = \App\Models\Medicine::firstOrFail();
+
+        $this->actingAs($user)->post(route('medical-records.store', $appointment), [
+            'chief_complaint' => 'Demam',
+            'subjective' => 'Demam 3 hari',
+            'objective' => 'Suhu 38C',
+            'assessment' => 'Dengue',
+            'plan' => 'Istirahat',
+            'diagnoses' => [
+                [
+                    'icd_code' => 'A90',
+                    'description' => 'Dengue',
+                    'is_primary' => true,
+                ],
+            ],
+            'prescriptions' => [
+                [
+                    'medicine_id' => $medicine->id,
+                    'quantity' => 10,
+                    'dosage' => '3x1',
+                    'frequency' => 'Sesudah makan',
+                    'duration' => '5 hari',
+                ],
+            ],
+        ])->assertSessionHasNoErrors();
+
+        $this->actingAs($user)->get(route('queue.display.pharmacy'))->assertOk();
+        $this->actingAs($user)->get(route('queue.display.pharmacy.json'))
+            ->assertOk()
+            ->assertJson(['total_patients' => 1]);
+    }
+
     public function test_admin_can_open_reports_and_export_pdf(): void
     {
         $user = $this->seedAdmin();

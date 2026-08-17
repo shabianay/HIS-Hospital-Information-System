@@ -53,6 +53,8 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('queue-display/json', [QueueDisplayController::class, 'getCurrentQueues'])->name('queue.display.json');
     Route::get('queue-display/lab', [QueueDisplayController::class, 'lab'])->name('queue.display.lab');
     Route::get('queue-display/lab/json', [QueueDisplayController::class, 'getLabQueues'])->name('queue.display.lab.json');
+    Route::get('queue-display/pharmacy', [QueueDisplayController::class, 'pharmacy'])->name('queue.display.pharmacy');
+    Route::get('queue-display/pharmacy/json', [QueueDisplayController::class, 'getPharmacyQueues'])->name('queue.display.pharmacy.json');
 
     // Patients
     Route::resource('patients', PatientController::class);
