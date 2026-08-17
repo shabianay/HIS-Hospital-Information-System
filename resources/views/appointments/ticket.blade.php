@@ -43,5 +43,10 @@
         <a href="{{ route('appointments.show', $appointment) }}" class="inline-flex items-center gap-2 rounded-xl border border-gray-300 bg-white px-5 py-2.5 text-xs font-semibold text-gray-700 hover:bg-gray-50 transition-all duration-200">Kembali</a>
     </div>
 </div>
+<script>
+    if (new URLSearchParams(window.location.search).get('auto') === '1') {
+        window.addEventListener('load', function () { setTimeout(function () { window.print(); }, 400); });
+    }
+</script>
 </body>
 </html>

@@ -70,7 +70,7 @@
     @endif
 
     <div class="no-print mt-6 flex justify-center gap-2">
-        <button onclick="window.print()" class="inline-flex items-center gap-2 rounded-xl bg-primary-600 px-5 py-2.5 text-xs font-semibold text-white shadow hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 transition-all duration-200">Cetak Kuitansi</button>
+        <button onclick="window.print()" class="inline-flex items-center gap-2 rounded-xl bg-primary px-5 py-2.5 text-xs font-semibold text-white shadow hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 transition-all duration-200">Cetak Kuitansi</button>
         <a href="{{ route('billings.show', $billing) }}" class="inline-flex items-center gap-2 rounded-xl border border-border-light bg-surface-light px-5 py-2.5 text-xs font-semibold text-text-primary-light hover:bg-primary-50 dark:border-border-dark dark:bg-surface-dark dark:text-text-primary-dark dark:hover:bg-primary-900/10 transition-all duration-200">Kembali</a>
     </div>
 </div>

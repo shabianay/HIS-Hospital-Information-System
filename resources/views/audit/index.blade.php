@@ -29,7 +29,17 @@
                     'App\Models\Appointment' => 'Pendaftaran',
                     'App\Models\MedicalRecord' => 'Rekam Medis',
                     'App\Models\Billing' => 'Billing',
+                    'App\Models\BillingItem' => 'Item Tagihan',
+                    'App\Models\Doctor' => 'Dokter',
+                    'App\Models\Poli' => 'Poli',
+                    'App\Models\Schedule' => 'Jadwal',
+                    'App\Models\Medicine' => 'Obat',
                     'App\Models\MedicineStock' => 'Stok Obat',
+                    'App\Models\StockMutation' => 'Mutasi Stok',
+                    'App\Models\LabRequest' => 'Permintaan Lab',
+                    'App\Models\LabTest' => 'Tes Lab',
+                    'App\Models\Tariff' => 'Tarif',
+                    'App\Models\User' => 'User',
                 ] as $val => $label)
                     <option value="{{ $val }}" {{ request('auditable_type') == $val ? 'selected' : '' }}>{{ $label }}</option>
                 @endforeach

@@ -19,7 +19,7 @@
             </div>
             <div class="flex items-center gap-3">
                 @if($appointment->status !== 'cancelled')
-                    <a href="{{ route('appointments.ticket', $appointment) }}" target="_blank" class="inline-flex items-center gap-2 rounded-xl border border-primary-300 dark:border-primary-700 bg-primary-50 dark:bg-primary-900/20 px-4 py-1.5 text-sm font-semibold text-primary-700 dark:text-primary-300 hover:bg-primary-100 dark:hover:bg-primary-900/40 transition-all duration-200">Cetak Tiket</a>
+                    <a href="{{ route('appointments.ticket', $appointment) }}?auto=1" target="_blank" class="inline-flex items-center gap-2 rounded-xl border border-primary-300 dark:border-primary-700 bg-primary-50 dark:bg-primary-900/20 px-4 py-1.5 text-sm font-semibold text-primary-700 dark:text-primary-300 hover:bg-primary-100 dark:hover:bg-primary-900/40 transition-all duration-200">Cetak Tiket</a>
                 @endif
                 <span class="inline-flex items-center rounded-full px-4 py-1.5 text-sm font-semibold border {{ $badge['color'] }}">{{ $badge['label'] }}</span>
             </div>
