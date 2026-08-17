@@ -1119,6 +1119,34 @@ class ModuleSmokeTest extends TestCase
         $this->assertAuthenticated();
     }
 
+    public function test_role_based_login_landing_pages(): void
+    {
+        $this->seed(DatabaseSeeder::class);
+
+        $cases = [
+            ['lab_tech', 'lab.requests'],
+            ['pharmacist', 'prescriptions.pending'],
+            ['cashier', 'billings.index'],
+            ['registration', 'appointments.create'],
+        ];
+
+        foreach ($cases as [$role, $route]) {
+            $user = User::role($role)->firstOrFail();
+            $this->actingAs($user)->get('/dashboard')->assertOk();
+            $this->assertTrue($user->hasRole($role));
+        }
+
+        $labTech = User::role('lab_tech')->firstOrFail();
+        $pharmacist = User::role('pharmacist')->firstOrFail();
+        $cashier = User::role('cashier')->firstOrFail();
+        $registration = User::role('registration')->firstOrFail();
+
+        $this->actingAs($labTech)->get(route('lab.requests'))->assertOk();
+        $this->actingAs($pharmacist)->get(route('prescriptions.pending'))->assertOk();
+        $this->actingAs($cashier)->get(route('billings.index'))->assertOk();
+        $this->actingAs($registration)->get(route('appointments.create'))->assertOk();
+    }
+
     public function test_dashboard_shows_reminder_counts(): void
     {
         $user = $this->seedAdmin();
