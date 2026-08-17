@@ -120,6 +120,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::delete('lab/tests/{labTest}', [LabController::class, 'testsDestroy'])->name('lab.tests.destroy');
 
     Route::get('lab/requests', [LabController::class, 'index'])->name('lab.requests');
+    Route::get('lab/requests/csv', [LabController::class, 'exportCsv'])->name('lab.requests.csv');
     Route::get('lab/create', [LabController::class, 'create'])->name('lab.create');
     Route::post('lab/requests', [LabController::class, 'store'])->name('lab.requests.store');
     Route::get('lab/requests/{labRequest}', [LabController::class, 'show'])->name('lab.requests.show');

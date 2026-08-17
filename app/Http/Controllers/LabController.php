@@ -99,6 +99,52 @@ class LabController extends Controller
         return view('lab.requests', compact('requests'));
     }
 
+    public function exportCsv(Request $request)
+    {
+        $this->authorize('viewAny', LabRequest::class);
+
+        $query = LabRequest::with(['patient', 'doctor', 'appointment'])
+            ->latest();
+
+        if ($request->filled('status')) {
+            $query->where('status', $request->status);
+        }
+
+        if ($request->filled('date')) {
+            $query->whereDate('created_at', $request->date);
+        }
+
+        $requests = $query->get();
+
+        $statusLabels = [
+            'pending' => 'Menunggu',
+            'in_progress' => 'Diproses',
+            'completed' => 'Selesai',
+        ];
+
+        $filename = 'permintaan-lab-' . now()->format('Ymd-His') . '.csv';
+
+        return response()->streamDownload(function () use ($requests, $statusLabels) {
+            $handle = fopen('php://output', 'w');
+
+            fputcsv($handle, ['PERMINTAAN LABORATORIUM']);
+            fputcsv($handle, ['No. Permintaan', 'Tanggal', 'Pasien', 'Dokter', 'Urgent', 'Status']);
+
+            foreach ($requests as $req) {
+                fputcsv($handle, [
+                    $req->id,
+                    $req->created_at?->format('d/m/Y H:i'),
+                    $req->patient?->name ?? '-',
+                    $req->doctor?->name ?? '-',
+                    $req->is_urgent ? 'Ya' : 'Tidak',
+                    $statusLabels[$req->status] ?? $req->status,
+                ]);
+            }
+
+            fclose($handle);
+        }, $filename, ['Content-Type' => 'text/csv']);
+    }
+
     public function create(Request $request)
     {
         $this->authorize('create', LabRequest::class);

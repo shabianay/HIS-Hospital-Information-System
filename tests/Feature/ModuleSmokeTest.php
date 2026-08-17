@@ -423,6 +423,17 @@ class ModuleSmokeTest extends TestCase
             ->assertSee('EXP-001');
     }
 
+    public function test_lab_tech_can_export_lab_requests_csv(): void
+    {
+        $this->seed(DatabaseSeeder::class);
+
+        $labTech = User::where('email', 'lab@his.local')->firstOrFail();
+
+        $this->actingAs($labTech)->get(route('lab.requests.csv'))
+            ->assertOk()
+            ->assertHeader('Content-Type', 'text/csv; charset=utf-8');
+    }
+
     public function test_lab_queue_display_accessible_to_authenticated_users(): void
     {
         $user = $this->seedAdmin();
