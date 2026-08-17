@@ -21,7 +21,7 @@
                     @foreach($days as $day)
                         <th class="py-3 px-3 font-semibold text-text-secondary-light dark:text-text-secondary-dark capitalize min-w-[130px]">
                             {{ $day }}
-                            @if(\Carbon\Carbon::now()->translatedFormat('l') === $day)
+                            @if(strtolower(\Carbon\Carbon::now()->translatedFormat('l')) === $day)
                                 <span class="ml-1 rounded-full bg-primary-100 dark:bg-primary-900 text-primary-700 dark:text-primary-300 px-2 py-0.5 text-[10px] uppercase">Hari ini</span>
                             @endif
                         </th>

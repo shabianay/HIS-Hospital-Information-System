@@ -228,7 +228,14 @@ class AppointmentController extends Controller
             ->orderBy('queue_number')
             ->get();
 
-        return view('appointments.my-patients', compact('appointments', 'today'));
+        $mySchedules = Schedule::with('poli')
+            ->where('doctor_id', $doctor->id)
+            ->where('is_active', true)
+            ->orderBy('day_of_week')
+            ->orderBy('start_time')
+            ->get();
+
+        return view('appointments.my-patients', compact('appointments', 'today', 'mySchedules'));
     }
 
     public function updateStatus(Request $request, Appointment $appointment)

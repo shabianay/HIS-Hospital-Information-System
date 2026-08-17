@@ -104,5 +104,36 @@
             @endforelse
         </x-table>
     </div>
+
+    <div class="bg-surface-light dark:bg-surface-dark p-8 rounded-2xl border border-border-light dark:border-border-dark shadow-glass-sm overflow-hidden">
+        <h3 class="mb-6 text-lg font-bold text-text-primary-light dark:text-text-primary-dark">Jadwal Praktik Saya</h3>
+        <x-table :searchable="false">
+            <x-slot name="head">
+                <tr class="text-xs uppercase tracking-wider text-text-secondary-light dark:text-text-secondary-dark border-b border-border-light dark:border-border-dark">
+                    <th class="pb-4 px-4 font-semibold">Hari</th>
+                    <th class="pb-4 px-4 font-semibold">Poli</th>
+                    <th class="pb-4 px-4 font-semibold">Jam</th>
+                    <th class="pb-4 px-4 font-semibold">Kuota</th>
+                    <th class="pb-4 px-4 font-semibold">Biaya Konsultasi</th>
+                </tr>
+            </x-slot>
+            @forelse($mySchedules as $schedule)
+                <tr class="hover:bg-secondary-50 dark:hover:bg-secondary-900/30 transition-colors {{ strtolower(\Carbon\Carbon::now()->translatedFormat('l')) === $schedule->day_of_week ? 'bg-primary-50/60 dark:bg-primary-900/10' : '' }}">
+                    <td class="py-4 px-4 text-sm text-text-primary-light dark:text-text-primary-dark capitalize">
+                        {{ $schedule->day_of_week }}
+                        @if(strtolower(\Carbon\Carbon::now()->translatedFormat('l')) === $schedule->day_of_week)
+                            <span class="ml-1 rounded-full bg-primary-100 dark:bg-primary-900 text-primary-700 dark:text-primary-300 px-2 py-0.5 text-[10px] uppercase">Hari ini</span>
+                        @endif
+                    </td>
+                    <td class="py-4 px-4 text-sm text-text-primary-light dark:text-text-primary-dark">{{ $schedule->poli?->name ?? '-' }}</td>
+                    <td class="py-4 px-4 text-sm text-text-primary-light dark:text-text-primary-dark">{{ $schedule->start_time->format('H:i') }} - {{ $schedule->end_time->format('H:i') }}</td>
+                    <td class="py-4 px-4 text-sm text-text-primary-light dark:text-text-primary-dark">{{ $schedule->daily_quota }}</td>
+                    <td class="py-4 px-4 text-sm text-text-primary-light dark:text-text-primary-dark">Rp {{ number_format($schedule->consultation_fee, 0, ',', '.') }}</td>
+                </tr>
+            @empty
+                <tr x-show="!search" data-search-row><td colspan="5" class="py-12 text-center text-text-secondary-light dark:text-text-secondary-dark">Belum ada jadwal praktik.</td></tr>
+            @endforelse
+        </x-table>
+    </div>
 </div>
 @endsection
