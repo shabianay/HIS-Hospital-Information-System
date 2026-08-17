@@ -381,6 +381,60 @@ class BillingController extends Controller
         return $pdf->download('laporan-billing-' . Carbon::parse($date)->format('Ymd') . '.pdf');
     }
 
+    public function dailyReportCsv(Request $request)
+    {
+        $this->authorize('viewAny', Billing::class);
+
+        $date = $request->get('date', Carbon::today()->format('Y-m-d'));
+        $dayStart = Carbon::parse($date)->startOfDay();
+        $dayEnd = Carbon::parse($date)->endOfDay();
+
+        $billings = Billing::with(['appointment.patient', 'appointment.doctor'])
+            ->whereBetween('created_at', [$dayStart, $dayEnd])
+            ->get();
+
+        $totalRevenue = $billings->where('status', 'paid')->sum('paid_amount');
+        $totalPending = $billings->where('status', 'unpaid')->sum('total_amount');
+        $totalPartial = $billings->where('status', 'partial')->sum('paid_amount');
+
+        $paymentMethodLabels = [
+            'cash' => 'Tunai',
+            'card' => 'Kartu',
+            'qris' => 'QRIS',
+            'bpjs' => 'BPJS',
+            'insurance' => 'Asuransi',
+        ];
+
+        $filename = 'laporan-billing-' . Carbon::parse($date)->format('Ymd') . '.csv';
+
+        return response()->streamDownload(function () use ($billings, $date, $totalRevenue, $totalPending, $totalPartial, $paymentMethodLabels) {
+            $handle = fopen('php://output', 'w');
+
+            fputcsv($handle, ['LAPORAN BILLING HARIAN']);
+            fputcsv($handle, ['Tanggal', Carbon::parse($date)->format('d/m/Y')]);
+            fputcsv($handle, []);
+            fputcsv($handle, ['Total Pendapatan', number_format($totalRevenue, 2)]);
+            fputcsv($handle, ['Total Belum Dibayar', number_format($totalPending, 2)]);
+            fputcsv($handle, ['Total Pembayaran Sebagian', number_format($totalPartial, 2)]);
+            fputcsv($handle, []);
+
+            fputcsv($handle, ['No. Invoice', 'Pasien', 'Dokter', 'Metode', 'Total', 'Dibayar', 'Status']);
+            foreach ($billings as $billing) {
+                fputcsv($handle, [
+                    $billing->invoice_number,
+                    $billing->appointment?->patient?->name ?? '-',
+                    $billing->appointment?->doctor?->name ?? '-',
+                    $paymentMethodLabels[$billing->payment_method] ?? $billing->payment_method,
+                    number_format((float) $billing->total_amount, 2),
+                    number_format((float) $billing->paid_amount, 2),
+                    $billing->status,
+                ]);
+            }
+
+            fclose($handle);
+        }, $filename, ['Content-Type' => 'text/csv']);
+    }
+
     private function generateInvoiceNumber()
     {
         $date = Carbon::now()->format('Ymd');

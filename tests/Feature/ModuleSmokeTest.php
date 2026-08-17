@@ -279,6 +279,9 @@ class ModuleSmokeTest extends TestCase
         $user = $this->seedAdmin();
 
         $this->actingAs($user)->get(route('billings.daily-report.pdf'))->assertOk();
+        $this->actingAs($user)->get(route('billings.daily-report.csv'))
+            ->assertOk()
+            ->assertHeader('Content-Type', 'text/csv; charset=utf-8');
     }
 
     public function test_export_routes_require_authorization(): void
