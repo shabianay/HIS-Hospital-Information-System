@@ -8,6 +8,7 @@ use App\Models\MedicalRecord;
 use App\Models\Medicine;
 use App\Models\Patient;
 use App\Models\Prescription;
+use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
@@ -203,5 +204,25 @@ class MedicalRecordController extends Controller
             ->paginate(15);
 
         return view('medical-records.history', compact('patient', 'records'));
+    }
+
+    public function exportPdf(MedicalRecord $medicalRecord)
+    {
+        $this->authorize('view', $medicalRecord);
+
+        $medicalRecord->load([
+            'appointment.patient',
+            'appointment.doctor',
+            'appointment.poli',
+            'diagnoses',
+            'prescriptions.medicine',
+        ]);
+
+        $pdf = Pdf::loadView('medical-records.pdf', [
+            'medicalRecord' => $medicalRecord,
+            'generatedAt' => now()->format('d/m/Y H:i:s'),
+        ])->setPaper('a4');
+
+        return $pdf->download('rekam-medis-' . str_pad($medicalRecord->id, 4, '0', STR_PAD_LEFT) . '.pdf');
     }
 }

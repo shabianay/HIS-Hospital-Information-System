@@ -256,4 +256,65 @@ class ModuleSmokeTest extends TestCase
         $this->actingAs($user)->get(route('audit.export.pdf'))->assertForbidden();
         $this->actingAs($user)->get(route('billings.daily-report.pdf'))->assertForbidden();
     }
+
+    public function test_admin_can_export_medical_record_pdf(): void
+    {
+        $user = $this->seedAdmin();
+
+        $appointment = Appointment::first();
+        $medicine = Medicine::first();
+
+        $this->actingAs($user)->post(route('medical-records.store', $appointment), [
+            'subjective' => 'Sakit kepala dan mual.',
+            'objective' => 'Tensi 130/90.',
+            'assessment' => 'Hipertensi.',
+            'plan' => 'Kontrol rutin.',
+            'chief_complaint' => 'Sakit kepala',
+            'diagnoses' => [
+                ['icd_code' => 'I10', 'description' => 'Essential (primary) hypertension', 'is_primary' => 1],
+            ],
+            'prescriptions' => [
+                [
+                    'medicine_id' => $medicine->id,
+                    'quantity' => 10,
+                    'dosage' => '1x1',
+                    'frequency' => 'Pagi hari',
+                    'duration' => '10 hari',
+                ],
+            ],
+        ])->assertSessionHasNoErrors();
+
+        $record = MedicalRecord::where('appointment_id', $appointment->id)->firstOrFail();
+
+        $this->actingAs($user)->get(route('medical-records.pdf', $record))->assertOk();
+    }
+
+    public function test_admin_can_export_lab_request_pdf(): void
+    {
+        $user = $this->seedAdmin();
+
+        $appointment = Appointment::first();
+        $test = \App\Models\LabTest::firstOrFail();
+
+        $this->actingAs($user)->post(route('lab.requests.store'), [
+            'appointment_id' => $appointment->id,
+            'patient_id' => $appointment->patient_id,
+            'notes' => 'Cek darah lengkap.',
+            'lab_test_ids' => [$test->id],
+        ])->assertSessionHasNoErrors();
+
+        $labRequest = \App\Models\LabRequest::where('appointment_id', $appointment->id)->firstOrFail();
+
+        $this->actingAs($user)->get(route('lab.requests.pdf', $labRequest))->assertOk();
+    }
+
+    public function test_queue_display_accessible_to_authenticated_users(): void
+    {
+        $this->seed(DatabaseSeeder::class);
+
+        $registration = User::where('email', 'pendaftaran@his.local')->firstOrFail();
+
+        $this->actingAs($registration)->get(route('queue.display'))->assertOk();
+        $this->actingAs($registration)->get(route('queue.display.json'))->assertOk();
+    }
 }

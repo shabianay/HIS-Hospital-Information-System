@@ -50,43 +50,31 @@ class QueueDisplayController extends Controller
                 ->where('status', 'waiting')
                 ->orderBy('queue_number')
                 ->get()
-                ->groupBy(function ($item) {
-                    return [
-                        'poli_id' => $item->poli->id,
-                        'poli_name' => $item->poli->name,
-                        'poli_code' => $item->poli->code,
-                    ];
-                });
+                ->groupBy('poli_id');
 
             $inProgress = Appointment::with(['patient', 'poli', 'doctor'])
                 ->whereBetween('appointment_date', [$dayStart, $dayEnd])
                 ->where('status', 'in_progress')
                 ->orderBy('queue_number')
                 ->get()
-                ->groupBy(function ($item) {
-                    return [
-                        'poli_id' => $item->poli->id,
-                        'poli_name' => $item->poli->name,
-                        'poli_code' => $item->poli->code,
-                    ];
-                });
+                ->groupBy('poli_id');
+
+            $poliIds = $waiting->keys()->merge($inProgress->keys())->unique()->values();
 
             $result = [];
+            foreach ($poliIds as $poliId) {
+                $poli = $inProgress->get($poliId, collect())->first()?->poli
+                    ?? $waiting->get($poliId, collect())->first()?->poli;
 
-            $allPoliIds = collect(array_merge(
-                $waiting->keys()->toArray(),
-                $inProgress->keys()->toArray()
-            ))->unique();
-
-            foreach ($allPoliIds as $poliKey) {
-                $poliData = is_array($poliKey) ? $poliKey : json_decode($poliKey, true);
-                $poliId = $poliData['poli_id'];
+                if (! $poli) {
+                    continue;
+                }
 
                 $result[] = [
-                    'poli_id' => $poliId,
-                    'poli_name' => $poliData['poli_name'],
-                    'poli_code' => $poliData['poli_code'],
-                    'in_progress' => $inProgress->get($poliKey, collect())->map(function ($item) {
+                    'poli_id' => (int) $poliId,
+                    'poli_name' => $poli->name,
+                    'poli_code' => $poli->code,
+                    'in_progress' => $inProgress->get($poliId, collect())->map(function ($item) {
                         return [
                             'id' => $item->id,
                             'queue_number' => $item->queue_number,
@@ -94,7 +82,7 @@ class QueueDisplayController extends Controller
                             'doctor_name' => $item->doctor->name,
                         ];
                     })->values(),
-                    'waiting' => $waiting->get($poliKey, collect())->map(function ($item) {
+                    'waiting' => $waiting->get($poliId, collect())->map(function ($item) {
                         return [
                             'id' => $item->id,
                             'queue_number' => $item->queue_number,

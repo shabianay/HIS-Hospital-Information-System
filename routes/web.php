@@ -54,6 +54,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('appointments/{appointment}/medical-record/create', [MedicalRecordController::class, 'create'])->name('medical-records.create');
     Route::post('appointments/{appointment}/medical-record', [MedicalRecordController::class, 'store'])->name('medical-records.store');
     Route::get('medical-records/{medicalRecord}', [MedicalRecordController::class, 'show'])->name('medical-records.show');
+    Route::get('medical-records/{medicalRecord}/pdf', [MedicalRecordController::class, 'exportPdf'])->name('medical-records.pdf');
     Route::get('medical-records/{medicalRecord}/edit', [MedicalRecordController::class, 'edit'])->name('medical-records.edit');
     Route::put('medical-records/{medicalRecord}', [MedicalRecordController::class, 'update'])->name('medical-records.update');
 
@@ -96,6 +97,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('lab/create', [LabController::class, 'create'])->name('lab.create');
     Route::post('lab/requests', [LabController::class, 'store'])->name('lab.requests.store');
     Route::get('lab/requests/{labRequest}', [LabController::class, 'show'])->name('lab.requests.show');
+    Route::get('lab/requests/{labRequest}/pdf', [LabController::class, 'exportPdf'])->name('lab.requests.pdf');
     Route::post('lab/requests/{labRequest}/results', [LabController::class, 'processStore'])->name('lab.requests.process');
     Route::delete('lab/requests/{labRequest}', [LabController::class, 'destroy'])->name('lab.requests.destroy');
 

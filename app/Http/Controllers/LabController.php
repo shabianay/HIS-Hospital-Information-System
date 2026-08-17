@@ -10,6 +10,7 @@ use App\Models\MedicalRecord;
 use App\Models\User;
 use App\Notifications\LabRequestCreated;
 use App\Notifications\LabResultCompleted;
+use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -245,5 +246,19 @@ class LabController extends Controller
         $labRequest->delete();
 
         return redirect()->route('lab.requests')->with('success', 'Permintaan laboratorium dihapus.');
+    }
+
+    public function exportPdf(LabRequest $labRequest)
+    {
+        $this->authorize('view', $labRequest);
+
+        $labRequest->load(['patient', 'doctor', 'appointment.poli', 'items', 'createdBy']);
+
+        $pdf = Pdf::loadView('lab.pdf', [
+            'labRequest' => $labRequest,
+            'generatedAt' => now()->format('d/m/Y H:i:s'),
+        ])->setPaper('a4');
+
+        return $pdf->download('hasil-lab-' . str_pad($labRequest->id, 4, '0', STR_PAD_LEFT) . '.pdf');
     }
 }

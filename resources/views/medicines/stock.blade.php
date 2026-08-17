@@ -91,7 +91,17 @@
                         </td>
                         <td class="py-4 px-4 text-sm text-text-primary-light dark:text-text-primary-dark">
                             @forelse($medicine->stocks as $stock)
-                                <span class="mr-1 text-xs">{{ $stock->expiry_date?->format('d/m/Y') }}</span>
+                                @php
+                                    $expiry = $stock->expiry_date;
+                                    $days = $expiry ? now()->diffInDays($expiry, false) : null;
+                                @endphp
+                                @if($expiry && $days < 0)
+                                    <span class="mr-1 inline-flex items-center rounded-full bg-danger-100 dark:bg-danger-900/30 px-2 py-0.5 text-xs font-semibold text-danger-800 dark:text-danger-400 border border-danger-200 dark:border-danger-800" title="Obat sudah kedaluwarsa">{{ $expiry->format('d/m/Y') }} (Kedaluwarsa)</span>
+                                @elseif($expiry && $days <= 60)
+                                    <span class="mr-1 inline-flex items-center rounded-full bg-yellow-100 dark:bg-yellow-900/30 px-2 py-0.5 text-xs font-semibold text-yellow-800 dark:text-yellow-400 border border-yellow-200 dark:border-yellow-800" title="Mendekati kedaluwarsa ({{ max(0, (int)$days) }} hari lagi)">{{ $expiry->format('d/m/Y') }} ({{ max(0, (int)$days) }} hr)</span>
+                                @else
+                                    <span class="mr-1 text-xs">{{ $expiry?->format('d/m/Y') }}</span>
+                                @endif
                             @empty
                                 <span class="text-text-secondary-light dark:text-text-secondary-dark">-</span>
                             @endforelse
