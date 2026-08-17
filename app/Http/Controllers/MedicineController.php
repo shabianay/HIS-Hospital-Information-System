@@ -184,4 +184,23 @@ class MedicineController extends Controller
 
         return view('medicines.reorder', compact('lowStock', 'totalSuggestedCost'));
     }
+
+    public function expiring()
+    {
+        $this->authorize('viewAny', Medicine::class);
+
+        $expiringStocks = \App\Models\MedicineStock::with('medicine')
+            ->where('quantity', '>', 0)
+            ->whereBetween('expiry_date', [now()->startOfDay(), now()->addDays(60)->endOfDay()])
+            ->orderBy('expiry_date')
+            ->get();
+
+        $expiredStocks = \App\Models\MedicineStock::with('medicine')
+            ->where('quantity', '>', 0)
+            ->where('expiry_date', '<', now()->startOfDay())
+            ->orderBy('expiry_date')
+            ->get();
+
+        return view('medicines.expiring', compact('expiringStocks', 'expiredStocks'));
+    }
 }

@@ -405,6 +405,24 @@ class ModuleSmokeTest extends TestCase
             ->assertSee('Rekomendasi Pembelian Stok');
     }
 
+    public function test_pharmacist_can_view_expiring_stock_report(): void
+    {
+        $user = $this->seedAdmin();
+
+        $medicine = \App\Models\Medicine::firstOrFail();
+        \App\Models\MedicineStock::create([
+            'medicine_id' => $medicine->id,
+            'batch_number' => 'EXP-001',
+            'quantity' => 5,
+            'expiry_date' => now()->addDays(20)->toDateString(),
+        ]);
+
+        $this->actingAs($user)->get(route('medicines.expiring'))
+            ->assertOk()
+            ->assertSee('Stok Mendekati Kedaluwarsa')
+            ->assertSee('EXP-001');
+    }
+
     public function test_lab_queue_display_accessible_to_authenticated_users(): void
     {
         $user = $this->seedAdmin();
