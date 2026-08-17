@@ -85,6 +85,9 @@ class ModuleSmokeTest extends TestCase
         $this->actingAs($user)->get(route('patients.show', $patient))->assertOk();
         $this->actingAs($user)->get(route('patients.medical-history', $patient))->assertOk();
         $this->actingAs($user)->get(route('patients.medical-history.pdf', $patient))->assertOk();
+        $this->actingAs($user)->get(route('patients.card', $patient))
+            ->assertOk()
+            ->assertHeader('Content-Type', 'application/pdf');
     }
 
     public function test_admin_can_open_appointment_and_create_medical_record_screen(): void

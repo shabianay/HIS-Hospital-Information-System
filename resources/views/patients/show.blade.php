@@ -15,6 +15,7 @@
             <h2 class="text-2xl font-bold text-text-primary-light dark:text-text-primary-dark">Profil Pasien</h2>
             <div class="flex gap-2">
                 <a href="{{ route('patients.medical-history', $patient) }}" class="inline-flex items-center justify-center px-4 py-2 bg-surface-light dark:bg-surface-dark border border-border-light dark:border-border-dark text-sm font-medium text-text-primary-light dark:text-text-primary-dark hover:bg-secondary-50 dark:hover:bg-secondary-800 transition-all">Riwayat Medis</a>
+                <a href="{{ route('patients.card', $patient) }}" class="inline-flex items-center justify-center px-4 py-2 bg-surface-light dark:bg-surface-dark border border-border-light dark:border-border-dark text-sm font-medium text-text-primary-light dark:text-text-primary-dark hover:bg-secondary-50 dark:hover:bg-secondary-800 transition-all">Kartu Berobat</a>
                 <a href="{{ route('patients.edit', $patient) }}" class="inline-flex items-center justify-center px-4 py-2 bg-surface-light dark:bg-surface-dark border border-border-light dark:border-border-dark text-sm font-medium text-text-primary-light dark:text-text-primary-dark hover:bg-secondary-50 dark:hover:bg-secondary-800 transition-all">Edit</a>
             </div>
         </div>

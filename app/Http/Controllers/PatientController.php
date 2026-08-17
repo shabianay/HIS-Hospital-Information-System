@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Appointment;
 use App\Models\Patient;
+use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cache;
 
@@ -97,6 +98,18 @@ class PatientController extends Controller
             ->get();
 
         return view('patients.show', compact('patient', 'recentVisits'));
+    }
+
+    public function card(Patient $patient)
+    {
+        $this->authorize('view', $patient);
+
+        $pdf = Pdf::loadView('patients.card', [
+            'patient' => $patient,
+            'generatedAt' => now()->format('d/m/Y H:i:s'),
+        ])->setPaper([0, 0, 210, 148], 'portrait');
+
+        return $pdf->download('kartu-berobat-' . str_replace(['-', '/', ' '], '', $patient->rm_number) . '.pdf');
     }
 
     public function edit(Patient $patient)
