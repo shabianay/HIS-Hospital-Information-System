@@ -1044,6 +1044,42 @@ class ModuleSmokeTest extends TestCase
         $prescription->delete();
     }
 
+    public function test_finalized_medical_record_can_export_referral_letter(): void
+    {
+        $user = $this->seedAdmin();
+
+        $appointment = Appointment::first();
+
+        $medicalRecord = $appointment->medicalRecord()->create([
+            'patient_id' => $appointment->patient_id,
+            'doctor_id' => $appointment->doctor_id,
+            'chief_complaint' => 'Demam',
+            'subjective' => 'Demam 3 hari',
+            'objective' => 'Suhu 38C',
+            'assessment' => 'Dengue',
+            'plan' => 'Rujuk',
+            'status' => 'finalized',
+        ]);
+
+        \App\Models\Diagnosis::create([
+            'medical_record_id' => $medicalRecord->id,
+            'icd_code' => 'A90',
+            'description' => 'Dengue',
+            'is_primary' => true,
+        ]);
+
+        $this->actingAs($user)->get(route('medical-records.show', $medicalRecord))
+            ->assertOk()
+            ->assertSee('Surat Rujukan');
+
+        $this->actingAs($user)->get(route('medical-records.referral', ['medicalRecord' => $medicalRecord, 'destination' => 'RS Harapan Sehat']))
+            ->assertOk()
+            ->assertHeader('Content-Type', 'application/pdf');
+
+        $this->actingAs($user)->get(route('medical-records.referral', $medicalRecord))
+            ->assertRedirect();
+    }
+
     public function test_dispense_fails_gracefully_when_stock_insufficient(): void
     {
         $user = $this->seedAdmin();

@@ -70,6 +70,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('medical-records/{medicalRecord}/pdf', [MedicalRecordController::class, 'exportPdf'])->name('medical-records.pdf');
     Route::get('medical-records/{medicalRecord}/sick-note', [MedicalRecordController::class, 'sickNotePdf'])->name('medical-records.sick-note');
     Route::get('medical-records/{medicalRecord}/prescription', [MedicalRecordController::class, 'prescriptionPdf'])->name('medical-records.prescription');
+    Route::get('medical-records/{medicalRecord}/referral', [MedicalRecordController::class, 'referralPdf'])->name('medical-records.referral');
     Route::get('medical-records/{medicalRecord}/edit', [MedicalRecordController::class, 'edit'])->name('medical-records.edit');
     Route::put('medical-records/{medicalRecord}', [MedicalRecordController::class, 'update'])->name('medical-records.update');
 

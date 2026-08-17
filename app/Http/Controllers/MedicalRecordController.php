@@ -297,6 +297,33 @@ class MedicalRecordController extends Controller
         return $pdf->download('resep-' . str_pad($medicalRecord->id, 4, '0', STR_PAD_LEFT) . '.pdf');
     }
 
+    public function referralPdf(MedicalRecord $medicalRecord, Request $request)
+    {
+        $this->authorize('view', $medicalRecord);
+
+        $destination = trim((string) $request->get('destination', ''));
+        if ($destination === '') {
+            return back()->with('error', 'Nama fasilitas tujuan rujukan wajib diisi.');
+        }
+
+        $medicalRecord->load([
+            'appointment.patient',
+            'appointment.doctor',
+            'appointment.poli',
+            'diagnoses',
+            'prescriptions.medicine',
+            'appointment.labRequests.items',
+        ]);
+
+        $pdf = Pdf::loadView('medical-records.referral', [
+            'medicalRecord' => $medicalRecord,
+            'destination' => $destination,
+            'generatedAt' => now()->format('d/m/Y H:i:s'),
+        ])->setPaper('a4');
+
+        return $pdf->download('surat-rujukan-' . str_pad($medicalRecord->id, 4, '0', STR_PAD_LEFT) . '.pdf');
+    }
+
     private function numberToIndonesianWords(int $number): string
     {
         $units = ['', 'satu', 'dua', 'tiga', 'empat', 'lima', 'enam', 'tujuh', 'delapan', 'sembilan'];
