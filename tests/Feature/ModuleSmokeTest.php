@@ -425,6 +425,16 @@ class ModuleSmokeTest extends TestCase
             ->assertSee('Rekomendasi Pembelian Stok');
     }
 
+    public function test_pharmacist_can_export_reorder_pdf(): void
+    {
+        $user = $this->seedAdmin();
+
+        $medicine = \App\Models\Medicine::firstOrFail();
+        $medicine->update(['minimum_stock' => 9999]);
+
+        $this->actingAs($user)->get(route('medicines.reorder.pdf'))->assertOk();
+    }
+
     public function test_pharmacist_can_view_expiring_stock_report(): void
     {
         $user = $this->seedAdmin();

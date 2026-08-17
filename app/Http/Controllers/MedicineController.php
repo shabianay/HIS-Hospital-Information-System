@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Medicine;
 use App\Models\StockMutation;
+use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
@@ -159,7 +160,28 @@ class MedicineController extends Controller
     {
         $this->authorize('viewAny', Medicine::class);
 
-        $lowStock = DB::table('medicines as m')
+        $lowStock = $this->buildReorderList();
+        $totalSuggestedCost = $lowStock->sum('estimated_cost');
+
+        return view('medicines.reorder', compact('lowStock', 'totalSuggestedCost'));
+    }
+
+    public function reorderPdf()
+    {
+        $this->authorize('viewAny', Medicine::class);
+
+        $lowStock = $this->buildReorderList();
+        $totalSuggestedCost = $lowStock->sum('estimated_cost');
+
+        $pdf = Pdf::loadView('medicines.reorder-pdf', compact('lowStock', 'totalSuggestedCost'))
+            ->setPaper('a4', 'portrait');
+
+        return $pdf->download('rekomendasi-pembelian-' . now()->format('Ymd') . '.pdf');
+    }
+
+    private function buildReorderList()
+    {
+        return DB::table('medicines as m')
             ->leftJoin('medicine_stocks as ms', 'm.id', '=', 'ms.medicine_id')
             ->select(
                 'm.id',
@@ -179,10 +201,6 @@ class MedicineController extends Controller
 
                 return $item;
             });
-
-        $totalSuggestedCost = $lowStock->sum('estimated_cost');
-
-        return view('medicines.reorder', compact('lowStock', 'totalSuggestedCost'));
     }
 
     public function expiring()
