@@ -222,7 +222,7 @@ class MedicalRecordController extends Controller
 
         $this->authorize('view', $patient);
 
-        $records = MedicalRecord::with(['appointment.doctor', 'appointment.poli', 'diagnoses'])
+        $records = MedicalRecord::with(['appointment.doctor', 'appointment.poli', 'appointment.labRequests', 'diagnoses'])
             ->where('patient_id', $patientId)
             ->latest()
             ->paginate(15);

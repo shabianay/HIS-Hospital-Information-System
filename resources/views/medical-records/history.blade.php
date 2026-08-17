@@ -39,6 +39,7 @@
                     <th class="pb-3 font-semibold">Tanggal Kunjungan</th>
                     <th class="pb-3 font-semibold">Dokter</th>
                     <th class="pb-3 font-semibold">Poli</th>
+                    <th class="pb-3 font-semibold">Lab</th>
                     <th class="pb-3 font-semibold">Diagnosis</th>
                     <th class="pb-3 font-semibold">Status</th>
                     <th class="pb-3 font-semibold">Aksi</th>
@@ -49,6 +50,22 @@
                         <td class="py-3 text-text-primary-light dark:text-text-primary-dark">{{ $record->appointment?->appointment_date?->format('d/m/Y') }}</td>
                         <td class="py-3 text-text-primary-light dark:text-text-primary-dark">{{ $record->appointment?->doctor?->name }}</td>
                         <td class="py-3 text-text-primary-light dark:text-text-primary-dark">{{ $record->appointment?->poli?->name }}</td>
+                        <td class="py-3">
+                            @php
+                                $hasLab = $record->appointment?->labRequests?->isNotEmpty();
+                                $hasPendingLab = $hasLab && $record->appointment->labRequests->where('status', '!=', 'completed')->isNotEmpty();
+                                $hasAbnormal = $hasLab && $record->appointment->labRequests->flatMap->items->contains('result_status', 'abnormal');
+                            @endphp
+                            @if(!$hasLab)
+                                <span class="text-xs text-text-secondary-light dark:text-text-secondary-dark">-</span>
+                            @elseif($hasAbnormal)
+                                <span class="inline-flex items-center rounded-full bg-danger-100 text-danger-800 dark:bg-danger-900/30 dark:text-danger-400 px-3 py-1 text-xs font-semibold border border-danger-200 dark:border-danger-800">Abnormal</span>
+                            @elseif($hasPendingLab)
+                                <span class="inline-flex items-center rounded-full bg-warning-100 text-warning-800 dark:bg-warning-900/30 dark:text-warning-400 px-3 py-1 text-xs font-semibold border border-warning-200 dark:border-warning-800">Proses</span>
+                            @else
+                                <span class="inline-flex items-center rounded-full bg-success-100 text-success-800 dark:bg-success-900/30 dark:text-success-400 px-3 py-1 text-xs font-semibold border border-success-200 dark:border-success-800">Selesai</span>
+                            @endif
+                        </td>
                         <td class="py-3">
                             @foreach($record->diagnoses as $diag)
                                 <span class="mr-1 inline-block rounded-full bg-primary-100 dark:bg-primary-900/30 px-3 py-1 text-xs font-semibold text-primary-800 dark:text-primary-400 border border-primary-200 dark:border-primary-800">{{ $diag->icd_code }} {{ $diag->description }}</span>
@@ -63,7 +80,7 @@
                         </td>
                     </tr>
                     @empty
-                    <tr x-show="!search" data-search-row><td colspan="6" class="py-6 text-center text-text-secondary-light dark:text-text-secondary-dark">Belum ada rekam medis.</td></tr>
+                    <tr x-show="!search" data-search-row><td colspan="7" class="py-6 text-center text-text-secondary-light dark:text-text-secondary-dark">Belum ada rekam medis.</td></tr>
                     @endforelse
             </x-table>
         <div class="mt-4">

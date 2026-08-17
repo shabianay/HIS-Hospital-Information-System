@@ -880,6 +880,10 @@ class ModuleSmokeTest extends TestCase
         $this->actingAs($user)->get(route('patients.medical-history.pdf', $appointment->patient))
             ->assertOk()
             ->assertHeader('Content-Type', 'application/pdf');
+
+        $this->actingAs($user)->get(route('patients.medical-history', $appointment->patient))
+            ->assertOk()
+            ->assertSee('Abnormal');
     }
 
     public function test_dispense_fails_gracefully_when_stock_insufficient(): void
