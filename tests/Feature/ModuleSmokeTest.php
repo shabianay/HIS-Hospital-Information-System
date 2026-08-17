@@ -796,6 +796,49 @@ class ModuleSmokeTest extends TestCase
             ->assertSee('Buat Tagihan');
     }
 
+    public function test_medical_record_show_displays_lab_results(): void
+    {
+        $user = $this->seedAdmin();
+
+        $appointment = Appointment::first();
+        $test = \App\Models\LabTest::firstOrFail();
+
+        $this->actingAs($user)->post(route('lab.requests.store'), [
+            'appointment_id' => $appointment->id,
+            'patient_id' => $appointment->patient_id,
+            'notes' => 'Cek lab.',
+            'lab_test_ids' => [$test->id],
+        ])->assertSessionHasNoErrors();
+
+        $labRequest = \App\Models\LabRequest::where('appointment_id', $appointment->id)->firstOrFail();
+
+        $items = $labRequest->items->mapWithKeys(function ($item) {
+            return [$item->id => ['result_value' => 'Positif', 'result_status' => 'abnormal']];
+        })->all();
+
+        $this->actingAs($user)->post(route('lab.requests.process', $labRequest), [
+            'status' => 'completed',
+            'items' => $items,
+        ])->assertSessionHasNoErrors();
+
+        $medicalRecord = $appointment->medicalRecord()->create([
+            'patient_id' => $appointment->patient_id,
+            'doctor_id' => $appointment->doctor_id,
+            'chief_complaint' => 'Demam',
+            'subjective' => 'Demam 3 hari',
+            'objective' => 'Suhu 38C',
+            'assessment' => 'Dengue',
+            'plan' => 'Istirahat',
+            'status' => 'draft',
+        ]);
+
+        $this->actingAs($user)->get(route('medical-records.show', $medicalRecord))
+            ->assertOk()
+            ->assertSee('Hasil Laboratorium')
+            ->assertSee('Abnormal')
+            ->assertSee('Positif');
+    }
+
     public function test_dispense_fails_gracefully_when_stock_insufficient(): void
     {
         $user = $this->seedAdmin();

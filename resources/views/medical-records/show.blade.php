@@ -86,6 +86,64 @@
                 <p class="mt-2 rounded-xl bg-primary-50/50 dark:bg-primary-900/10 p-4 text-sm text-text-primary-light dark:text-text-primary-dark border border-border-light dark:border-border-dark">{{ $medicalRecord->plan ?: '-' }}</p>
             </div>
         </div>
+
+        @if($medicalRecord->appointment?->labRequests?->isNotEmpty())
+        <div class="mt-8 border-t border-border-light dark:border-border-dark pt-6">
+            <h4 class="mb-4 text-sm font-semibold text-text-primary-light dark:text-text-primary-dark">Hasil Laboratorium</h4>
+            @foreach($medicalRecord->appointment->labRequests as $labRequest)
+                <div class="mb-4 rounded-xl border border-border-light dark:border-border-dark overflow-hidden">
+                    <div class="flex flex-wrap items-center justify-between gap-2 bg-secondary-50 dark:bg-secondary-800/40 px-4 py-3">
+                        <div class="text-sm font-semibold text-text-primary-light dark:text-text-primary-dark">
+                            Permintaan Lab #{{ str_pad($labRequest->id, 3, '0', STR_PAD_LEFT) }}
+                            @if($labRequest->is_urgent)
+                                <span class="ml-2 inline-flex items-center rounded-full bg-danger-100 dark:bg-danger-900/30 px-2 py-0.5 text-xs font-semibold text-danger-700 dark:text-danger-400 border border-danger-200 dark:border-danger-800">Urgent</span>
+                            @endif
+                        </div>
+                        <span class="inline-flex items-center rounded-full px-3 py-1 text-xs font-semibold
+                            {{ $labRequest->status === 'completed' ? 'bg-success-100 text-success-800 dark:bg-success-900/30 dark:text-success-400 border border-success-200 dark:border-success-800' : 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-400 border border-yellow-200 dark:border-yellow-800' }}">
+                            {{ $labRequest->status === 'completed' ? 'Selesai' : ($labRequest->status === 'in_progress' ? 'Diproses' : 'Menunggu') }}
+                        </span>
+                    </div>
+                    @if($labRequest->notes)
+                        <p class="border-t border-border-light dark:border-border-dark px-4 py-2 text-xs text-text-secondary-light dark:text-text-secondary-dark"><strong>Catatan:</strong> {{ $labRequest->notes }}</p>
+                    @endif
+                    <x-table :searchable="false">
+                        <x-slot name="head">
+                            <tr class="border-b border-border-light dark:border-border-dark text-xs uppercase tracking-wider text-text-secondary-light dark:text-text-secondary-dark">
+                                <th class="pb-3 px-4 font-semibold">Pemeriksaan</th>
+                                <th class="pb-3 px-4 font-semibold">Nilai Rujukan</th>
+                                <th class="pb-3 px-4 font-semibold">Hasil</th>
+                                <th class="pb-3 px-4 font-semibold">Status</th>
+                                <th class="pb-3 px-4 font-semibold">Catatan</th>
+                            </tr>
+                        </x-slot>
+                        @forelse($labRequest->items as $item)
+                            <tr class="border-b border-border-light dark:border-border-dark hover:bg-primary-50/50 dark:hover:bg-primary-900/10 transition-colors">
+                                <td class="py-3 px-4">
+                                    <div class="text-sm font-semibold text-text-primary-light dark:text-text-primary-dark">{{ $item->test_name }}</div>
+                                    <div class="text-xs text-text-secondary-light dark:text-text-secondary-dark">{{ $item->unit ?? '' }}</div>
+                                </td>
+                                <td class="py-3 px-4 text-sm text-text-secondary-light dark:text-text-secondary-dark">{{ $item->reference_range ?? '-' }}</td>
+                                <td class="py-3 px-4 text-sm text-text-primary-light dark:text-text-primary-dark">{{ $item->result_value ?: '-' }}</td>
+                                <td class="py-3 px-4">
+                                    @if($item->result_status === 'normal')
+                                        <span class="inline-flex items-center rounded-full bg-success-100 text-success-800 dark:bg-success-900/30 dark:text-success-400 px-2.5 py-0.5 text-xs font-semibold border border-success-200 dark:border-success-800">Normal</span>
+                                    @elseif($item->result_status === 'abnormal')
+                                        <span class="inline-flex items-center rounded-full bg-danger-100 text-danger-800 dark:bg-danger-900/30 dark:text-danger-400 px-2.5 py-0.5 text-xs font-semibold border border-danger-200 dark:border-danger-800">Abnormal</span>
+                                    @else
+                                        <span class="text-xs text-text-secondary-light dark:text-text-secondary-dark">-</span>
+                                    @endif
+                                </td>
+                                <td class="py-3 px-4 text-sm text-text-secondary-light dark:text-text-secondary-dark">{{ $item->result_notes ?: '-' }}</td>
+                            </tr>
+                        @empty
+                            <tr><td colspan="5" class="py-6 text-center text-text-secondary-light dark:text-text-secondary-dark">Belum ada item pemeriksaan.</td></tr>
+                        @endforelse
+                    </x-table>
+                </div>
+            @endforeach
+        </div>
+        @endif
     </div>
 
     <div class="bg-surface-light dark:bg-surface-dark p-8 rounded-2xl border border-border-light dark:border-border-dark shadow-glass-sm">

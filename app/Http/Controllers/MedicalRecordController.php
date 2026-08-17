@@ -36,6 +36,7 @@ class MedicalRecordController extends Controller
             'appointment.patient',
             'appointment.doctor',
             'appointment.poli',
+            'appointment.labRequests.items',
             'diagnoses',
             'prescriptions.medicine',
         ]);
