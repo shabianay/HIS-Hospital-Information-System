@@ -58,6 +58,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
     // Medical Records
     Route::get('medical-records', [MedicalRecordController::class, 'index'])->name('medical-records.index');
     Route::get('patients/{patient}/medical-history', [MedicalRecordController::class, 'history'])->name('patients.medical-history');
+    Route::get('patients/{patient}/medical-history/pdf', [MedicalRecordController::class, 'historyPdf'])->name('patients.medical-history.pdf');
     Route::get('appointments/{appointment}/medical-record/create', [MedicalRecordController::class, 'create'])->name('medical-records.create');
     Route::post('appointments/{appointment}/medical-record', [MedicalRecordController::class, 'store'])->name('medical-records.store');
     Route::get('medical-records/{medicalRecord}', [MedicalRecordController::class, 'show'])->name('medical-records.show');

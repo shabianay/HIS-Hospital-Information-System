@@ -11,7 +11,10 @@
     <div class="bg-surface-light dark:bg-surface-dark p-8 rounded-2xl border border-border-light dark:border-border-dark shadow-glass-sm">
         <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8 pb-6 border-b border-border-light dark:border-border-dark">
             <h3 class="text-lg font-bold text-text-primary-light dark:text-text-primary-dark">Riwayat Medis Pasien</h3>
-            <x-secondary-button href="{{ route('patients.show', $patient) }}">Kembali ke Profil</x-secondary-button>
+            <div class="flex items-center gap-3">
+                <a href="{{ route('patients.medical-history.pdf', $patient) }}" class="inline-flex items-center gap-2 rounded-xl border border-primary-300 dark:border-primary-700 bg-primary-50 dark:bg-primary-900/20 px-5 py-2.5 text-sm font-semibold text-primary-700 dark:text-primary-300 hover:bg-primary-100 dark:hover:bg-primary-900/40 transition-all duration-200">Cetak PDF</a>
+                <x-secondary-button href="{{ route('patients.show', $patient) }}">Kembali ke Profil</x-secondary-button>
+            </div>
         </div>
         <div class="grid grid-cols-1 gap-4 text-sm md:grid-cols-3">
             <div>

@@ -248,4 +248,29 @@ class MedicalRecordController extends Controller
 
         return $pdf->download('rekam-medis-' . str_pad($medicalRecord->id, 4, '0', STR_PAD_LEFT) . '.pdf');
     }
+
+    public function historyPdf($patientId)
+    {
+        $patient = Patient::findOrFail($patientId);
+
+        $this->authorize('view', $patient);
+
+        $records = MedicalRecord::with([
+            'appointment.doctor',
+            'appointment.poli',
+            'diagnoses',
+            'prescriptions.medicine',
+        ])
+            ->where('patient_id', $patientId)
+            ->latest()
+            ->get();
+
+        $pdf = Pdf::loadView('medical-records.history-pdf', [
+            'patient' => $patient,
+            'records' => $records,
+            'generatedAt' => now()->format('d/m/Y H:i:s'),
+        ])->setPaper('a4');
+
+        return $pdf->download('riwayat-medis-' . ($patient->rm_number ?: str_pad($patient->id, 4, '0', STR_PAD_LEFT)) . '.pdf');
+    }
 }
