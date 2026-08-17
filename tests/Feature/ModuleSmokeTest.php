@@ -222,13 +222,13 @@ class ModuleSmokeTest extends TestCase
 
         $regResponse = $this->actingAs($registration)->get(route('dashboard'));
         $regResponse->assertOk()
-            ->assertSee(route('appointments.queue'))
-            ->assertDontSee(route('billings.index'));
+            ->assertSee('Antrian Hari Ini')
+            ->assertDontSee('Kasir / Billing');
 
         $cashierResponse = $this->actingAs($cashier)->get(route('dashboard'));
         $cashierResponse->assertOk()
-            ->assertSee(route('billings.index'))
-            ->assertDontSee(route('appointments.index'));
+            ->assertSee('Kasir / Billing')
+            ->assertDontSee('Antrian Hari Ini');
     }
 
     public function test_admin_can_export_audit_csv_and_pdf(): void
@@ -550,5 +550,72 @@ class ModuleSmokeTest extends TestCase
         $registration = User::where('email', 'pendaftaran@his.local')->firstOrFail();
 
         $this->actingAs($registration)->get(route('notifications.index'))->assertOk();
+    }
+
+    public function test_appointment_with_downstream_records_cannot_be_deleted(): void
+    {
+        $user = $this->seedAdmin();
+
+        $appointment = Appointment::first();
+        $medicine = Medicine::first();
+
+        $this->actingAs($user)->post(route('medical-records.store', $appointment), [
+            'subjective' => 'Sakit perut.',
+            'objective' => 'Perut kembung.',
+            'assessment' => 'Dispepsia.',
+            'plan' => 'Obat maag.',
+            'chief_complaint' => 'Sakit perut',
+            'diagnoses' => [
+                ['icd_code' => 'K30', 'description' => 'Dyspepsia', 'is_primary' => 1],
+            ],
+            'prescriptions' => [
+                [
+                    'medicine_id' => $medicine->id,
+                    'quantity' => 5,
+                    'dosage' => '2x1',
+                    'frequency' => 'Sebelum makan',
+                    'duration' => '5 hari',
+                ],
+            ],
+        ])->assertSessionHasNoErrors();
+
+        $this->actingAs($user)->delete(route('appointments.destroy', $appointment))
+            ->assertSessionHasNoErrors();
+
+        $this->assertDatabaseHas('appointments', ['id' => $appointment->id]);
+        $this->assertDatabaseHas('medical_records', ['appointment_id' => $appointment->id]);
+    }
+
+    public function test_appointment_without_downstream_records_can_be_deleted(): void
+    {
+        $user = $this->seedAdmin();
+
+        $appointment = Appointment::whereDoesntHave('medicalRecord')
+            ->whereDoesntHave('billing')
+            ->whereDoesntHave('labRequests')
+            ->firstOrFail();
+
+        $this->actingAs($user)->delete(route('appointments.destroy', $appointment))
+            ->assertSessionHasNoErrors();
+
+        $this->assertDatabaseMissing('appointments', ['id' => $appointment->id]);
+    }
+
+    public function test_doctor_can_view_my_patients_today(): void
+    {
+        $this->seed(DatabaseSeeder::class);
+
+        $doctorUser = User::where('email', 'dokter@his.local')->firstOrFail();
+
+        $this->actingAs($doctorUser)->get(route('appointments.my-patients'))->assertOk();
+    }
+
+    public function test_notifications_unread_count_requires_dashboard_permission(): void
+    {
+        $this->seed(DatabaseSeeder::class);
+
+        $noRoleUser = User::factory()->create();
+
+        $this->actingAs($noRoleUser)->get(route('notifications.unread-count'))->assertForbidden();
     }
 }

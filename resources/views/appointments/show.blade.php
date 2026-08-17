@@ -111,6 +111,21 @@
                 </a>
             @endif
 
+            @if($appointment->status === 'cancelled' || $appointment->status === 'waiting')
+                @if(!$appointment->medicalRecord && !$appointment->billing)
+                    <form action="{{ route('appointments.destroy', $appointment) }}" method="POST" onsubmit="return confirm('Hapus janji temu ini? Tindakan ini permanen.')">
+                        @csrf
+                        @method('DELETE')
+                        <button type="submit" class="inline-flex items-center justify-center px-5 py-2.5 bg-danger-600 hover:bg-danger-700 text-white text-sm font-semibold rounded-xl shadow-glass-sm transition-all duration-200">
+                            Hapus
+                        </button>
+                    </form>
+                @endif
+            @endif
+
+            <a href="{{ route('appointments.queue') }}" class="inline-flex items-center justify-center px-5 py-2.5 bg-surface-light border border-border-light text-text-primary-light hover:bg-secondary-50 text-sm font-semibold rounded-xl shadow-glass-sm transition-all duration-200 dark:bg-surface-dark dark:border-border-dark dark:text-text-primary-dark dark:hover:bg-secondary-800">
+                Lihat Antrian Hari Ini
+            </a>
             <a href="{{ route('appointments.index') }}" class="inline-flex items-center justify-center px-5 py-2.5 bg-surface-light border border-border-light text-text-primary-light hover:bg-secondary-50 text-sm font-semibold rounded-xl shadow-glass-sm transition-all duration-200 dark:bg-surface-dark dark:border-border-dark dark:text-text-primary-dark dark:hover:bg-secondary-800">
                 Kembali
             </a>

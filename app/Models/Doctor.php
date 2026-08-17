@@ -12,6 +12,7 @@ class Doctor extends Model
     protected $table = 'doctors';
 
     protected $fillable = [
+        'user_id',
         'name',
         'specialization',
         'license_number',
@@ -21,6 +22,11 @@ class Doctor extends Model
     protected $casts = [
         'is_active' => 'boolean',
     ];
+
+    public function user()
+    {
+        return $this->belongsTo(User::class);
+    }
 
     public function polis()
     {

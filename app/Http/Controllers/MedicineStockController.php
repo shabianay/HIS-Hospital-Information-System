@@ -2,10 +2,13 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Medicine;
 use App\Models\MedicineStock;
 use App\Models\MedicalRecord;
 use App\Models\Prescription;
 use App\Models\StockMutation;
+use App\Models\User;
+use App\Notifications\LowStockAlert;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
@@ -119,6 +122,29 @@ class MedicineStockController extends Controller
             $locked->update(['is_dispensed' => true]);
         });
 
+        $this->notifyLowStock($prescription->medicine_id);
+
         return redirect()->back()->with('success', 'Resep berhasil didispensasi.');
+    }
+
+    private function notifyLowStock(int $medicineId): void
+    {
+        $medicine = Medicine::find($medicineId);
+        if (! $medicine) {
+            return;
+        }
+
+        $remaining = MedicineStock::where('medicine_id', $medicineId)->sum('quantity');
+
+        if ($remaining > $medicine->minimum_stock) {
+            return;
+        }
+
+        $pharmacists = User::role('pharmacist')->get();
+        foreach ($pharmacists as $pharmacist) {
+            if ($pharmacist->id !== auth()->id()) {
+                $pharmacist->notify(new LowStockAlert($medicine, (int) $remaining));
+            }
+        }
     }
 }

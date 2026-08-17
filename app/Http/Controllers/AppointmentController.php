@@ -21,9 +21,10 @@ class AppointmentController extends Controller
 
         $query = Appointment::with(['patient', 'doctor', 'poli']);
 
-        if ($request->filled('date')) {
-            $dayStart = Carbon::parse($request->date)->startOfDay();
-            $dayEnd = Carbon::parse($request->date)->endOfDay();
+        $date = $request->get('date', Carbon::today()->toDateString());
+        if ($date) {
+            $dayStart = Carbon::parse($date)->startOfDay();
+            $dayEnd = Carbon::parse($date)->endOfDay();
             $query->whereBetween('appointment_date', [$dayStart, $dayEnd]);
         }
 
@@ -138,6 +139,27 @@ class AppointmentController extends Controller
         return view('appointments.queue', compact('groups', 'today'));
     }
 
+    public function myPatients()
+    {
+        $doctor = auth()->user()?->doctor;
+        if (! $doctor) {
+            return back()->with('error', 'Akun Anda tidak tertaut ke data dokter.');
+        }
+
+        $today = Carbon::today();
+        $dayStart = $today->copy()->startOfDay();
+        $dayEnd = $today->copy()->endOfDay();
+
+        $appointments = Appointment::with(['patient', 'poli', 'medicalRecord'])
+            ->where('doctor_id', $doctor->id)
+            ->whereBetween('appointment_date', [$dayStart, $dayEnd])
+            ->whereIn('status', ['waiting', 'in_progress', 'completed'])
+            ->orderBy('queue_number')
+            ->get();
+
+        return view('appointments.my-patients', compact('appointments', 'today'));
+    }
+
     public function updateStatus(Request $request, Appointment $appointment)
     {
         $this->authorize('update', $appointment);
@@ -169,6 +191,21 @@ class AppointmentController extends Controller
 
         return redirect()->route('appointments.show', $appointment)
             ->with('success', 'Status kunjungan diperbarui.');
+    }
+
+    public function destroy(Appointment $appointment)
+    {
+        $this->authorize('delete', $appointment);
+
+        if ($appointment->medicalRecord()->exists() || $appointment->billing()->exists() || $appointment->labRequests()->exists()) {
+            return redirect()->route('appointments.show', $appointment)
+                ->with('error', 'Janji temu tidak dapat dihapus karena sudah memiliki rekam medis, tagihan, atau permintaan lab.');
+        }
+
+        $appointment->delete();
+
+        return redirect()->route('appointments.index')
+            ->with('success', 'Janji temu berhasil dihapus.');
     }
 
     private function resolvePatientsForCreate()

@@ -2,33 +2,33 @@
 @section('title', 'Dashboard')
 @section('content')
     <div class="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
-        <div
-            class="bg-surface-light dark:bg-surface-dark p-6 rounded-2xl border border-border-light dark:border-border-dark shadow-glass-sm">
+        <a href="{{ route('patients.index') }}"
+            class="bg-surface-light dark:bg-surface-dark p-6 rounded-2xl border border-border-light dark:border-border-dark shadow-glass-sm hover:bg-secondary-50 dark:hover:bg-secondary-900/30 transition-colors">
             <div class="text-sm font-semibold text-text-secondary-light dark:text-text-secondary-dark mb-2">Total Pasien Hari
                 Ini</div>
             <div class="text-3xl font-bold text-text-primary-light dark:text-text-primary-dark">
                 {{ number_format($totalPatientsToday) }}</div>
-        </div>
-        <div
-            class="bg-surface-light dark:bg-surface-dark p-6 rounded-2xl border border-border-light dark:border-border-dark shadow-glass-sm">
+        </a>
+        <a href="{{ route('appointments.queue') }}"
+            class="bg-surface-light dark:bg-surface-dark p-6 rounded-2xl border border-border-light dark:border-border-dark shadow-glass-sm hover:bg-secondary-50 dark:hover:bg-secondary-900/30 transition-colors">
             <div class="text-sm font-semibold text-text-secondary-light dark:text-text-secondary-dark mb-2">Total Kunjungan
                 Hari Ini</div>
             <div class="text-3xl font-bold text-text-primary-light dark:text-text-primary-dark">
                 {{ number_format($appointmentsToday) }}</div>
-        </div>
-        <div
-            class="bg-surface-light dark:bg-surface-dark p-6 rounded-2xl border border-border-light dark:border-border-dark shadow-glass-sm">
+        </a>
+        <a href="{{ route('billings.daily-report') }}"
+            class="bg-surface-light dark:bg-surface-dark p-6 rounded-2xl border border-border-light dark:border-border-dark shadow-glass-sm hover:bg-secondary-50 dark:hover:bg-secondary-900/30 transition-colors">
             <div class="text-sm font-semibold text-text-secondary-light dark:text-text-secondary-dark mb-2">Pendapatan Hari
                 Ini</div>
             <div class="text-3xl font-bold text-text-primary-light dark:text-text-primary-dark">Rp
                 {{ number_format($revenueToday, 0, ',', '.') }}</div>
-        </div>
-        <div
-            class="bg-surface-light dark:bg-surface-dark p-6 rounded-2xl border border-border-light dark:border-border-dark shadow-glass-sm">
+        </a>
+        <a href="{{ route('medicines.stock') }}"
+            class="bg-surface-light dark:bg-surface-dark p-6 rounded-2xl border border-border-light dark:border-border-dark shadow-glass-sm hover:bg-secondary-50 dark:hover:bg-secondary-900/30 transition-colors">
             <div class="text-sm font-semibold text-text-secondary-light dark:text-text-secondary-dark mb-2">Stok Obat
                 Menipis</div>
             <div class="text-3xl font-bold text-red-600 dark:text-red-400">{{ number_format($lowStockCount) }}</div>
-        </div>
+        </a>
     </div>
 
     <div class="mt-8 grid grid-cols-1 gap-6 lg:grid-cols-1">
@@ -48,8 +48,8 @@
                 @forelse($recentAppointments as $appt)
                     <tr
                         class="border-b border-border-light dark:border-border-dark hover:bg-primary-50/50 dark:hover:bg-primary-900/10 transition-colors">
-                        <td class="py-3 text-text-primary-light dark:text-text-primary-dark">{{ $appt->queue_number }}</td>
-                        <td class="py-3 text-text-primary-light dark:text-text-primary-dark">{{ $appt->patient_name }}</td>
+                        <td class="py-3"><a href="{{ route('appointments.show', $appt->id) }}" class="text-text-primary-light dark:text-text-primary-dark hover:text-primary-600 dark:hover:text-primary-400">{{ $appt->queue_number }}</a></td>
+                        <td class="py-3"><a href="{{ route('appointments.show', $appt->id) }}" class="text-text-primary-light dark:text-text-primary-dark hover:text-primary-600 dark:hover:text-primary-400">{{ $appt->patient_name }}</a></td>
                         <td class="py-3 text-text-primary-light dark:text-text-primary-dark">{{ $appt->doctor_name }}</td>
                         <td class="py-3">
                             @php

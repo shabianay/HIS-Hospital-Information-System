@@ -159,6 +159,12 @@ class DatabaseSeeder extends Seeder
             ]);
         }
 
+        // Link doctor user to the first doctor record
+        $docUser = User::where('email', 'dokter@his.local')->first();
+        if ($docUser && isset($doctorModels[0]) && ! $doctorModels[0]->user_id) {
+            $doctorModels[0]->update(['user_id' => $docUser->id]);
+        }
+
         // Schedules
         $days = ['senin', 'selasa', 'rabu', 'kamis', 'jumat'];
         foreach ($doctorModels as $index => $doc) {

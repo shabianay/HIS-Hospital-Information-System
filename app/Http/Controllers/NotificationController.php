@@ -9,6 +9,8 @@ class NotificationController extends Controller
 {
     public function index()
     {
+        $this->authorize('view-dashboard');
+
         $notifications = auth()->user()->notifications()->paginate(20);
 
         return view('notifications.index', compact('notifications'));
@@ -16,6 +18,8 @@ class NotificationController extends Controller
 
     public function unreadCount(): JsonResponse
     {
+        $this->authorize('view-dashboard');
+
         return response()->json([
             'count' => auth()->user()->unreadNotifications()->count(),
         ]);
@@ -23,6 +27,8 @@ class NotificationController extends Controller
 
     public function markAllRead()
     {
+        $this->authorize('view-dashboard');
+
         auth()->user()->unreadNotifications->markAsRead();
 
         return redirect()->route('notifications.index')
@@ -31,6 +37,8 @@ class NotificationController extends Controller
 
     public function markRead(Request $request, string $id)
     {
+        $this->authorize('view-dashboard');
+
         $notification = auth()->user()->notifications()->findOrFail($id);
         $notification->markAsRead();
 

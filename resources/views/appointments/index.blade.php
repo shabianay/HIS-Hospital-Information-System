@@ -40,7 +40,7 @@
                 class="mb-8 grid grid-cols-1 md:grid-cols-4 gap-6 p-6 bg-secondary-50 dark:bg-secondary-900/30 rounded-2xl border border-border-light dark:border-border-dark">
                 <div>
                     <x-input-label for="date" value="Filter Tanggal" />
-                    <x-text-input type="date" name="date" id="date" value="{{ request('date') }}" />
+                    <x-text-input type="date" name="date" id="date" value="{{ request('date', now()->toDateString()) }}" />
                 </div>
                 <div>
                     <x-input-label for="poli_id" value="Filter Poli" />

@@ -58,4 +58,9 @@ class Appointment extends Model
     {
         return $this->hasOne(Billing::class);
     }
+
+    public function labRequests()
+    {
+        return $this->hasMany(LabRequest::class);
+    }
 }
