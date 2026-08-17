@@ -27,6 +27,9 @@
             </p>
         </div>
         <div class="flex items-center gap-3">
+            <a href="{{ route('appointments.queue.csv', ['date' => $today->toDateString()]) }}" class="inline-flex items-center justify-center px-5 py-2.5 bg-surface-light border border-border-light text-text-primary-light hover:bg-secondary-50 text-sm font-semibold rounded-xl shadow-glass-sm transition-all duration-200 dark:bg-surface-dark dark:border-border-dark dark:text-text-primary-dark dark:hover:bg-secondary-800">
+                Export CSV
+            </a>
             <a href="{{ route('appointments.index', ['date' => $today->toDateString()]) }}"
                 class="inline-flex items-center justify-center px-5 py-2.5 bg-surface-light border border-border-light text-text-primary-light hover:bg-secondary-50 text-sm font-semibold rounded-xl shadow-glass-sm transition-all duration-200 dark:bg-surface-dark dark:border-border-dark dark:text-text-primary-dark dark:hover:bg-secondary-800">
                 Daftar Janji Temu

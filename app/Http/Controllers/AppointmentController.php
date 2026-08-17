@@ -165,6 +165,51 @@ class AppointmentController extends Controller
         return view('appointments.queue', compact('groups', 'today'));
     }
 
+    public function queueCsv(Request $request)
+    {
+        $this->authorize('viewAny', Appointment::class);
+
+        $date = $request->get('date', Carbon::today()->toDateString());
+        $dayStart = Carbon::parse($date)->startOfDay();
+        $dayEnd = Carbon::parse($date)->endOfDay();
+
+        $appointments = Appointment::with(['patient', 'doctor', 'poli'])
+            ->whereBetween('appointment_date', [$dayStart, $dayEnd])
+            ->where('status', '!=', 'cancelled')
+            ->orderBy('appointment_date')
+            ->orderBy('queue_number')
+            ->get();
+
+        $statusLabels = [
+            'waiting' => 'Menunggu',
+            'in_progress' => 'Sedang Diperiksa',
+            'completed' => 'Selesai',
+            'cancelled' => 'Dibatalkan',
+        ];
+
+        $filename = 'antrian-' . Carbon::parse($date)->format('Ymd') . '.csv';
+
+        return response()->streamDownload(function () use ($appointments, $date, $statusLabels) {
+            $handle = fopen('php://output', 'w');
+
+            fputcsv($handle, ['ANTRIAN PASIEN ' . Carbon::parse($date)->format('d/m/Y')]);
+            fputcsv($handle, ['No. Antrian', 'Pasien', 'NIK', 'Poli', 'Dokter', 'Status']);
+
+            foreach ($appointments as $appointment) {
+                fputcsv($handle, [
+                    $appointment->queue_number,
+                    $appointment->patient?->name ?? '-',
+                    $appointment->patient?->nik ?? '-',
+                    $appointment->poli?->name ?? '-',
+                    $appointment->doctor?->name ?? '-',
+                    $statusLabels[$appointment->status] ?? $appointment->status,
+                ]);
+            }
+
+            fclose($handle);
+        }, $filename, ['Content-Type' => 'text/csv']);
+    }
+
     public function myPatients()
     {
         $doctor = auth()->user()?->doctor;
