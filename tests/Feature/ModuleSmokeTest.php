@@ -349,6 +349,26 @@ class ModuleSmokeTest extends TestCase
         $this->actingAs($registration)->get(route('queue.display.json'))->assertOk();
     }
 
+    public function test_lab_queue_display_accessible_to_authenticated_users(): void
+    {
+        $user = $this->seedAdmin();
+
+        $appointment = Appointment::first();
+        $test = \App\Models\LabTest::firstOrFail();
+
+        $this->actingAs($user)->post(route('lab.requests.store'), [
+            'appointment_id' => $appointment->id,
+            'patient_id' => $appointment->patient_id,
+            'notes' => 'Cek lab.',
+            'lab_test_ids' => [$test->id],
+        ])->assertSessionHasNoErrors();
+
+        $this->actingAs($user)->get(route('queue.display.lab'))->assertOk();
+        $this->actingAs($user)->get(route('queue.display.lab.json'))
+            ->assertOk()
+            ->assertJson(['total' => 1]);
+    }
+
     public function test_admin_can_open_reports_and_export_pdf(): void
     {
         $user = $this->seedAdmin();
