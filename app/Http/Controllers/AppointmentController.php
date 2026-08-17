@@ -119,6 +119,15 @@ class AppointmentController extends Controller
         return view('appointments.show', compact('appointment'));
     }
 
+    public function ticket(Appointment $appointment)
+    {
+        $this->authorize('view', $appointment);
+
+        $appointment->load(['patient', 'doctor', 'poli', 'schedule']);
+
+        return view('appointments.ticket', compact('appointment'));
+    }
+
     public function queue()
     {
         $this->authorize('viewAny', Appointment::class);

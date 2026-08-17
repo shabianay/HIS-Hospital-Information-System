@@ -17,7 +17,12 @@
                 <span class="text-sm font-semibold text-primary-600 dark:text-primary-400 uppercase tracking-wider">No. Antrian</span>
                 <h2 class="text-4xl font-extrabold text-text-primary-light dark:text-text-primary-dark mt-1">{{ $appointment->queue_number }}</h2>
             </div>
-            <span class="inline-flex items-center rounded-full px-4 py-1.5 text-sm font-semibold border {{ $badge['color'] }}">{{ $badge['label'] }}</span>
+            <div class="flex items-center gap-3">
+                @if($appointment->status !== 'cancelled')
+                    <a href="{{ route('appointments.ticket', $appointment) }}" target="_blank" class="inline-flex items-center gap-2 rounded-xl border border-primary-300 dark:border-primary-700 bg-primary-50 dark:bg-primary-900/20 px-4 py-1.5 text-sm font-semibold text-primary-700 dark:text-primary-300 hover:bg-primary-100 dark:hover:bg-primary-900/40 transition-all duration-200">Cetak Tiket</a>
+                @endif
+                <span class="inline-flex items-center rounded-full px-4 py-1.5 text-sm font-semibold border {{ $badge['color'] }}">{{ $badge['label'] }}</span>
+            </div>
         </div>
 
         <div class="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-6">

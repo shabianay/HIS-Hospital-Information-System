@@ -102,6 +102,18 @@ class ModuleSmokeTest extends TestCase
         }
     }
 
+    public function test_admin_can_print_appointment_queue_ticket(): void
+    {
+        $user = $this->seedAdmin();
+
+        $appointment = Appointment::first();
+
+        $this->actingAs($user)->get(route('appointments.ticket', $appointment))
+            ->assertOk()
+            ->assertSee($appointment->queue_number)
+            ->assertSee('Cetak Tiket');
+    }
+
     public function test_admin_can_complete_emr_pharmacy_and_billing_flow(): void
     {
         $user = $this->seedAdmin();
