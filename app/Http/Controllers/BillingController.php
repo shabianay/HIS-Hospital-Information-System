@@ -303,6 +303,26 @@ class BillingController extends Controller
         return view('billings.receipt', compact('billing'));
     }
 
+    public function receiptPdf(Billing $billing)
+    {
+        $this->authorize('view', $billing);
+
+        $billing->load([
+            'appointment.patient',
+            'appointment.doctor',
+            'appointment.poli',
+            'appointment.medicalRecord.prescriptions.medicine',
+            'billingItems',
+        ]);
+
+        $paymentLabels = ['cash' => 'Tunai', 'card' => 'Kartu', 'qris' => 'QRIS', 'bpjs' => 'BPJS', 'insurance' => 'Asuransi'];
+
+        $pdf = Pdf::loadView('billings.receipt-pdf', compact('billing', 'paymentLabels'))
+            ->setPaper('a5', 'portrait');
+
+        return $pdf->download('kuitansi-' . $billing->invoice_number . '.pdf');
+    }
+
     public function dailyReport(Request $request)
     {
         $this->authorize('viewAny', Billing::class);

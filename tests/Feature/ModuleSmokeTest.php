@@ -310,6 +310,26 @@ class ModuleSmokeTest extends TestCase
             ->assertHeader('Content-Type', 'text/csv; charset=utf-8');
     }
 
+    public function test_admin_can_export_billing_receipt_pdf(): void
+    {
+        $user = $this->seedAdmin();
+
+        $appointment = Appointment::first();
+
+        $this->actingAs($user)->post(route('billings.store'), [
+            'appointment_id' => $appointment->id,
+            'consultation_fee' => $appointment->consultation_fee,
+            'medicine_fee' => 0,
+            'action_fee' => 0,
+            'discount' => 0,
+        ])->assertSessionHasNoErrors();
+
+        $billing = $appointment->billing;
+        $this->assertNotNull($billing);
+
+        $this->actingAs($user)->get(route('billings.receipt.pdf', $billing))->assertOk();
+    }
+
     public function test_export_routes_require_authorization(): void
     {
         $this->seed(DatabaseSeeder::class);

@@ -106,6 +106,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::patch('billings/{billing}', [BillingController::class, 'update'])->name('billings.update');
     Route::patch('billings/{billing}/payment', [BillingController::class, 'processPayment'])->name('billings.payment');
     Route::get('billings/{billing}/receipt', [BillingController::class, 'receipt'])->name('billings.receipt');
+    Route::get('billings/{billing}/receipt/pdf', [BillingController::class, 'receiptPdf'])->name('billings.receipt.pdf');
     Route::get('billing/daily-report', [BillingController::class, 'dailyReport'])->name('billings.daily-report');
     Route::get('billing/daily-report/pdf', [BillingController::class, 'dailyReportPdf'])->name('billings.daily-report.pdf');
     Route::get('billing/daily-report/csv', [BillingController::class, 'dailyReportCsv'])->name('billings.daily-report.csv');
