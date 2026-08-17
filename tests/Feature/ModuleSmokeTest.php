@@ -782,7 +782,8 @@ class ModuleSmokeTest extends TestCase
             ->assertOk()
             ->assertSee('Antrian Menunggu')
             ->assertSee('Permintaan Lab Pending')
-            ->assertSee('Resep Belum Diserahkan');
+            ->assertSee('Resep Belum Diserahkan')
+            ->assertSee('Tagihan Belum Lunas');
     }
 
     public function test_near_expiry_stock_creation_notifies_pharmacist(): void
