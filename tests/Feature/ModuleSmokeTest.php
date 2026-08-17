@@ -317,4 +317,41 @@ class ModuleSmokeTest extends TestCase
         $this->actingAs($registration)->get(route('queue.display'))->assertOk();
         $this->actingAs($registration)->get(route('queue.display.json'))->assertOk();
     }
+
+    public function test_admin_can_open_reports_and_export_pdf(): void
+    {
+        $user = $this->seedAdmin();
+
+        $this->actingAs($user)->get(route('reports.index'))->assertOk();
+        $this->actingAs($user)->get(route('reports.pdf'))->assertOk();
+    }
+
+    public function test_pharmacist_can_open_stock_mutation_history(): void
+    {
+        $this->seed(DatabaseSeeder::class);
+
+        $pharmacist = User::where('email', 'apoteker@his.local')->firstOrFail();
+
+        $this->actingAs($pharmacist)->get(route('medicines.mutations'))->assertOk();
+    }
+
+    public function test_stock_mutation_recorded_on_stock_in(): void
+    {
+        $user = $this->seedAdmin();
+
+        $medicine = Medicine::firstOrFail();
+
+        $this->actingAs($user)->post(route('medicine-stocks.store'), [
+            'medicine_id' => $medicine->id,
+            'batch_number' => 'BATCH-TEST',
+            'quantity' => 25,
+            'expiry_date' => now()->addYear()->toDateString(),
+        ])->assertSessionHasNoErrors();
+
+        $this->assertDatabaseHas('stock_mutations', [
+            'medicine_id' => $medicine->id,
+            'type' => 'in',
+            'quantity' => 25,
+        ]);
+    }
 }

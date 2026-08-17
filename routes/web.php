@@ -14,6 +14,7 @@ use App\Http\Controllers\PatientController;
 use App\Http\Controllers\PoliController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\QueueDisplayController;
+use App\Http\Controllers\ReportController;
 use App\Http\Controllers\ScheduleController;
 use App\Http\Controllers\TariffController;
 use App\Http\Controllers\UserController;
@@ -37,6 +38,10 @@ Route::middleware('auth')->group(function () {
 
 // All authenticated routes
 Route::middleware(['auth', 'verified'])->group(function () {
+
+    // Reports
+    Route::get('reports', [ReportController::class, 'index'])->name('reports.index');
+    Route::get('reports/pdf', [ReportController::class, 'exportPdf'])->name('reports.pdf');
 
     // Registration & Queue
     Route::resource('appointments', AppointmentController::class)->except(['edit', 'update']);
@@ -70,6 +75,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
     // Medicines & Pharmacy
     Route::resource('medicines', MedicineController::class);
     Route::get('medicines-stock', [MedicineController::class, 'stock'])->name('medicines.stock');
+    Route::get('medicine-mutations', [MedicineController::class, 'mutations'])->name('medicines.mutations');
     Route::post('medicine-stocks', [MedicineStockController::class, 'store'])->name('medicine-stocks.store');
     Route::post('prescriptions/{prescription}/dispense', [MedicineStockController::class, 'dispense'])->name('prescriptions.dispense');
 

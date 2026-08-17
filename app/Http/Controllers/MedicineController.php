@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Medicine;
+use App\Models\StockMutation;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
@@ -128,5 +129,29 @@ class MedicineController extends Controller
             ->get();
 
         return view('medicines.stock', compact('medicines', 'lowStockMedicines'));
+    }
+
+    public function mutations(Request $request)
+    {
+        $this->authorize('viewAny', Medicine::class);
+
+        $query = StockMutation::with('medicine')->latest();
+
+        if ($request->filled('type')) {
+            $query->where('type', $request->type);
+        }
+
+        if ($request->filled('medicine_id')) {
+            $query->where('medicine_id', $request->medicine_id);
+        }
+
+        if ($request->filled('date')) {
+            $query->whereDate('created_at', $request->date);
+        }
+
+        $mutations = $query->paginate(20)->withQueryString();
+        $medicines = Medicine::orderBy('name')->get();
+
+        return view('medicines.mutations', compact('mutations', 'medicines'));
     }
 }
