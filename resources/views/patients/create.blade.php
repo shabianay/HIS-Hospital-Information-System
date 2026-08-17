@@ -42,6 +42,18 @@
                     <x-text-input type="text" name="phone_number" value="{{ old('phone_number') }}" />
                     <x-input-error :messages="$errors->get('phone_number')" />
                 </div>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                        <x-input-label for="insurance_provider" value="Asuransi / BPJS" />
+                        <x-text-input type="text" name="insurance_provider" value="{{ old('insurance_provider') }}" placeholder="cth: BPJS Kesehatan" />
+                        <x-input-error :messages="$errors->get('insurance_provider')" />
+                    </div>
+                    <div>
+                        <x-input-label for="insurance_number" value="No. Asuransi / BPJS" />
+                        <x-text-input type="text" name="insurance_number" value="{{ old('insurance_number') }}" />
+                        <x-input-error :messages="$errors->get('insurance_number')" />
+                    </div>
+                </div>
                 <div class="flex justify-end gap-3 pt-6">
                     <x-secondary-button href="{{ route('patients.index') }}">Batal</x-secondary-button>
                     <x-primary-button type="submit">Simpan</x-primary-button>

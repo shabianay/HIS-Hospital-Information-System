@@ -118,6 +118,26 @@ class AppointmentController extends Controller
         return view('appointments.show', compact('appointment'));
     }
 
+    public function queue()
+    {
+        $this->authorize('viewAny', Appointment::class);
+
+        $today = Carbon::today();
+        $dayStart = $today->copy()->startOfDay();
+        $dayEnd = $today->copy()->endOfDay();
+
+        $appointments = Appointment::with(['patient', 'doctor', 'poli'])
+            ->whereBetween('appointment_date', [$dayStart, $dayEnd])
+            ->where('status', '!=', 'cancelled')
+            ->orderBy('appointment_date')
+            ->orderBy('queue_number')
+            ->get();
+
+        $groups = $appointments->groupBy('poli_id')->sortBy(fn ($group) => $group->first()->poli?->name);
+
+        return view('appointments.queue', compact('groups', 'today'));
+    }
+
     public function updateStatus(Request $request, Appointment $appointment)
     {
         $this->authorize('update', $appointment);
@@ -141,6 +161,11 @@ class AppointmentController extends Controller
 
         Cache::forget(QueueDisplayController::cacheKey($appointment->appointment_date));
         Cache::forget('dashboard.' . $appointment->appointment_date->format('Y-m-d'));
+
+        if ($request->boolean('back') && $request->input('back') === 'queue') {
+            return redirect()->route('appointments.queue')
+                ->with('success', 'Status kunjungan diperbarui.');
+        }
 
         return redirect()->route('appointments.show', $appointment)
             ->with('success', 'Status kunjungan diperbarui.');

@@ -222,7 +222,7 @@ class ModuleSmokeTest extends TestCase
 
         $regResponse = $this->actingAs($registration)->get(route('dashboard'));
         $regResponse->assertOk()
-            ->assertSee(route('appointments.index'))
+            ->assertSee(route('appointments.queue'))
             ->assertDontSee(route('billings.index'));
 
         $cashierResponse = $this->actingAs($cashier)->get(route('dashboard'));
@@ -353,5 +353,98 @@ class ModuleSmokeTest extends TestCase
             'type' => 'in',
             'quantity' => 25,
         ]);
+    }
+
+    public function test_registration_can_open_today_queue_board(): void
+    {
+        $this->seed(DatabaseSeeder::class);
+
+        $registration = User::where('email', 'pendaftaran@his.local')->firstOrFail();
+
+        $this->actingAs($registration)->get(route('appointments.queue'))->assertOk();
+    }
+
+    public function test_call_patient_from_queue_board_updates_status(): void
+    {
+        $user = $this->seedAdmin();
+
+        $appointment = Appointment::first();
+
+        $this->actingAs($user)->patch(route('appointments.status.update', $appointment), [
+            'status' => 'in_progress',
+            'back' => 'queue',
+        ])->assertSessionHasNoErrors();
+
+        $this->assertEquals('in_progress', $appointment->fresh()->status);
+    }
+
+    public function test_admin_can_toggle_user_active_status(): void
+    {
+        $user = $this->seedAdmin();
+
+        $target = User::where('email', 'kasir@his.local')->firstOrFail();
+
+        $this->actingAs($user)->patch(route('users.toggle-active', $target))->assertSessionHasNoErrors();
+        $this->assertFalse($target->fresh()->is_active);
+
+        $this->actingAs($user)->patch(route('users.toggle-active', $target))->assertSessionHasNoErrors();
+        $this->assertTrue($target->fresh()->is_active);
+    }
+
+    public function test_deactivated_user_cannot_login(): void
+    {
+        $this->seed(DatabaseSeeder::class);
+
+        $cashier = User::where('email', 'kasir@his.local')->firstOrFail();
+        $cashier->update(['is_active' => false]);
+
+        $this->post('/login', [
+            'email' => 'kasir@his.local',
+            'password' => 'password',
+        ])->assertSessionHasErrors('email');
+
+        $this->assertGuest();
+    }
+
+    public function test_new_patient_gets_rm_number_and_insurance(): void
+    {
+        $user = $this->seedAdmin();
+
+        $this->actingAs($user)->post(route('patients.store'), [
+            'name' => 'Pasien Tes RM',
+            'nik' => '3201234567890123',
+            'date_of_birth' => '1990-05-10',
+            'gender' => 'L',
+            'phone_number' => '081234567890',
+            'address' => 'Jl. Merdeka No. 1',
+            'insurance_provider' => 'BPJS Kesehatan',
+            'insurance_number' => 'BPJS-12345',
+        ])->assertSessionHasNoErrors();
+
+        $patient = Patient::where('nik', '3201234567890123')->firstOrFail();
+
+        $this->assertMatchesRegularExpression('/^RM-\d{4}-\d{5}$/', $patient->rm_number);
+        $this->assertEquals('BPJS Kesehatan', $patient->insurance_provider);
+        $this->assertEquals('BPJS-12345', $patient->insurance_number);
+    }
+
+    public function test_lab_request_stores_doctor_from_appointment_not_auth_user(): void
+    {
+        $user = $this->seedAdmin();
+
+        $appointment = Appointment::first();
+        $test = \App\Models\LabTest::firstOrFail();
+
+        $this->actingAs($user)->post(route('lab.requests.store'), [
+            'appointment_id' => $appointment->id,
+            'patient_id' => $appointment->patient_id,
+            'notes' => 'Cek laboratorium.',
+            'lab_test_ids' => [$test->id],
+        ])->assertSessionHasNoErrors();
+
+        $labRequest = \App\Models\LabRequest::where('appointment_id', $appointment->id)->firstOrFail();
+
+        $this->assertEquals($appointment->doctor_id, $labRequest->doctor_id);
+        $this->assertDatabaseHas('doctors', ['id' => $labRequest->doctor_id]);
     }
 }

@@ -15,6 +15,7 @@
                 <th class="pb-4 px-4 font-semibold">Nama</th>
                 <th class="pb-4 px-4 font-semibold">Email</th>
                 <th class="pb-4 px-4 font-semibold">Role / Hak Akses</th>
+                <th class="pb-4 px-4 font-semibold">Status</th>
                 <th class="pb-4 px-4 font-semibold">Aksi</th>
             </tr>
         </x-slot>
@@ -28,9 +29,21 @@
                         @endforeach
                     </td>
                     <td class="py-4 px-4 text-sm text-text-primary-light dark:text-text-primary-dark">
+                        @if($user->is_active)
+                            <span class="inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-semibold bg-success-100 text-success-800 dark:bg-success-900/30 dark:text-success-400 border border-success-200 dark:border-success-800">Aktif</span>
+                        @else
+                            <span class="inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-semibold bg-danger-100 text-danger-800 dark:bg-danger-900/30 dark:text-danger-400 border border-danger-200 dark:border-danger-800">Nonaktif</span>
+                        @endif
+                    </td>
+                    <td class="py-4 px-4 text-sm text-text-primary-light dark:text-text-primary-dark">
                         <div class="flex items-center gap-2">
                             <a href="{{ route('users.edit', $user) }}" class="inline-flex items-center justify-center px-3 py-1.5 bg-warning-50 dark:bg-warning-900/30 border border-warning-200 dark:border-warning-800 rounded-lg text-xs font-medium text-warning-700 dark:text-warning-400 hover:bg-warning-100 dark:hover:bg-warning-800 transition-all">Edit</a>
                             @if($user->id !== auth()->id())
+                            <form action="{{ route('users.toggle-active', $user) }}" method="POST" onsubmit="return confirm('{{ $user->is_active ? 'Nonaktifkan' : 'Aktifkan' }} user ini?')">
+                                @csrf
+                                @method('PATCH')
+                                <button type="submit" class="inline-flex items-center justify-center px-3 py-1.5 bg-surface-light dark:bg-surface-dark border border-border-light dark:border-border-dark rounded-lg text-xs font-medium text-text-primary-light dark:text-text-primary-dark hover:bg-secondary-100 dark:hover:bg-secondary-800 transition-all">{{ $user->is_active ? 'Nonaktifkan' : 'Aktifkan' }}</button>
+                            </form>
                             <form action="{{ route('users.destroy', $user) }}" method="POST" onsubmit="return confirm('Hapus user ini?')">
                                 @csrf
                                 @method('DELETE')
@@ -41,7 +54,7 @@
                     </td>
                 </tr>
                 @empty
-                <tr x-show="!search" data-search-row><td colspan="4" class="py-12 text-center text-text-secondary-light dark:text-text-secondary-dark">Tidak ada data user.</td></tr>
+                <tr x-show="!search" data-search-row><td colspan="5" class="py-12 text-center text-text-secondary-light dark:text-text-secondary-dark">Tidak ada data user.</td></tr>
                 @endforelse
     </x-table>
     <div class="mt-6">

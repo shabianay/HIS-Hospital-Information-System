@@ -14,11 +14,14 @@ class Patient extends Model
 
     protected $fillable = [
         'nik',
+        'rm_number',
         'name',
         'date_of_birth',
         'gender',
         'address',
         'phone_number',
+        'insurance_provider',
+        'insurance_number',
     ];
 
     public function appointments()

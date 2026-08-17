@@ -44,6 +44,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('reports/pdf', [ReportController::class, 'exportPdf'])->name('reports.pdf');
 
     // Registration & Queue
+    Route::get('appointments/queue', [AppointmentController::class, 'queue'])->name('appointments.queue');
     Route::resource('appointments', AppointmentController::class)->except(['edit', 'update']);
     Route::patch('appointments/{appointment}/status', [AppointmentController::class, 'updateStatus'])->name('appointments.status.update');
     Route::get('queue-display', [QueueDisplayController::class, 'index'])->name('queue.display');
@@ -109,6 +110,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
     // Admin: User Management
     Route::resource('users', UserController::class);
+    Route::patch('users/{user}/toggle-active', [UserController::class, 'toggleActive'])->name('users.toggle-active');
     Route::get('audit', [AuditController::class, 'index'])->name('audit.index');
     Route::get('audit/export/csv', [AuditController::class, 'exportCsv'])->name('audit.export.csv');
     Route::get('audit/export/pdf', [AuditController::class, 'exportPdf'])->name('audit.export.pdf');

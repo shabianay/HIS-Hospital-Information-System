@@ -72,7 +72,11 @@ class PatientController extends Controller
             'gender' => 'required|in:L,P',
             'phone_number' => 'nullable|string|max:20',
             'address' => 'nullable|string',
+            'insurance_provider' => 'nullable|string|max:100',
+            'insurance_number' => 'nullable|string|max:50',
         ]);
+
+        $validated['rm_number'] = $this->generateRmNumber();
 
         Patient::create($validated);
 
@@ -110,6 +114,8 @@ class PatientController extends Controller
             'gender' => 'required|in:L,P',
             'phone_number' => 'nullable|string|max:20',
             'address' => 'nullable|string',
+            'insurance_provider' => 'nullable|string|max:100',
+            'insurance_number' => 'nullable|string|max:50',
         ]);
 
         $patient->update($validated);
@@ -129,5 +135,13 @@ class PatientController extends Controller
         $patient->delete();
 
         return redirect()->route('patients.index')->with('success', 'Pasien berhasil dihapus.');
+    }
+
+    private function generateRmNumber(): string
+    {
+        $year = now()->format('Y');
+        $nextId = (Patient::max('id') ?? 0) + 1;
+
+        return "RM-{$year}-" . str_pad((string) $nextId, 5, '0', STR_PAD_LEFT);
     }
 }

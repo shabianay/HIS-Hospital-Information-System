@@ -98,4 +98,18 @@ class UserController extends Controller
 
         return redirect()->route('users.index')->with('success', 'User deleted successfully.');
     }
+
+    public function toggleActive(User $user)
+    {
+        $this->authorize('update', $user);
+
+        if ($user->id === auth()->id()) {
+            return redirect()->route('users.index')->with('error', 'Anda tidak dapat menonaktifkan akun sendiri.');
+        }
+
+        $user->update(['is_active' => ! $user->is_active]);
+
+        return redirect()->route('users.index')
+            ->with('success', $user->is_active ? 'User berhasil diaktifkan.' : 'User berhasil dinonaktifkan.');
+    }
 }

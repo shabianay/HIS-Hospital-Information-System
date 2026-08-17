@@ -20,6 +20,10 @@
         </div>
         <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div>
+                <span class="block text-xs font-semibold text-text-secondary-light dark:text-text-secondary-dark uppercase mb-1">No. RM</span>
+                <span class="block text-base font-medium text-text-primary-light dark:text-text-primary-dark">{{ $patient->rm_number ?: '-' }}</span>
+            </div>
+            <div>
                 <span class="block text-xs font-semibold text-text-secondary-light dark:text-text-secondary-dark uppercase mb-1">NIK</span>
                 <span class="block text-base font-medium text-text-primary-light dark:text-text-primary-dark">{{ $patient->nik }}</span>
             </div>
@@ -42,6 +46,14 @@
             <div>
                 <span class="block text-xs font-semibold text-text-secondary-light dark:text-text-secondary-dark uppercase mb-1">Alamat</span>
                 <span class="block text-base font-medium text-text-primary-light dark:text-text-primary-dark">{{ $patient->address ?: '-' }}</span>
+            </div>
+            <div>
+                <span class="block text-xs font-semibold text-text-secondary-light dark:text-text-secondary-dark uppercase mb-1">Asuransi / BPJS</span>
+                <span class="block text-base font-medium text-text-primary-light dark:text-text-primary-dark">{{ $patient->insurance_provider ?: '-' }}</span>
+            </div>
+            <div>
+                <span class="block text-xs font-semibold text-text-secondary-light dark:text-text-secondary-dark uppercase mb-1">No. Asuransi / BPJS</span>
+                <span class="block text-base font-medium text-text-primary-light dark:text-text-primary-dark">{{ $patient->insurance_number ?: '-' }}</span>
             </div>
         </div>
     </div>

@@ -135,13 +135,14 @@ class LabController extends Controller
         ]);
 
         $labTests = LabTest::whereIn('id', $validated['lab_test_ids'])->get();
+        $appointment = Appointment::find($validated['appointment_id']);
 
-        $labRequest = DB::transaction(function () use ($validated, $labTests) {
+        $labRequest = DB::transaction(function () use ($validated, $labTests, $appointment) {
             $requestRecord = LabRequest::create([
                 'appointment_id' => $validated['appointment_id'],
                 'patient_id' => $validated['patient_id'],
                 'medical_record_id' => $validated['medical_record_id'] ?? null,
-                'doctor_id' => auth()->user()?->hasRole('doctor') ? Auth::id() : null,
+                'doctor_id' => $appointment?->doctor_id,
                 'created_by' => Auth::id(),
                 'is_urgent' => (bool) ($validated['is_urgent'] ?? false),
                 'status' => 'pending',

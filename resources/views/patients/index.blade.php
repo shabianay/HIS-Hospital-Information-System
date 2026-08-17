@@ -13,6 +13,7 @@
     <x-table placeholder="Cari nama / NIK / no. telepon..." class="overflow-hidden">
             <x-slot name="head">
                 <tr class="text-xs uppercase tracking-wider text-text-secondary-light dark:text-text-secondary-dark border-b border-border-light dark:border-border-dark">
+                    <th class="pb-4 px-4 font-semibold">No. RM</th>
                     <th class="pb-4 px-4 font-semibold">NIK</th>
                     <th class="pb-4 px-4 font-semibold">Nama</th>
                     <th class="pb-4 px-4 font-semibold">Tanggal Lahir</th>
@@ -23,6 +24,7 @@
             </x-slot>
             @forelse($patients as $patient)
                 <tr data-search-row x-show="!search || $el.textContent.toLowerCase().includes(search.toLowerCase())" class="hover:bg-secondary-50 dark:hover:bg-secondary-900/30 transition-colors">
+                    <td class="py-4 px-4 font-mono text-sm font-medium text-text-primary-light dark:text-text-primary-dark">{{ $patient->rm_number ?: '-' }}</td>
                     <td class="py-4 px-4 font-mono text-sm font-medium text-text-primary-light dark:text-text-primary-dark">{{ $patient->nik }}</td>
                     <td class="py-4 px-4 text-sm text-text-primary-light dark:text-text-primary-dark">{{ $patient->name }}</td>
                     <td class="py-4 px-4 text-sm text-text-secondary-light dark:text-text-secondary-dark">{{ $patient->date_of_birth ? \Carbon\Carbon::parse($patient->date_of_birth)->format('d/m/Y') : '-' }}</td>
@@ -41,7 +43,7 @@
                     </td>
                 </tr>
                 @empty
-                <tr x-show="!search" data-search-row><td colspan="6" class="py-12 text-center text-text-secondary-light dark:text-text-secondary-dark">Tidak ada data pasien.</td></tr>
+                <tr x-show="!search" data-search-row><td colspan="7" class="py-12 text-center text-text-secondary-light dark:text-text-secondary-dark">Tidak ada data pasien.</td></tr>
                 @endforelse
             </x-table>
 
