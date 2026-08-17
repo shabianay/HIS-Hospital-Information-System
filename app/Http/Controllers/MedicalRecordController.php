@@ -8,6 +8,8 @@ use App\Models\MedicalRecord;
 use App\Models\Medicine;
 use App\Models\Patient;
 use App\Models\Prescription;
+use App\Models\User;
+use App\Notifications\PrescriptionCreated;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -124,7 +126,7 @@ class MedicalRecordController extends Controller
             }
 
             foreach ($validated['prescriptions'] ?? [] as $item) {
-                Prescription::create([
+                $prescription = Prescription::create([
                     'medical_record_id' => $record->id,
                     'medicine_id' => $item['medicine_id'],
                     'quantity' => $item['quantity'],
@@ -139,8 +141,29 @@ class MedicalRecordController extends Controller
             return $record;
         });
 
+        $this->notifyPharmacistsOfPendingPrescriptions($medicalRecord);
+
         return redirect()->route('medical-records.show', $medicalRecord)
             ->with('success', 'Rekam medis berhasil dibuat.');
+    }
+
+    private function notifyPharmacistsOfPendingPrescriptions(MedicalRecord $record): void
+    {
+        $pending = $record->prescriptions()->where('is_dispensed', false)->get();
+        if ($pending->isEmpty()) {
+            return;
+        }
+
+        $pharmacists = User::role('pharmacist')->get();
+        if ($pharmacists->isEmpty()) {
+            return;
+        }
+
+        foreach ($pending as $prescription) {
+            foreach ($pharmacists as $pharmacist) {
+                $pharmacist->notify(new PrescriptionCreated($prescription));
+            }
+        }
     }
 
     public function edit(MedicalRecord $medicalRecord)

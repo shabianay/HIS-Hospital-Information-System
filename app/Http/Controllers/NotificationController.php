@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
 class NotificationController extends Controller
@@ -11,6 +12,13 @@ class NotificationController extends Controller
         $notifications = auth()->user()->notifications()->paginate(20);
 
         return view('notifications.index', compact('notifications'));
+    }
+
+    public function unreadCount(): JsonResponse
+    {
+        return response()->json([
+            'count' => auth()->user()->unreadNotifications()->count(),
+        ]);
     }
 
     public function markAllRead()

@@ -447,4 +447,108 @@ class ModuleSmokeTest extends TestCase
         $this->assertEquals($appointment->doctor_id, $labRequest->doctor_id);
         $this->assertDatabaseHas('doctors', ['id' => $labRequest->doctor_id]);
     }
+
+    public function test_pharmacist_can_open_pending_prescription_queue(): void
+    {
+        $this->seed(DatabaseSeeder::class);
+
+        $pharmacist = User::where('email', 'apoteker@his.local')->firstOrFail();
+
+        $this->actingAs($pharmacist)->get(route('prescriptions.pending'))->assertOk();
+    }
+
+    public function test_prescription_creation_notifies_pharmacists(): void
+    {
+        $user = $this->seedAdmin();
+
+        $appointment = Appointment::first();
+        $medicine = Medicine::first();
+
+        $this->actingAs($user)->post(route('medical-records.store', $appointment), [
+            'subjective' => 'Pusing.',
+            'objective' => 'Tensi normal.',
+            'assessment' => 'Vertigo.',
+            'plan' => 'Terapi obat.',
+            'chief_complaint' => 'Pusing',
+            'diagnoses' => [
+                ['icd_code' => 'R42', 'description' => 'Dizziness and giddiness', 'is_primary' => 1],
+            ],
+            'prescriptions' => [
+                [
+                    'medicine_id' => $medicine->id,
+                    'quantity' => 5,
+                    'dosage' => '2x1',
+                    'frequency' => 'Sesudah makan',
+                    'duration' => '3 hari',
+                ],
+            ],
+        ])->assertSessionHasNoErrors();
+
+        $pharmacist = User::where('email', 'apoteker@his.local')->firstOrFail();
+        $this->assertGreaterThan(0, $pharmacist->notifications()->count());
+    }
+
+    public function test_billing_creation_notifies_cashiers(): void
+    {
+        $user = $this->seedAdmin();
+
+        $appointment = Appointment::first();
+        $medicine = Medicine::first();
+
+        $this->actingAs($user)->post(route('medical-records.store', $appointment), [
+            'subjective' => 'Batuk.',
+            'objective' => 'Suhu normal.',
+            'assessment' => 'ISPA.',
+            'plan' => 'Obat simptomatik.',
+            'chief_complaint' => 'Batuk',
+            'diagnoses' => [
+                ['icd_code' => 'J00', 'description' => 'Acute nasopharyngitis', 'is_primary' => 1],
+            ],
+            'prescriptions' => [
+                [
+                    'medicine_id' => $medicine->id,
+                    'quantity' => 5,
+                    'dosage' => '3x1',
+                    'frequency' => 'Sesudah makan',
+                    'duration' => '5 hari',
+                ],
+            ],
+        ])->assertSessionHasNoErrors();
+
+        $record = MedicalRecord::where('appointment_id', $appointment->id)->firstOrFail();
+
+        $this->actingAs($user)->post(route('prescriptions.dispense', $record->prescriptions()->first()))
+            ->assertSessionHasNoErrors();
+
+        $this->actingAs($user)->post(route('billings.store'), [
+            'appointment_id' => $appointment->id,
+            'consultation_fee' => $appointment->consultation_fee,
+            'medicine_fee' => 10000,
+            'action_fee' => 0,
+            'discount' => 0,
+        ])->assertSessionHasNoErrors();
+
+        $cashier = User::where('email', 'kasir@his.local')->firstOrFail();
+        $this->assertGreaterThan(0, $cashier->notifications()->count());
+    }
+
+    public function test_notifications_unread_count_endpoint(): void
+    {
+        $this->seed(DatabaseSeeder::class);
+
+        $pharmacist = User::where('email', 'apoteker@his.local')->firstOrFail();
+
+        $this->actingAs($pharmacist)->get(route('notifications.unread-count'))
+            ->assertOk()
+            ->assertJsonStructure(['count']);
+    }
+
+    public function test_notifications_page_and_sidebar_accessible(): void
+    {
+        $this->seed(DatabaseSeeder::class);
+
+        $registration = User::where('email', 'pendaftaran@his.local')->firstOrFail();
+
+        $this->actingAs($registration)->get(route('notifications.index'))->assertOk();
+    }
 }

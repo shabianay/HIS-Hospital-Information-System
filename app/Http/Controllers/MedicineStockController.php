@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\MedicineStock;
+use App\Models\MedicalRecord;
 use App\Models\Prescription;
 use App\Models\StockMutation;
 use Illuminate\Http\Request;
@@ -10,6 +11,24 @@ use Illuminate\Support\Facades\DB;
 
 class MedicineStockController extends Controller
 {
+    public function pending()
+    {
+        $this->authorize('update', Prescription::class);
+
+        $prescriptions = Prescription::with(['medicine', 'medicalRecord.patient'])
+            ->where('is_dispensed', false)
+            ->whereHas('medicalRecord', fn ($q) => $q->whereHas('appointment', fn ($a) => $a->where('status', '!=', 'cancelled')))
+            ->latest()
+            ->get();
+
+        $counts = [
+            'total' => $prescriptions->count(),
+            'medicines' => $prescriptions->unique('medicine_id')->count(),
+        ];
+
+        return view('pharmacy.pending', compact('prescriptions', 'counts'));
+    }
+
     public function store(Request $request)
     {
         $this->authorize('create', MedicineStock::class);

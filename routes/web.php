@@ -79,6 +79,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('medicine-mutations', [MedicineController::class, 'mutations'])->name('medicines.mutations');
     Route::post('medicine-stocks', [MedicineStockController::class, 'store'])->name('medicine-stocks.store');
     Route::post('prescriptions/{prescription}/dispense', [MedicineStockController::class, 'dispense'])->name('prescriptions.dispense');
+    Route::get('pharmacy/pending', [MedicineStockController::class, 'pending'])->name('prescriptions.pending');
 
     // Billing
     Route::get('billings', [BillingController::class, 'index'])->name('billings.index');
@@ -117,6 +118,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
     // Notifications
     Route::get('notifications', [NotificationController::class, 'index'])->name('notifications.index');
+    Route::get('notifications/unread-count', [NotificationController::class, 'unreadCount'])->name('notifications.unread-count');
     Route::delete('notifications', [NotificationController::class, 'markAllRead'])->name('notifications.mark-all-read');
     Route::patch('notifications/{id}/read', [NotificationController::class, 'markRead'])->name('notifications.mark-read');
 });

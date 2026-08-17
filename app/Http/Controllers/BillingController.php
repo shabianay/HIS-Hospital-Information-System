@@ -5,6 +5,8 @@ namespace App\Http\Controllers;
 use App\Models\Appointment;
 use App\Models\Billing;
 use App\Models\BillingItem;
+use App\Models\User;
+use App\Notifications\BillingCreated;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
@@ -144,6 +146,13 @@ class BillingController extends Controller
         }
 
         $this->forgetDashboardCache(Carbon::parse($billing->created_at));
+
+        $cashiers = User::role('cashier')->get();
+        foreach ($cashiers as $cashier) {
+            if ($cashier->id !== auth()->id()) {
+                $cashier->notify(new BillingCreated($billing));
+            }
+        }
 
         return redirect()->route('billings.show', $billing)
             ->with('success', 'Tagihan berhasil dibuat.');

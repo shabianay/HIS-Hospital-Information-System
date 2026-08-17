@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Appointment;
 use App\Models\Patient;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Cache;
 
 class PatientController extends Controller
 {
@@ -79,6 +80,8 @@ class PatientController extends Controller
         $validated['rm_number'] = $this->generateRmNumber();
 
         Patient::create($validated);
+
+        Cache::forget('dashboard.' . now()->format('Y-m-d'));
 
         return redirect()->route('patients.index')->with('success', 'Pasien berhasil didaftarkan.');
     }

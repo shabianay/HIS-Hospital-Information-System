@@ -55,12 +55,12 @@
 
                     <div class="flex items-center gap-4">
                         {{-- Notifications Bell --}}
-                        <a href="{{ route('notifications.index') }}" class="relative p-2 rounded-lg text-text-secondary-light dark:text-text-secondary-dark hover:bg-primary-50 dark:hover:bg-primary-900 hover:text-primary-500 dark:hover:text-primary-400 transition">
-                            <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M14.857 17.082a23.848 23.848 0 0 0 5.454-1.31A8.967 8.967 0 0 1 18 9.75V9A6 6 0 0 0 6 9v.75a8.967 8.967 0 0 1-2.312 6.022c1.733.64 3.56 1.085 5.455 1.31m7.714 0a24.255 24.255 0 0 1-7.714 0m7.714 0a3 3 0 1 1-7.714 0"/></svg>
-                            @if(auth()->user()->unreadNotifications->count() > 0)
-                            <span class="absolute top-0 right-0 inline-flex h-5 w-5 items-center justify-center rounded-full bg-danger-600 text-[10px] font-bold text-white">{{ min(auth()->user()->unreadNotifications->count(), 99) }}</span>
-                            @endif
-                        </a>
+                        <div x-data="unreadNotifier()" x-init="init()">
+                            <a href="{{ route('notifications.index') }}" class="relative p-2 rounded-lg text-text-secondary-light dark:text-text-secondary-dark hover:bg-primary-50 dark:hover:bg-primary-900 hover:text-primary-500 dark:hover:text-primary-400 transition">
+                                <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M14.857 17.082a23.848 23.848 0 0 0 5.454-1.31A8.967 8.967 0 0 1 18 9.75V9A6 6 0 0 0 6 9v.75a8.967 8.967 0 0 1-2.312 6.022c1.733.64 3.56 1.085 5.455 1.31m7.714 0a24.255 24.255 0 0 1-7.714 0m7.714 0a3 3 0 1 1-7.714 0"/></svg>
+                                <span x-show="count > 0" x-cloak class="absolute top-0 right-0 inline-flex h-5 w-5 items-center justify-center rounded-full bg-danger-600 text-[10px] font-bold text-white" x-text="Math.min(count, 99)"></span>
+                            </a>
+                        </div>
                         <span class="hidden md:block text-text-secondary-light dark:text-text-secondary-dark">{{ Auth::user()->name }}</span>
                         <form method="POST" action="{{ route('logout') }}" class="inline">
                             @csrf
@@ -97,6 +97,23 @@
                 </main>
             </div>
         </div>
+        <script>
+            function unreadNotifier() {
+                return {
+                    count: 0,
+                    init() {
+                        this.refresh();
+                        setInterval(() => this.refresh(), 30000);
+                    },
+                    refresh() {
+                        fetch('{{ route('notifications.unread-count') }}')
+                            .then(r => r.json())
+                            .then(d => { this.count = d.count || 0; })
+                            .catch(() => {});
+                    },
+                };
+            }
+        </script>
         @stack('scripts')
     </body>
 </html>
