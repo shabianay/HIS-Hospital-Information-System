@@ -253,6 +253,23 @@ class ModuleSmokeTest extends TestCase
         $this->actingAs($user)->get(route('audit.export.pdf'))->assertOk();
     }
 
+    public function test_master_data_changes_are_audited(): void
+    {
+        $user = $this->seedAdmin();
+
+        $medicine = \App\Models\Medicine::firstOrFail();
+        $oldName = $medicine->name;
+
+        $this->actingAs($user)->patch(route('medicines.update', $medicine), array_merge($medicine->toArray(), ['name' => $oldName . ' (Revisi)']))
+            ->assertRedirect();
+
+        $this->assertDatabaseHas('audit_logs', [
+            'auditable_type' => \App\Models\Medicine::class,
+            'auditable_id' => $medicine->id,
+            'action' => 'updated',
+        ]);
+    }
+
     public function test_admin_can_export_daily_report_pdf(): void
     {
         $user = $this->seedAdmin();

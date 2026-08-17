@@ -2,12 +2,13 @@
 
 namespace App\Models;
 
+use App\Audit\AuditsActivity;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
 class Doctor extends Model
 {
-    use HasFactory;
+    use AuditsActivity, HasFactory;
 
     protected $table = 'doctors';
 
