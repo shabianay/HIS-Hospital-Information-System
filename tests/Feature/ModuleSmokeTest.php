@@ -415,6 +415,9 @@ class ModuleSmokeTest extends TestCase
 
         $this->actingAs($user)->get(route('reports.index'))->assertOk()->assertSee('Nilai Stok Obat');
         $this->actingAs($user)->get(route('reports.pdf'))->assertOk();
+        $this->actingAs($user)->get(route('reports.csv'))
+            ->assertOk()
+            ->assertHeader('Content-Type', 'text/csv; charset=utf-8');
     }
 
     public function test_pharmacist_can_open_stock_mutation_history(): void

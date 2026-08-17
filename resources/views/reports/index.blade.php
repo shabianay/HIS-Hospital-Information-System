@@ -11,6 +11,7 @@
                 <input type="date" name="end" value="{{ $end->format('Y-m-d') }}" class="border border-border-light bg-surface-light px-4 py-3 text-sm text-text-primary-light focus:border-primary-500 focus:ring-2 focus:ring-primary-500/20 focus:outline-none rounded-xl shadow-glass-sm dark:border-border-dark dark:bg-surface-dark dark:text-text-primary-dark">
                 <x-primary-button type="submit">Tampilkan</x-primary-button>
                 <a href="{{ route('reports.pdf', ['start' => $start->format('Y-m-d'), 'end' => $end->format('Y-m-d')]) }}" class="inline-flex items-center px-4 py-2 text-sm font-semibold rounded-xl border border-border-light bg-surface-light text-text-primary-light hover:bg-primary-50 dark:border-border-dark dark:bg-surface-dark dark:text-text-primary-dark dark:hover:bg-primary-900/10 transition-colors">Export PDF</a>
+                <a href="{{ route('reports.csv', ['start' => $start->format('Y-m-d'), 'end' => $end->format('Y-m-d')]) }}" class="inline-flex items-center px-4 py-2 text-sm font-semibold rounded-xl border border-border-light bg-surface-light text-text-primary-light hover:bg-primary-50 dark:border-border-dark dark:bg-surface-dark dark:text-text-primary-dark dark:hover:bg-primary-900/10 transition-colors">Export CSV</a>
             </form>
         </div>
         <div class="mb-6 rounded-xl border border-border-light dark:border-border-dark bg-primary-50/50 dark:bg-primary-900/10 p-4 text-sm">

@@ -48,6 +48,79 @@ class ReportController extends Controller
         return $pdf->download('laporan-' . $start->format('Ymd') . '-' . $end->format('Ymd') . '.pdf');
     }
 
+    public function exportCsv(Request $request)
+    {
+        $this->authorize('view-dashboard');
+
+        $start = $request->filled('start') ? Carbon::parse($request->start)->startOfDay() : Carbon::today()->subDays(29)->startOfDay();
+        $end = $request->filled('end') ? Carbon::parse($request->end)->endOfDay() : Carbon::today()->endOfDay();
+
+        $data = $this->buildReport($start, $end);
+
+        $filename = 'laporan-' . $start->format('Ymd') . '-' . $end->format('Ymd') . '.csv';
+
+        return response()->streamDownload(function () use ($data, $start, $end) {
+            $handle = fopen('php://output', 'w');
+
+            fputcsv($handle, ['LAPORAN RUMAH SAKIT HIS']);
+            fputcsv($handle, ['Periode', $start->format('d/m/Y'), 's.d.', $end->format('d/m/Y')]);
+            fputcsv($handle, []);
+            fputcsv($handle, ['RINGKASAN']);
+            fputcsv($handle, ['Total Pendapatan (Lunas)', number_format($data['totalRevenue'], 2)]);
+            fputcsv($handle, ['Pendapatan Tertunda', number_format($data['pendingRevenue'], 2)]);
+            fputcsv($handle, ['Total Kunjungan', $data['totalVisits']]);
+            fputcsv($handle, ['Kunjungan Selesai', $data['completedVisits']]);
+            fputcsv($handle, ['Pasien Baru', $data['newPatients']]);
+            fputcsv($handle, ['Total Tagihan', $data['totalBilling']]);
+            fputcsv($handle, ['Tagihan Lunas', $data['paidBilling']]);
+            fputcsv($handle, []);
+
+            fputcsv($handle, ['KUNJUNGAN PER POLI']);
+            fputcsv($handle, ['Poli', 'Jumlah']);
+            foreach ($data['poliVisits'] as $row) {
+                fputcsv($handle, [$row->name, $row->total]);
+            }
+            fputcsv($handle, []);
+
+            fputcsv($handle, ['PRODUKTIVITAS DOKTER']);
+            fputcsv($handle, ['Dokter', 'Kunjungan', 'Selesai', 'Pendapatan']);
+            foreach ($data['doctorProductivity'] as $row) {
+                fputcsv($handle, [$row->doctor_name, $row->total_visits, $row->completed, number_format((float) $row->revenue, 2)]);
+            }
+            fputcsv($handle, []);
+
+            fputcsv($handle, ['DIAGNOSIS TERBANYAK']);
+            fputcsv($handle, ['Kode ICD', 'Diagnosis', 'Jumlah']);
+            foreach ($data['topDiagnoses'] as $row) {
+                fputcsv($handle, [$row->icd_code, $row->description, $row->total]);
+            }
+            fputcsv($handle, []);
+
+            fputcsv($handle, ['KONSUMSI OBAT']);
+            fputcsv($handle, ['Obat', 'Total Qty', 'Nilai', 'Jumlah Resep']);
+            foreach ($data['medicineConsumption'] as $row) {
+                fputcsv($handle, [$row->name, $row->total_quantity, number_format((float) $row->total_value, 2), $row->total_prescriptions]);
+            }
+            fputcsv($handle, []);
+
+            fputcsv($handle, ['BEBAN LABORATORIUM']);
+            fputcsv($handle, ['Status', 'Jumlah']);
+            foreach ($data['labWorkload'] as $status => $row) {
+                fputcsv($handle, [$status, $row->total]);
+            }
+            fputcsv($handle, []);
+
+            fputcsv($handle, ['NILAI STOK OBAT']);
+            fputcsv($handle, ['Obat', 'Satuan', 'Harga Beli', 'Harga Jual', 'Total Qty', 'Nilai Stok']);
+            foreach ($data['stockValuation'] as $row) {
+                fputcsv($handle, [$row->name, $row->unit, number_format((float) $row->buy_price, 2), number_format((float) $row->sell_price, 2), $row->total_quantity, number_format((float) $row->total_value, 2)]);
+            }
+            fputcsv($handle, ['TOTAL NILAI STOK', number_format((float) $data['stockValuationTotal'], 2)]);
+
+            fclose($handle);
+        }, $filename, ['Content-Type' => 'text/csv']);
+    }
+
     private function buildReport(Carbon $start, Carbon $end): array
     {
         // Summary

@@ -42,6 +42,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
     // Reports
     Route::get('reports', [ReportController::class, 'index'])->name('reports.index');
     Route::get('reports/pdf', [ReportController::class, 'exportPdf'])->name('reports.pdf');
+    Route::get('reports/csv', [ReportController::class, 'exportCsv'])->name('reports.csv');
 
     // Registration & Queue
     Route::get('appointments/queue', [AppointmentController::class, 'queue'])->name('appointments.queue');
