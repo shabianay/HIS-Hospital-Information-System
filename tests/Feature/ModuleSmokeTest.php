@@ -5,6 +5,7 @@ namespace Tests\Feature;
 use App\Models\Appointment;
 use App\Models\MedicalRecord;
 use App\Models\Medicine;
+use App\Models\MedicineStock;
 use App\Models\Patient;
 use App\Models\Schedule;
 use App\Models\User;
@@ -760,6 +761,46 @@ class ModuleSmokeTest extends TestCase
         $this->actingAs($user)->get(route('lab.requests.show', $labRequest))
             ->assertOk()
             ->assertSee('Buat Tagihan');
+    }
+
+    public function test_dispense_fails_gracefully_when_stock_insufficient(): void
+    {
+        $user = $this->seedAdmin();
+
+        $appointment = Appointment::first();
+        $medicine = Medicine::firstOrFail();
+
+        MedicineStock::where('medicine_id', $medicine->id)->delete();
+
+        $this->actingAs($user)->post(route('medical-records.store', $appointment), [
+            'subjective' => 'Demam.',
+            'objective' => 'Suhu 38 C.',
+            'assessment' => 'ISPA.',
+            'plan' => 'Obat simptomatik.',
+            'chief_complaint' => 'Demam',
+            'diagnoses' => [
+                ['icd_code' => 'J00', 'description' => 'Acute nasopharyngitis', 'is_primary' => 1],
+            ],
+            'prescriptions' => [
+                [
+                    'medicine_id' => $medicine->id,
+                    'quantity' => 5,
+                    'dosage' => '3x1',
+                    'frequency' => 'Sesudah makan',
+                    'duration' => '5 hari',
+                ],
+            ],
+        ])->assertSessionHasNoErrors();
+
+        $record = MedicalRecord::where('appointment_id', $appointment->id)->firstOrFail();
+        $prescription = $record->prescriptions()->firstOrFail();
+
+        $this->actingAs($user)->post(route('prescriptions.dispense', $prescription))
+            ->assertSessionHasNoErrors()
+            ->assertSessionHas('error');
+
+        $this->assertFalse($prescription->fresh()->is_dispensed);
+        $this->assertSame(0, MedicineStock::where('medicine_id', $medicine->id)->sum('quantity'));
     }
 
     public function test_doctor_login_lands_on_my_patients(): void

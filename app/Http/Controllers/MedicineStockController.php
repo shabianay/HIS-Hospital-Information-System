@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Exceptions\InsufficientStockException;
 use App\Models\Medicine;
 use App\Models\MedicineStock;
 use App\Models\MedicalRecord;
@@ -102,50 +103,54 @@ class MedicineStockController extends Controller
             return redirect()->back()->with('error', 'Resep telah didispensasi.');
         }
 
-        DB::transaction(function () use ($prescription) {
-            $locked = Prescription::whereKey($prescription->id)
-                ->where('is_dispensed', false)
-                ->lockForUpdate()
-                ->first();
+        try {
+            DB::transaction(function () use ($prescription) {
+                $locked = Prescription::whereKey($prescription->id)
+                    ->where('is_dispensed', false)
+                    ->lockForUpdate()
+                    ->first();
 
-            if (! $locked) {
-                return; // resep sudah didispensasi oleh request lain yang bersamaan
-            }
-
-            $quantityNeeded = $locked->quantity;
-
-            $stocks = MedicineStock::where('medicine_id', $locked->medicine_id)
-                ->where('quantity', '>', 0)
-                ->orderBy('expiry_date', 'asc')
-                ->lockForUpdate()
-                ->get();
-
-            foreach ($stocks as $stock) {
-                if ($quantityNeeded <= 0) {
-                    break;
+                if (! $locked) {
+                    return; // resep sudah didispensasi oleh request lain yang bersamaan
                 }
 
-                $deducted = min($stock->quantity, $quantityNeeded);
-                $stock->decrement('quantity', $deducted);
-                $quantityNeeded -= $deducted;
+                $quantityNeeded = $locked->quantity;
 
-                StockMutation::create([
-                    'medicine_id' => $locked->medicine_id,
-                    'type' => 'out',
-                    'quantity' => $deducted,
-                    'reference' => "prescription#{$locked->id}",
-                    'notes' => "Dispense resep #{$locked->id} ({$locked->medicine->name})",
-                ]);
-            }
+                $stocks = MedicineStock::where('medicine_id', $locked->medicine_id)
+                    ->where('quantity', '>', 0)
+                    ->orderBy('expiry_date', 'asc')
+                    ->lockForUpdate()
+                    ->get();
 
-            if ($quantityNeeded > 0) {
-                throw new \Exception(
-                    "Stok tidak mencukupi untuk {$locked->medicine->name}. Kurang {$quantityNeeded} unit."
-                );
-            }
+                foreach ($stocks as $stock) {
+                    if ($quantityNeeded <= 0) {
+                        break;
+                    }
 
-            $locked->update(['is_dispensed' => true]);
-        });
+                    $deducted = min($stock->quantity, $quantityNeeded);
+                    $stock->decrement('quantity', $deducted);
+                    $quantityNeeded -= $deducted;
+
+                    StockMutation::create([
+                        'medicine_id' => $locked->medicine_id,
+                        'type' => 'out',
+                        'quantity' => $deducted,
+                        'reference' => "prescription#{$locked->id}",
+                        'notes' => "Dispense resep #{$locked->id} ({$locked->medicine->name})",
+                    ]);
+                }
+
+                if ($quantityNeeded > 0) {
+                    throw new InsufficientStockException(
+                        "Stok tidak mencukupi untuk {$locked->medicine->name}. Kurang {$quantityNeeded} unit."
+                    );
+                }
+
+                $locked->update(['is_dispensed' => true]);
+            });
+        } catch (InsufficientStockException $e) {
+            return redirect()->back()->with('error', $e->getMessage());
+        }
 
         $this->notifyLowStock($prescription->medicine_id);
 
