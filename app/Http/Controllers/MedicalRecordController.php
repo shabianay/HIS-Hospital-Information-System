@@ -260,6 +260,7 @@ class MedicalRecordController extends Controller
         $records = MedicalRecord::with([
             'appointment.doctor',
             'appointment.poli',
+            'appointment.labRequests.items',
             'diagnoses',
             'prescriptions.medicine',
         ])

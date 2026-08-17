@@ -85,6 +85,28 @@
         </tbody>
     </table>
     @endif
+
+    @if($record->appointment?->labRequests?->isNotEmpty())
+    <table>
+        <thead><tr><th>Hasil Laboratorium</th></tr></thead>
+        <tbody>
+            @foreach($record->appointment->labRequests as $labRequest)
+            <tr><td>
+                <strong>Permintaan Lab #{{ str_pad($labRequest->id, 3, '0', STR_PAD_LEFT) }}</strong> ·
+                Status: {{ $labRequest->status === 'completed' ? 'Selesai' : ($labRequest->status === 'in_progress' ? 'Diproses' : 'Menunggu') }}
+                @if($labRequest->notes)<br>Catatan: {{ $labRequest->notes }}@endif
+            </td></tr>
+            @foreach($labRequest->items as $item)
+            <tr>
+                <td>{{ $item->test_name }}{{ $item->unit ? ' (' . $item->unit . ')' : '' }}
+                    — {{ $item->result_value ?: '-' }}
+                    ({{ $item->result_status === 'normal' ? 'Normal' : ($item->result_status === 'abnormal' ? 'Abnormal' : 'Belum') }}){{ $item->result_notes ? ' · ' . $item->result_notes : '' }}</td>
+            </tr>
+            @endforeach
+            @endforeach
+        </tbody>
+    </table>
+    @endif
     @empty
     <p class="body">Pasien belum memiliki rekam medis.</p>
     @endforelse

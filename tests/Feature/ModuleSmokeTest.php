@@ -682,6 +682,41 @@ class ModuleSmokeTest extends TestCase
         $this->actingAs($doctorUser)->get(route('appointments.my-patients'))->assertOk();
     }
 
+    public function test_doctor_my_patients_shows_lab_status(): void
+    {
+        $user = $this->seedAdmin();
+
+        $appointment = Appointment::first();
+        $test = \App\Models\LabTest::firstOrFail();
+
+        $this->actingAs($user)->post(route('lab.requests.store'), [
+            'appointment_id' => $appointment->id,
+            'patient_id' => $appointment->patient_id,
+            'notes' => 'Cek lab.',
+            'lab_test_ids' => [$test->id],
+        ])->assertSessionHasNoErrors();
+
+        $labRequest = \App\Models\LabRequest::where('appointment_id', $appointment->id)->firstOrFail();
+
+        $doctorUser = User::where('email', 'dokter@his.local')->firstOrFail();
+        $this->actingAs($doctorUser)->get(route('appointments.my-patients'))
+            ->assertOk()
+            ->assertSee('Proses');
+
+        $items = $labRequest->items->mapWithKeys(function ($item) {
+            return [$item->id => ['result_value' => 'Positif', 'result_status' => 'abnormal']];
+        })->all();
+
+        $this->actingAs($user)->post(route('lab.requests.process', $labRequest), [
+            'status' => 'completed',
+            'items' => $items,
+        ])->assertSessionHasNoErrors();
+
+        $this->actingAs($doctorUser)->get(route('appointments.my-patients'))
+            ->assertOk()
+            ->assertSee('Abnormal');
+    }
+
     public function test_notifications_unread_count_requires_dashboard_permission(): void
     {
         $this->seed(DatabaseSeeder::class);
@@ -839,6 +874,10 @@ class ModuleSmokeTest extends TestCase
             ->assertSee('Positif');
 
         $this->actingAs($user)->get(route('medical-records.pdf', $medicalRecord))
+            ->assertOk()
+            ->assertHeader('Content-Type', 'application/pdf');
+
+        $this->actingAs($user)->get(route('patients.medical-history.pdf', $appointment->patient))
             ->assertOk()
             ->assertHeader('Content-Type', 'application/pdf');
     }

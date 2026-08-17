@@ -150,7 +150,7 @@ class AppointmentController extends Controller
         $dayStart = $today->copy()->startOfDay();
         $dayEnd = $today->copy()->endOfDay();
 
-        $appointments = Appointment::with(['patient', 'poli', 'medicalRecord'])
+        $appointments = Appointment::with(['patient', 'poli', 'medicalRecord', 'labRequests'])
             ->where('doctor_id', $doctor->id)
             ->whereBetween('appointment_date', [$dayStart, $dayEnd])
             ->whereIn('status', ['waiting', 'in_progress', 'completed'])

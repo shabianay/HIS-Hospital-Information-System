@@ -35,6 +35,7 @@
                     <th class="pb-4 px-4 font-semibold">No. Antrian</th>
                     <th class="pb-4 px-4 font-semibold">Pasien</th>
                     <th class="pb-4 px-4 font-semibold">Poli</th>
+                    <th class="pb-4 px-4 font-semibold">Lab</th>
                     <th class="pb-4 px-4 font-semibold">Status</th>
                     <th class="pb-4 px-4 font-semibold text-right">Aksi</th>
                 </tr>
@@ -49,6 +50,22 @@
                     @endif
                 </td>
                 <td class="py-4 px-4 text-sm text-text-secondary-light dark:text-text-secondary-dark">{{ $appointment->poli?->name }}</td>
+                <td class="py-4 px-4">
+                    @php
+                        $hasLab = $appointment->labRequests->isNotEmpty();
+                        $hasPendingLab = $hasLab && $appointment->labRequests->where('status', '!=', 'completed')->isNotEmpty();
+                        $hasAbnormal = $hasLab && $appointment->labRequests->flatMap->items->contains('result_status', 'abnormal');
+                    @endphp
+                    @if(!$hasLab)
+                        <span class="text-xs text-text-secondary-light dark:text-text-secondary-dark">-</span>
+                    @elseif($hasAbnormal)
+                        <span class="inline-flex items-center rounded-full px-3 py-1 text-xs font-semibold bg-danger-100 text-danger-800 dark:bg-danger-900/30 dark:text-danger-400 border border-danger-200 dark:border-danger-800">Abnormal</span>
+                    @elseif($hasPendingLab)
+                        <span class="inline-flex items-center rounded-full px-3 py-1 text-xs font-semibold bg-warning-100 text-warning-800 dark:bg-warning-900/30 dark:text-warning-400 border border-warning-200 dark:border-warning-800">Proses</span>
+                    @else
+                        <span class="inline-flex items-center rounded-full px-3 py-1 text-xs font-semibold bg-success-100 text-success-800 dark:bg-success-900/30 dark:text-success-400 border border-success-200 dark:border-success-800">Selesai</span>
+                    @endif
+                </td>
                 <td class="py-4 px-4">
                     @php $st = $statuses[$appointment->status] ?? $statuses['waiting']; @endphp
                     <span class="inline-flex items-center rounded-full px-3 py-1 text-xs font-semibold {{ $st['color'] }}">{{ $st['label'] }}</span>
@@ -83,7 +100,7 @@
                 </td>
             </tr>
             @empty
-            <tr x-show="!search" data-search-row><td colspan="5" class="py-12 text-center text-text-secondary-light dark:text-text-secondary-dark">Belum ada pasien untuk Anda hari ini.</td></tr>
+            <tr x-show="!search" data-search-row><td colspan="6" class="py-12 text-center text-text-secondary-light dark:text-text-secondary-dark">Belum ada pasien untuk Anda hari ini.</td></tr>
             @endforelse
         </x-table>
     </div>
