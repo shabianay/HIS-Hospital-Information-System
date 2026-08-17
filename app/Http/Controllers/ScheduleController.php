@@ -18,6 +18,38 @@ class ScheduleController extends Controller
         return view('schedules.index', compact('schedules'));
     }
 
+    public function board()
+    {
+        $this->authorize('viewAny', Schedule::class);
+
+        $days = ['senin', 'selasa', 'rabu', 'kamis', 'jumat', 'sabtu', 'minggu'];
+
+        $schedules = Schedule::with(['doctor', 'poli'])
+            ->where('is_active', true)
+            ->orderBy('doctor_id')
+            ->get()
+            ->groupBy('doctor_id')
+            ->map(function ($rows) {
+                $byDay = $rows->groupBy('day_of_week');
+
+                return [
+                    'doctor' => $rows->first()->doctor,
+                    'days' => $byDay->map(function ($dayRows) {
+                        return $dayRows->map(fn ($s) => [
+                            'id' => $s->id,
+                            'poli' => $s->poli?->name,
+                            'start' => $s->start_time?->format('H:i'),
+                            'end' => $s->end_time?->format('H:i'),
+                            'quota' => $s->daily_quota,
+                        ])->values();
+                    }),
+                ];
+            })
+            ->values();
+
+        return view('schedules.board', compact('schedules', 'days'));
+    }
+
     public function create()
     {
         $this->authorize('create', Schedule::class);

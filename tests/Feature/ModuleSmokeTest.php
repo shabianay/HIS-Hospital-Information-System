@@ -35,6 +35,7 @@ class ModuleSmokeTest extends TestCase
             'doctors.index',
             'polis.index',
             'schedules.index',
+            'schedules.board',
             'medical-records.index',
             'medicines.index',
             'medicines.stock',

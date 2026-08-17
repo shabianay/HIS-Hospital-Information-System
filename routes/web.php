@@ -83,6 +83,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::resource('polis', PoliController::class);
 
     // Schedule routes
+    Route::get('schedules/board', [ScheduleController::class, 'board'])->name('schedules.board');
     Route::resource('schedules', ScheduleController::class);
 
     // Medicines & Pharmacy
