@@ -107,6 +107,36 @@
         </tbody>
     </table>
 
+    @if($medicalRecord->appointment?->labRequests?->isNotEmpty())
+    <h2 class="section">Hasil Laboratorium</h2>
+    @foreach($medicalRecord->appointment->labRequests as $labRequest)
+    <p class="body" style="background:#f1f5f9"><strong>Permintaan Lab #{{ str_pad($labRequest->id, 3, '0', STR_PAD_LEFT) }}</strong>
+        · Status: {{ $labRequest->status === 'completed' ? 'Selesai' : ($labRequest->status === 'in_progress' ? 'Diproses' : 'Menunggu') }}
+        @if($labRequest->is_urgent) · <strong>URGENT</strong>@endif</p>
+    @if($labRequest->notes)
+    <p class="body"><strong>Catatan:</strong> {{ $labRequest->notes }}</p>
+    @endif
+    <table>
+        <thead>
+            <tr><th>Pemeriksaan</th><th>Nilai Rujukan</th><th>Hasil</th><th>Status</th><th>Catatan</th></tr>
+        </thead>
+        <tbody>
+            @forelse($labRequest->items as $item)
+            <tr>
+                <td>{{ $item->test_name }}{{ $item->unit ? ' (' . $item->unit . ')' : '' }}</td>
+                <td>{{ $item->reference_range ?? '-' }}</td>
+                <td>{{ $item->result_value ?: '-' }}</td>
+                <td>{{ $item->result_status === 'normal' ? 'Normal' : ($item->result_status === 'abnormal' ? 'Abnormal' : '-') }}</td>
+                <td>{{ $item->result_notes ?: '-' }}</td>
+            </tr>
+            @empty
+            <tr><td colspan="5">Belum ada item pemeriksaan.</td></tr>
+            @endforelse
+        </tbody>
+    </table>
+    @endforeach
+    @endif
+
     <div class="footer">Dokumen ini dihasilkan oleh sistem HIS dan merupakan bagian dari rekam medis pasien.</div>
 </body>
 </html>

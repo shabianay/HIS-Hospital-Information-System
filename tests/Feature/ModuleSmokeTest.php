@@ -837,6 +837,10 @@ class ModuleSmokeTest extends TestCase
             ->assertSee('Hasil Laboratorium')
             ->assertSee('Abnormal')
             ->assertSee('Positif');
+
+        $this->actingAs($user)->get(route('medical-records.pdf', $medicalRecord))
+            ->assertOk()
+            ->assertHeader('Content-Type', 'application/pdf');
     }
 
     public function test_dispense_fails_gracefully_when_stock_insufficient(): void
