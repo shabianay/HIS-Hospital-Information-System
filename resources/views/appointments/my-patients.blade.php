@@ -75,6 +75,9 @@
                         @elseif(in_array($appointment->status, ['waiting', 'in_progress']))
                             <a href="{{ route('medical-records.create', $appointment) }}" class="inline-flex items-center justify-center px-3 py-1.5 bg-primary-600 hover:bg-primary-700 text-white text-xs font-semibold rounded-lg shadow-glass-sm transition-all duration-200">Buat Rekam Medis</a>
                         @endif
+                        @can('create', App\Models\LabRequest::class)
+                            <a href="{{ route('lab.create', ['appointment_id' => $appointment->id]) }}" class="inline-flex items-center justify-center px-3 py-1.5 border border-border-light dark:border-border-dark rounded-lg text-xs font-medium text-text-primary-light dark:text-text-primary-dark hover:bg-secondary-100 dark:hover:bg-secondary-800 transition-all">Rujuk Lab</a>
+                        @endcan
                         <a href="{{ route('appointments.show', $appointment) }}" class="inline-flex items-center justify-center px-3 py-1.5 border border-border-light dark:border-border-dark rounded-lg text-xs font-medium text-text-primary-light dark:text-text-primary-dark hover:bg-secondary-100 dark:hover:bg-secondary-800 transition-all">Detail</a>
                     </div>
                 </td>
