@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Appointment;
 use App\Models\Billing;
 use App\Models\BillingItem;
+use App\Models\Tariff;
 use App\Models\User;
 use App\Notifications\BillingCreated;
 use Barryvdh\DomPDF\Facade\Pdf;
@@ -72,13 +73,21 @@ class BillingController extends Controller
         $consultationFee = $appointment->consultation_fee ?? 0;
         $totalAmount = $consultationFee + $totalPrescription + $totalLab;
 
+        $tariffs = Tariff::where('is_active', true)
+            ->where(function ($q) use ($appointment) {
+                $q->whereNull('poli_id')->orWhere('poli_id', $appointment->poli_id);
+            })
+            ->orderBy('name')
+            ->get();
+
         return view('billings.create', compact(
             'appointment',
             'totalPrescription',
             'totalLab',
             'labItems',
             'consultationFee',
-            'totalAmount'
+            'totalAmount',
+            'tariffs'
         ));
     }
 
@@ -92,6 +101,8 @@ class BillingController extends Controller
             'medicine_fee' => 'nullable|numeric|min:0',
             'lab_fee' => 'nullable|numeric|min:0',
             'action_fee' => 'nullable|numeric|min:0',
+            'tariff_ids' => 'nullable|array',
+            'tariff_ids.*' => 'exists:tariffs,id',
             'discount' => 'nullable|numeric|min:0',
             'notes' => 'nullable|string|max:1000',
         ]);
@@ -104,12 +115,15 @@ class BillingController extends Controller
                 ->with('info', 'Tagihan untuk kunjungan ini sudah ada.');
         }
 
+        $tariffs = Tariff::whereIn('id', $validated['tariff_ids'] ?? [])->get();
+        $tariffTotal = $tariffs->sum('price');
+
         $consultationFee = (float) ($validated['consultation_fee'] ?? 0);
         $medicineFee = (float) ($validated['medicine_fee'] ?? 0);
         $labFee = (float) ($validated['lab_fee'] ?? 0);
         $actionFee = (float) ($validated['action_fee'] ?? 0);
         $discount = (float) ($validated['discount'] ?? 0);
-        $totalAmount = max(0, $consultationFee + $medicineFee + $labFee + $actionFee - $discount);
+        $totalAmount = max(0, $consultationFee + $medicineFee + $labFee + $tariffTotal + $actionFee - $discount);
 
         $billing = DB::transaction(function () use ($appointment, $totalAmount, $discount, $validated) {
             $this->acquireLock('billing_invoice');
@@ -158,6 +172,16 @@ class BillingController extends Controller
                 'quantity' => 1,
                 'unit_price' => $labFee,
                 'subtotal' => $labFee,
+            ];
+        }
+        foreach ($tariffs as $tariff) {
+            $items[] = [
+                'billing_id' => $billing->id,
+                'description' => $tariff->name,
+                'type' => $tariff->type,
+                'quantity' => 1,
+                'unit_price' => $tariff->price,
+                'subtotal' => $tariff->price,
             ];
         }
         if ($actionFee > 0) {

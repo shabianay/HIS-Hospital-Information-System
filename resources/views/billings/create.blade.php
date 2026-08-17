@@ -1,7 +1,7 @@
 @extends('layouts.app')
 @section('title', 'Buat Tagihan Pasien')
 @section('content')
-<div class="mx-auto max-w-4xl" x-data="{ consultation: {{ $consultationFee }}, medicineTotal: {{ $totalPrescription }}, labTotal: {{ $totalLab }}, actionTotal: 0, discount: 0, get total() { return Math.max(0, parseFloat(this.consultation || 0) + parseFloat(this.medicineTotal || 0) + parseFloat(this.labTotal || 0) + parseFloat(this.actionTotal || 0) - parseFloat(this.discount || 0)); } }">
+<div class="mx-auto max-w-4xl" x-data="{ consultation: {{ $consultationFee }}, medicineTotal: {{ $totalPrescription }}, labTotal: {{ $totalLab }}, actionTotal: 0, discount: 0, selectedTariffs: [], tariffs: {{ $tariffs->map(fn ($t) => ['id' => $t->id, 'name' => $t->name, 'price' => (float) $t->price])->toJson() }}, get tariffTotal() { return this.selectedTariffs.reduce((sum, id) => { const t = this.tariffs.find(x => x.id === id); return sum + (t ? t.price : 0); }, 0); }, get total() { return Math.max(0, parseFloat(this.consultation || 0) + parseFloat(this.medicineTotal || 0) + parseFloat(this.labTotal || 0) + this.tariffTotal + parseFloat(this.actionTotal || 0) - parseFloat(this.discount || 0)); } }">
     <div class="bg-surface-light dark:bg-surface-dark p-8 rounded-2xl border border-border-light dark:border-border-dark shadow-glass-sm">
         <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8 pb-6 border-b border-border-light dark:border-border-dark">
             <h2 class="text-2xl font-bold text-text-primary-light dark:text-text-primary-dark">Buat Tagihan Pembayaran Pasien</h2>
@@ -93,6 +93,22 @@
                                 <input type="number" x-model.number="labTotal" name="lab_fee" class="w-full border border-border-light bg-surface-light px-4 py-3 text-sm text-text-primary-light focus:border-primary-500 focus:ring-2 focus:ring-primary-500/20 focus:outline-none rounded-xl shadow-glass-sm transition-all duration-200 dark:border-border-dark dark:bg-surface-dark dark:text-text-primary-dark text-right">
                             </div>
                         </div>
+                                                @if($tariffs->isNotEmpty())
+                        <div class="rounded-xl border border-border-light dark:border-border-dark p-5">
+                            <h4 class="mb-3 text-sm font-semibold text-text-primary-light dark:text-text-primary-dark">Tarif Tindakan / Penunjang</h4>
+                            <div class="grid grid-cols-1 gap-2 sm:grid-cols-2">
+                                <template x-for="tariff in tariffs" :key="tariff.id">
+                                    <label class="flex items-center justify-between gap-3 rounded-lg border border-border-light dark:border-border-dark px-4 py-3 cursor-pointer hover:bg-primary-50/50 dark:hover:bg-primary-900/10 transition-colors">
+                                        <span class="flex items-center gap-3">
+                                            <input type="checkbox" :value="tariff.id" name="tariff_ids[]" x-model="selectedTariffs" class="h-4 w-4 rounded border-border-light text-primary-600 focus:ring-primary-500 dark:border-border-dark dark:bg-secondary-700 dark:checked:bg-primary-500">
+                                            <span class="text-sm font-medium text-text-primary-light dark:text-text-primary-dark" x-text="tariff.name"></span>
+                                        </span>
+                                        <span class="text-sm font-semibold text-primary-700 dark:text-primary-300" x-text="'Rp ' + tariff.price.toLocaleString('id-ID')"></span>
+                                    </label>
+                                </template>
+                            </div>
+                        </div>
+                        @endif
                         <div class="flex flex-wrap items-center justify-between gap-4">
                             <span class="text-sm font-medium text-text-primary-light dark:text-text-primary-dark">Biaya Tindakan / Penunjang (Tarif)</span>
                             <div class="w-full md:w-48">

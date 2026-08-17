@@ -571,6 +571,38 @@ class ModuleSmokeTest extends TestCase
         $this->assertGreaterThan(0, (float) $billing->total_amount);
     }
 
+    public function test_billing_includes_selected_tariffs(): void
+    {
+        $user = $this->seedAdmin();
+
+        $appointment = Appointment::first();
+        $tariff = \App\Models\Tariff::where('type', 'tindakan')->firstOrFail();
+
+        $this->actingAs($user)->get(route('billings.create', $appointment))
+            ->assertOk()
+            ->assertSee('Tarif Tindakan / Penunjang');
+
+        $this->actingAs($user)->post(route('billings.store'), [
+            'appointment_id' => $appointment->id,
+            'consultation_fee' => $appointment->consultation_fee,
+            'medicine_fee' => 0,
+            'lab_fee' => 0,
+            'action_fee' => 0,
+            'tariff_ids' => [$tariff->id],
+            'discount' => 0,
+        ])->assertSessionHasNoErrors();
+
+        $billing = $appointment->billing;
+        $this->assertNotNull($billing);
+        $this->assertTrue(
+            $billing->billingItems->contains(fn ($item) => $item->description === $tariff->name)
+        );
+        $this->assertSame(
+            (float) $appointment->consultation_fee + (float) $tariff->price,
+            (float) $billing->total_amount
+        );
+    }
+
     public function test_notifications_unread_count_endpoint(): void
     {
         $this->seed(DatabaseSeeder::class);
