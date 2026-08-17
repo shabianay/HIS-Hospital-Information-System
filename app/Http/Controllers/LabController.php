@@ -236,6 +236,12 @@ class LabController extends Controller
                 }
             }
 
+            foreach (User::role('cashier')->get() as $cashier) {
+                if ($cashier->id !== Auth::id()) {
+                    $recipients->push($cashier);
+                }
+            }
+
             foreach ($recipients->unique('id') as $recipient) {
                 $recipient->notify(new LabResultCompleted($labRequest));
             }

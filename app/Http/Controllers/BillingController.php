@@ -44,7 +44,7 @@ class BillingController extends Controller
     {
         $this->authorize('create', Billing::class);
 
-        $appointment->load(['patient', 'doctor', 'poli', 'medicalRecord.prescriptions.medicine']);
+        $appointment->load(['patient', 'doctor', 'poli', 'medicalRecord.prescriptions.medicine', 'labRequests.items']);
 
         if ($appointment->billing) {
             return redirect()->route('billings.show', $appointment->billing)
@@ -58,10 +58,28 @@ class BillingController extends Controller
             }
         }
 
-        $consultationFee = $appointment->consultation_fee ?? 0;
-        $totalAmount = $consultationFee + $totalPrescription;
+        $labItems = collect();
+        foreach ($appointment->labRequests as $labRequest) {
+            foreach ($labRequest->items as $item) {
+                $labItems->push([
+                    'test_name' => $item->test_name,
+                    'price' => (float) $item->price,
+                ]);
+            }
+        }
+        $totalLab = $labItems->sum('price');
 
-        return view('billings.create', compact('appointment', 'totalPrescription', 'consultationFee', 'totalAmount'));
+        $consultationFee = $appointment->consultation_fee ?? 0;
+        $totalAmount = $consultationFee + $totalPrescription + $totalLab;
+
+        return view('billings.create', compact(
+            'appointment',
+            'totalPrescription',
+            'totalLab',
+            'labItems',
+            'consultationFee',
+            'totalAmount'
+        ));
     }
 
     public function store(Request $request)
@@ -72,6 +90,7 @@ class BillingController extends Controller
             'appointment_id' => 'required|exists:appointments,id',
             'consultation_fee' => 'nullable|numeric|min:0',
             'medicine_fee' => 'nullable|numeric|min:0',
+            'lab_fee' => 'nullable|numeric|min:0',
             'action_fee' => 'nullable|numeric|min:0',
             'discount' => 'nullable|numeric|min:0',
             'notes' => 'nullable|string|max:1000',
@@ -87,9 +106,10 @@ class BillingController extends Controller
 
         $consultationFee = (float) ($validated['consultation_fee'] ?? 0);
         $medicineFee = (float) ($validated['medicine_fee'] ?? 0);
+        $labFee = (float) ($validated['lab_fee'] ?? 0);
         $actionFee = (float) ($validated['action_fee'] ?? 0);
         $discount = (float) ($validated['discount'] ?? 0);
-        $totalAmount = max(0, $consultationFee + $medicineFee + $actionFee - $discount);
+        $totalAmount = max(0, $consultationFee + $medicineFee + $labFee + $actionFee - $discount);
 
         $billing = DB::transaction(function () use ($appointment, $totalAmount, $discount, $validated) {
             $this->acquireLock('billing_invoice');
@@ -128,6 +148,16 @@ class BillingController extends Controller
                 'quantity' => 1,
                 'unit_price' => $medicineFee,
                 'subtotal' => $medicineFee,
+            ];
+        }
+        if ($labFee > 0) {
+            $items[] = [
+                'billing_id' => $billing->id,
+                'description' => 'Biaya Laboratorium',
+                'type' => 'lab',
+                'quantity' => 1,
+                'unit_price' => $labFee,
+                'subtotal' => $labFee,
             ];
         }
         if ($actionFee > 0) {

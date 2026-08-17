@@ -23,7 +23,7 @@ class LabResultCompleted extends Notification
     {
         return [
             'title' => 'Hasil Lab Selesai',
-            'message' => 'Hasil lab untuk pasien ' . ($this->labRequest->patient?->name ?? '-') . ' sudah tersedia.',
+            'message' => 'Hasil lab untuk pasien ' . ($this->labRequest->patient?->name ?? '-') . ' sudah tersedia.' . ($this->labRequest->appointment?->billing ? '' : ' Biaya laboratorium siap ditagihkan.'),
             'url' => route('lab.requests.show', $this->labRequest),
         ];
     }

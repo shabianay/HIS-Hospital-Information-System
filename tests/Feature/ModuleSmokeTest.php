@@ -532,6 +532,44 @@ class ModuleSmokeTest extends TestCase
         $this->assertGreaterThan(0, $cashier->notifications()->count());
     }
 
+    public function test_billing_includes_lab_fees(): void
+    {
+        $user = $this->seedAdmin();
+
+        $appointment = Appointment::first();
+        $test = \App\Models\LabTest::firstOrFail();
+
+        $this->actingAs($user)->post(route('lab.requests.store'), [
+            'appointment_id' => $appointment->id,
+            'patient_id' => $appointment->patient_id,
+            'notes' => 'Cek darah lengkap.',
+            'lab_test_ids' => [$test->id],
+        ])->assertSessionHasNoErrors();
+
+        $labRequest = \App\Models\LabRequest::where('appointment_id', $appointment->id)->firstOrFail();
+        $labTotal = $labRequest->items()->sum('price');
+
+        $this->actingAs($user)->get(route('billings.create', $appointment))
+            ->assertOk()
+            ->assertSee('Biaya Laboratorium');
+
+        $this->actingAs($user)->post(route('billings.store'), [
+            'appointment_id' => $appointment->id,
+            'consultation_fee' => $appointment->consultation_fee,
+            'medicine_fee' => 0,
+            'lab_fee' => $labTotal,
+            'action_fee' => 0,
+            'discount' => 0,
+        ])->assertSessionHasNoErrors();
+
+        $billing = $appointment->billing;
+        $this->assertNotNull($billing);
+        $this->assertTrue(
+            $billing->billingItems->contains(fn ($item) => $item->type === 'lab')
+        );
+        $this->assertGreaterThan(0, (float) $billing->total_amount);
+    }
+
     public function test_notifications_unread_count_endpoint(): void
     {
         $this->seed(DatabaseSeeder::class);
@@ -690,6 +728,38 @@ class ModuleSmokeTest extends TestCase
 
         $doctorUser = User::where('email', 'dokter@his.local')->firstOrFail();
         $this->assertGreaterThan(0, $doctorUser->notifications()->count());
+    }
+
+    public function test_lab_completion_notifies_cashiers_for_billing(): void
+    {
+        $user = $this->seedAdmin();
+
+        $appointment = Appointment::first();
+        $test = \App\Models\LabTest::firstOrFail();
+
+        $this->actingAs($user)->post(route('lab.requests.store'), [
+            'appointment_id' => $appointment->id,
+            'patient_id' => $appointment->patient_id,
+            'notes' => 'Cek lab.',
+            'lab_test_ids' => [$test->id],
+        ])->assertSessionHasNoErrors();
+
+        $labRequest = \App\Models\LabRequest::where('appointment_id', $appointment->id)->firstOrFail();
+        $items = $labRequest->items->mapWithKeys(function ($item) {
+            return [$item->id => ['result_value' => 'Negatif', 'result_status' => 'normal']];
+        })->all();
+
+        $this->actingAs($user)->post(route('lab.requests.process', $labRequest), [
+            'status' => 'completed',
+            'items' => $items,
+        ])->assertSessionHasNoErrors();
+
+        $cashier = User::where('email', 'kasir@his.local')->firstOrFail();
+        $this->assertGreaterThan(0, $cashier->notifications()->count());
+
+        $this->actingAs($user)->get(route('lab.requests.show', $labRequest))
+            ->assertOk()
+            ->assertSee('Buat Tagihan');
     }
 
     public function test_doctor_login_lands_on_my_patients(): void

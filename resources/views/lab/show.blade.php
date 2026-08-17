@@ -1,5 +1,5 @@
 @extends('layouts.app')
-@section('title', 'Permintaan Lab #{{ str_pad($labRequest->id, 4, '0', STR_PAD_LEFT) }}')
+@section('title', 'Permintaan Lab #' . str_pad($labRequest->id, 4, '0', STR_PAD_LEFT))
 @section('content')
 <div class="space-y-6">
     @php
@@ -19,6 +19,11 @@
             @if($labRequest->is_urgent)<span class="inline-flex items-center rounded-full px-3 py-1 text-xs font-bold bg-danger-100 text-danger-800 dark:bg-danger-900/30 dark:text-danger-400">PRIORITAS</span>@endif
         </div>
         <a href="{{ route('lab.requests.pdf', $labRequest) }}" class="inline-flex items-center gap-2 rounded-xl border border-primary-300 dark:border-primary-700 bg-primary-50 dark:bg-primary-900/20 px-5 py-2.5 text-sm font-semibold text-primary-700 dark:text-primary-300 hover:bg-primary-100 dark:hover:bg-primary-900/40 transition-all duration-200">Cetak PDF</a>
+        @can('create', App\Models\Billing::class)
+            @if($labRequest->appointment && ! $labRequest->appointment->billing)
+            <a href="{{ route('billings.create', $labRequest->appointment) }}" class="inline-flex items-center gap-2 rounded-xl bg-primary-600 hover:bg-primary-700 text-white px-5 py-2.5 text-sm font-semibold shadow-glass-sm hover:shadow-glass-md transition-all duration-200">Buat Tagihan</a>
+            @endif
+        @endcan
         <a href="{{ route('lab.requests') }}" class="text-sm font-semibold text-primary-600 hover:text-primary-800 dark:text-primary-400 dark:hover:text-primary-300">← Kembali</a>
     </div>
 
