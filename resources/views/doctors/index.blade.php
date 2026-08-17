@@ -16,6 +16,7 @@
                     <th class="pb-4 px-4 font-semibold">Nama Dokter</th>
                     <th class="pb-4 px-4 font-semibold">Spesialisasi</th>
                     <th class="pb-4 px-4 font-semibold">No. SIP</th>
+                    <th class="pb-4 px-4 font-semibold">Akun Login</th>
                     <th class="pb-4 px-4 font-semibold">Status</th>
                     <th class="pb-4 px-4 font-semibold text-right">Aksi</th>
                 </tr>
@@ -25,6 +26,14 @@
                     <td class="py-4 px-4 text-sm text-text-primary-light dark:text-text-primary-dark">{{ $doctor->name }}</td>
                     <td class="py-4 px-4 text-sm text-text-secondary-light dark:text-text-secondary-dark">{{ $doctor->specialization ?: '-' }}</td>
                     <td class="py-4 px-4 text-sm text-text-secondary-light dark:text-text-secondary-dark">{{ $doctor->license_number }}</td>
+                    <td class="py-4 px-4 text-sm text-text-primary-light dark:text-text-primary-dark">
+                        @if($doctor->user)
+                            {{ $doctor->user->name }}
+                            <span class="block text-xs font-mono text-text-secondary-light dark:text-text-secondary-dark">{{ $doctor->user->email }}</span>
+                        @else
+                            <span class="text-text-secondary-light dark:text-text-secondary-dark">-</span>
+                        @endif
+                    </td>
                     <td class="py-4 px-4">
                         @if($doctor->is_active)
                             <span class="inline-flex items-center rounded-full px-3 py-1 text-xs font-semibold bg-success-100 text-success-800 dark:bg-success-900/30 dark:text-success-400 border border-success-200 dark:border-success-800">Aktif</span>
@@ -45,7 +54,7 @@
                     </td>
                 </tr>
                 @empty
-                <tr x-show="!search" data-search-row><td colspan="5" class="py-12 text-center text-text-secondary-light dark:text-text-secondary-dark">Tidak ada data dokter.</td></tr>
+                <tr x-show="!search" data-search-row><td colspan="6" class="py-12 text-center text-text-secondary-light dark:text-text-secondary-dark">Tidak ada data dokter.</td></tr>
                 @endforelse
             </x-table>
 

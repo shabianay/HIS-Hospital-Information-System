@@ -9,6 +9,7 @@ use App\Models\Prescription;
 use App\Models\StockMutation;
 use App\Models\User;
 use App\Notifications\LowStockAlert;
+use App\Notifications\StockExpiringAlert;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
@@ -64,7 +65,31 @@ class MedicineStockController extends Controller
             ]);
         });
 
+        $this->notifyNearExpiry($validated['medicine_id']);
+
         return redirect()->route('medicines.stock')->with('success', 'Stok berhasil ditambahkan.');
+    }
+
+    private function notifyNearExpiry(int $medicineId): void
+    {
+        $nearExpiry = MedicineStock::with('medicine')
+            ->where('medicine_id', $medicineId)
+            ->where('quantity', '>', 0)
+            ->whereBetween('expiry_date', [now()->startOfDay(), now()->addDays(60)->endOfDay()])
+            ->get();
+
+        if ($nearExpiry->isEmpty()) {
+            return;
+        }
+
+        $pharmacists = User::role('pharmacist')->get();
+        foreach ($nearExpiry as $stock) {
+            foreach ($pharmacists as $pharmacist) {
+                if ($pharmacist->id !== auth()->id()) {
+                    $pharmacist->notify(new StockExpiringAlert($stock));
+                }
+            }
+        }
     }
 
     public function dispense($prescriptionId)

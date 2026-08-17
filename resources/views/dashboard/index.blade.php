@@ -31,6 +31,33 @@
         </a>
     </div>
 
+    <div class="mt-8 grid grid-cols-1 gap-6 lg:grid-cols-3">
+        <a href="{{ route('appointments.queue') }}"
+            class="bg-surface-light dark:bg-surface-dark p-6 rounded-2xl border border-border-light dark:border-border-dark shadow-glass-sm hover:bg-secondary-50 dark:hover:bg-secondary-900/30 transition-colors flex items-center justify-between">
+            <div>
+                <div class="text-sm font-semibold text-text-secondary-light dark:text-text-secondary-dark">Antrian Menunggu</div>
+                <div class="mt-1 text-xs text-text-secondary-light dark:text-text-secondary-dark">Hari ini</div>
+            </div>
+            <span class="inline-flex items-center justify-center rounded-xl bg-warning-100 text-warning-800 dark:bg-warning-900/30 dark:text-warning-400 px-4 py-2 text-2xl font-bold">{{ $waitingQueueToday }}</span>
+        </a>
+        <a href="{{ route('lab.requests') }}"
+            class="bg-surface-light dark:bg-surface-dark p-6 rounded-2xl border border-border-light dark:border-border-dark shadow-glass-sm hover:bg-secondary-50 dark:hover:bg-secondary-900/30 transition-colors flex items-center justify-between">
+            <div>
+                <div class="text-sm font-semibold text-text-secondary-light dark:text-text-secondary-dark">Permintaan Lab Pending</div>
+                <div class="mt-1 text-xs text-text-secondary-light dark:text-text-secondary-dark">Belum selesai</div>
+            </div>
+            <span class="inline-flex items-center justify-center rounded-xl bg-info-100 text-info-800 dark:bg-info-900/30 dark:text-info-400 px-4 py-2 text-2xl font-bold">{{ $pendingLabCount }}</span>
+        </a>
+        <a href="{{ route('prescriptions.pending') }}"
+            class="bg-surface-light dark:bg-surface-dark p-6 rounded-2xl border border-border-light dark:border-border-dark shadow-glass-sm hover:bg-secondary-50 dark:hover:bg-secondary-900/30 transition-colors flex items-center justify-between">
+            <div>
+                <div class="text-sm font-semibold text-text-secondary-light dark:text-text-secondary-dark">Resep Belum Diserahkan</div>
+                <div class="mt-1 text-xs text-text-secondary-light dark:text-text-secondary-dark">Menunggu dispense</div>
+            </div>
+            <span class="inline-flex items-center justify-center rounded-xl bg-primary-100 text-primary-800 dark:bg-primary-900/30 dark:text-primary-400 px-4 py-2 text-2xl font-bold">{{ $pendingPrescriptionsCount }}</span>
+        </a>
+    </div>
+
     <div class="mt-8 grid grid-cols-1 gap-6 lg:grid-cols-1">
         <div
             class="bg-surface-light dark:bg-surface-dark p-8 rounded-2xl border border-border-light dark:border-border-dark shadow-glass-sm">

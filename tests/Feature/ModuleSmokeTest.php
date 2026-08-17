@@ -618,4 +618,117 @@ class ModuleSmokeTest extends TestCase
 
         $this->actingAs($noRoleUser)->get(route('notifications.unread-count'))->assertForbidden();
     }
+
+    public function test_doctor_can_be_linked_to_user_account(): void
+    {
+        $user = $this->seedAdmin();
+
+        $doctorUser = User::factory()->create();
+        $doctorUser->assignRole('doctor');
+        $doctor = \App\Models\Doctor::where('license_number', 'SIP/002/A/2026')->firstOrFail();
+
+        $this->actingAs($user)->put(route('doctors.update', $doctor), [
+            'name' => $doctor->name,
+            'specialization' => $doctor->specialization,
+            'license_number' => $doctor->license_number,
+            'user_id' => $doctorUser->id,
+            'is_active' => 1,
+        ])->assertSessionHasNoErrors();
+
+        $this->assertSame($doctorUser->id, $doctor->fresh()->user_id);
+    }
+
+    public function test_doctor_user_cannot_be_linked_to_two_doctors(): void
+    {
+        $user = $this->seedAdmin();
+
+        $doctorUser = User::where('email', 'dokter@his.local')->firstOrFail();
+        $doctors = \App\Models\Doctor::orderBy('id')->get();
+
+        $this->actingAs($user)->put(route('doctors.update', $doctors[0]), [
+            'name' => $doctors[0]->name,
+            'specialization' => $doctors[0]->specialization,
+            'license_number' => $doctors[0]->license_number,
+            'user_id' => $doctorUser->id,
+        ])->assertSessionHasNoErrors();
+
+        $this->actingAs($user)->put(route('doctors.update', $doctors[1]), [
+            'name' => $doctors[1]->name,
+            'specialization' => $doctors[1]->specialization,
+            'license_number' => $doctors[1]->license_number,
+            'user_id' => $doctorUser->id,
+        ])->assertSessionHasErrors('user_id');
+    }
+
+    public function test_lab_completion_notifies_requesting_doctor(): void
+    {
+        $user = $this->seedAdmin();
+
+        $appointment = Appointment::first();
+        $test = \App\Models\LabTest::firstOrFail();
+
+        $this->actingAs($user)->post(route('lab.requests.store'), [
+            'appointment_id' => $appointment->id,
+            'patient_id' => $appointment->patient_id,
+            'notes' => 'Cek lab.',
+            'lab_test_ids' => [$test->id],
+        ])->assertSessionHasNoErrors();
+
+        $labRequest = \App\Models\LabRequest::where('appointment_id', $appointment->id)->firstOrFail();
+
+        $items = $labRequest->items->mapWithKeys(function ($item) {
+            return [$item->id => [
+                'result_value' => 'Positif',
+                'result_status' => 'normal',
+            ]];
+        })->all();
+
+        $this->actingAs($user)->post(route('lab.requests.process', $labRequest), [
+            'status' => 'completed',
+            'items' => $items,
+        ])->assertSessionHasNoErrors();
+
+        $doctorUser = User::where('email', 'dokter@his.local')->firstOrFail();
+        $this->assertGreaterThan(0, $doctorUser->notifications()->count());
+    }
+
+    public function test_doctor_login_lands_on_my_patients(): void
+    {
+        $this->seed(DatabaseSeeder::class);
+
+        $this->post('/login', [
+            'email' => 'dokter@his.local',
+            'password' => 'password',
+        ])->assertRedirect(route('appointments.my-patients'));
+
+        $this->assertAuthenticated();
+    }
+
+    public function test_dashboard_shows_reminder_counts(): void
+    {
+        $user = $this->seedAdmin();
+
+        $this->actingAs($user)->get(route('dashboard'))
+            ->assertOk()
+            ->assertSee('Antrian Menunggu')
+            ->assertSee('Permintaan Lab Pending')
+            ->assertSee('Resep Belum Diserahkan');
+    }
+
+    public function test_near_expiry_stock_creation_notifies_pharmacist(): void
+    {
+        $user = $this->seedAdmin();
+
+        $medicine = Medicine::firstOrFail();
+
+        $this->actingAs($user)->post(route('medicine-stocks.store'), [
+            'medicine_id' => $medicine->id,
+            'batch_number' => 'BATCH-NEAR-EXP',
+            'quantity' => 10,
+            'expiry_date' => now()->addDays(30)->toDateString(),
+        ])->assertSessionHasNoErrors();
+
+        $pharmacist = User::where('email', 'apoteker@his.local')->firstOrFail();
+        $this->assertGreaterThan(0, $pharmacist->notifications()->count());
+    }
 }

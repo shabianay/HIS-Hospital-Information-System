@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Doctor;
+use App\Models\User;
 use Illuminate\Http\Request;
 
 class DoctorController extends Controller
@@ -11,7 +12,7 @@ class DoctorController extends Controller
     {
         $this->authorize('viewAny', Doctor::class);
 
-        $query = Doctor::query();
+        $query = Doctor::with('user');
 
         if ($request->filled('search')) {
             $search = $request->search;
@@ -31,7 +32,9 @@ class DoctorController extends Controller
     {
         $this->authorize('create', Doctor::class);
 
-        return view('doctors.create');
+        $availableUsers = $this->unlinkedDoctorUsers();
+
+        return view('doctors.create', compact('availableUsers'));
     }
 
     public function store(Request $request)
@@ -42,6 +45,7 @@ class DoctorController extends Controller
             'name' => 'required|string|max:255',
             'specialization' => 'nullable|string|max:255',
             'license_number' => 'required|string|max:50|unique:doctors,license_number',
+            'user_id' => ['nullable', 'exists:users,id', $this->userNotLinkedRule()],
         ]);
 
         $validated['is_active'] = $request->boolean('is_active', true);
@@ -55,6 +59,7 @@ class DoctorController extends Controller
     {
         $this->authorize('view', $doctor);
 
+        $doctor->load('user');
         $schedules = $doctor->schedules()->with('poli')->latest()->get();
 
         return view('doctors.show', compact('doctor', 'schedules'));
@@ -64,7 +69,10 @@ class DoctorController extends Controller
     {
         $this->authorize('update', $doctor);
 
-        return view('doctors.edit', compact('doctor'));
+        $availableUsers = $this->unlinkedDoctorUsers()
+            ->when($doctor->user_id, fn ($c) => $c->push($doctor->user));
+
+        return view('doctors.edit', compact('doctor', 'availableUsers'));
     }
 
     public function update(Request $request, Doctor $doctor)
@@ -75,6 +83,7 @@ class DoctorController extends Controller
             'name' => 'required|string|max:255',
             'specialization' => 'nullable|string|max:255',
             'license_number' => 'required|string|max:50|unique:doctors,license_number,'.$doctor->id,
+            'user_id' => ['nullable', 'exists:users,id', $this->userNotLinkedRule($doctor->id)],
         ]);
 
         $validated['is_active'] = $request->boolean('is_active', true);
@@ -96,5 +105,30 @@ class DoctorController extends Controller
         $doctor->delete();
 
         return redirect()->route('doctors.index')->with('success', 'Dokter berhasil dihapus.');
+    }
+
+    private function unlinkedDoctorUsers()
+    {
+        return User::role('doctor')
+            ->whereDoesntHave('doctor')
+            ->orderBy('name')
+            ->get();
+    }
+
+    private function userNotLinkedRule(?int $exceptDoctorId = null)
+    {
+        return function ($attribute, $value, $fail) use ($exceptDoctorId) {
+            if (! $value) {
+                return;
+            }
+
+            $linked = Doctor::where('user_id', $value)
+                ->when($exceptDoctorId, fn ($q) => $q->where('id', '!=', $exceptDoctorId))
+                ->exists();
+
+            if ($linked) {
+                $fail('Akun user tersebut sudah tertaut ke dokter lain.');
+            }
+        };
     }
 }

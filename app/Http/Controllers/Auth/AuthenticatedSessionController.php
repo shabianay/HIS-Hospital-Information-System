@@ -28,7 +28,13 @@ class AuthenticatedSessionController extends Controller
 
         $request->session()->regenerate();
 
-        return redirect()->intended(route('dashboard', absolute: false));
+        $user = $request->user();
+
+        $landing = $user->doctor
+            ? route('appointments.my-patients')
+            : route('dashboard');
+
+        return redirect()->intended($landing);
     }
 
     /**

@@ -27,6 +27,19 @@ class DashboardController extends Controller
                 ->whereBetween('appointment_date', [$dayStart, $dayEnd])
                 ->count();
 
+            $waitingQueueToday = DB::table('appointments')
+                ->whereBetween('appointment_date', [$dayStart, $dayEnd])
+                ->where('status', 'waiting')
+                ->count();
+
+            $pendingLabCount = DB::table('lab_requests')
+                ->whereIn('status', ['pending', 'in_progress'])
+                ->count();
+
+            $pendingPrescriptionsCount = DB::table('prescriptions')
+                ->where('is_dispensed', false)
+                ->count();
+
             $revenueToday = DB::table('billings')
                 ->whereBetween('created_at', [$dayStart, $dayEnd])
                 ->where('status', 'paid')
@@ -70,6 +83,9 @@ class DashboardController extends Controller
             return compact(
                 'totalPatientsToday',
                 'appointmentsToday',
+                'waitingQueueToday',
+                'pendingLabCount',
+                'pendingPrescriptionsCount',
                 'revenueToday',
                 'topDiagnoses',
                 'recentAppointments',

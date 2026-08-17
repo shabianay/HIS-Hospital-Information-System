@@ -225,6 +225,11 @@ class LabController extends Controller
                 }
             }
 
+            $doctor = $labRequest->doctor;
+            if ($doctor?->user_id) {
+                $recipients->push($doctor->user);
+            }
+
             foreach (User::role('admin')->get() as $admin) {
                 if ($admin->id !== Auth::id()) {
                     $recipients->push($admin);

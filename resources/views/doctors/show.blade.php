@@ -26,6 +26,15 @@
                     <span class="inline-flex items-center rounded-full px-3 py-1 text-xs font-semibold bg-secondary-100 text-secondary-800 dark:bg-secondary-900/30 dark:text-secondary-400 border border-secondary-200 dark:border-secondary-800">Nonaktif</span>
                 @endif
             </div>
+            <div>
+                <span class="block text-xs font-semibold text-text-secondary-light dark:text-text-secondary-dark uppercase mb-1">Akun Login</span>
+                @if($doctor->user)
+                    <span class="block text-base font-medium text-text-primary-light dark:text-text-primary-dark">{{ $doctor->user->name }}</span>
+                    <span class="block text-sm font-mono text-text-secondary-light dark:text-text-secondary-dark">{{ $doctor->user->email }}</span>
+                @else
+                    <span class="block text-base font-medium text-text-primary-light dark:text-text-primary-dark">-</span>
+                @endif
+            </div>
         </div>
     </div>
 
