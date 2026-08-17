@@ -119,6 +119,7 @@
                 queues: @json($initialQueues),
                 time: '',
                 timer: null,
+                lastAnnounced: '',
                 init() {
                     this.refreshClock();
                     setInterval(() => this.refreshClock(), 1000);
@@ -134,11 +135,27 @@
                         const res = await fetch('{{ route('queue.display.json') }}');
                         const data = await res.json();
                         if (Array.isArray(data)) {
+                            const before = this.activeCall ? this.activeCall.queue_number : '';
                             this.queues = data;
+                            const after = this.activeCall ? this.activeCall.queue_number : '';
+                            if (after && after !== before && after !== this.lastAnnounced) {
+                                this.lastAnnounced = after;
+                                this.announce(after, this.activeCall.poli_name);
+                            }
                         }
                     } catch (e) {
                         // ignore transient network errors, keep current data
                     }
+                },
+                announce(number, poli) {
+                    if (!('speechSynthesis' in window)) return;
+                    const msg = new SpeechSynthesisUtterance(
+                        'Nomor antrian ' + number + ', silakan menuju ' + (poli || 'poli tujuan')
+                    );
+                    msg.lang = 'id-ID';
+                    msg.rate = 0.9;
+                    window.speechSynthesis.cancel();
+                    window.speechSynthesis.speak(msg);
                 },
                 get activeCall() {
                     for (const queue of this.queues) {
