@@ -803,6 +803,68 @@ class ModuleSmokeTest extends TestCase
         $this->assertSame(0, MedicineStock::where('medicine_id', $medicine->id)->sum('quantity'));
     }
 
+    public function test_stock_adjustment_adds_and_deducts_quantity(): void
+    {
+        $user = $this->seedAdmin();
+
+        $medicine = Medicine::firstOrFail();
+
+        $this->actingAs($user)->post(route('medicine-stocks.store'), [
+            'medicine_id' => $medicine->id,
+            'batch_number' => 'BATCH-ADJ',
+            'quantity' => 10,
+            'expiry_date' => now()->addMonths(6)->toDateString(),
+        ])->assertSessionHasNoErrors();
+
+        $this->actingAs($user)->post(route('medicine-stocks.adjust'), [
+            'medicine_id' => $medicine->id,
+            'batch_number' => 'BATCH-ADJ',
+            'adjustment_type' => 'in',
+            'quantity' => 5,
+            'notes' => 'Selisih stok opname (lebih).',
+        ])->assertSessionHasNoErrors();
+
+        $batch = MedicineStock::where('medicine_id', $medicine->id)->where('batch_number', 'BATCH-ADJ')->firstOrFail();
+        $this->assertSame(15, $batch->quantity);
+
+        $this->actingAs($user)->post(route('medicine-stocks.adjust'), [
+            'medicine_id' => $medicine->id,
+            'batch_number' => 'BATCH-ADJ',
+            'adjustment_type' => 'out',
+            'quantity' => 3,
+            'notes' => 'Selisih stok opname (kurang).',
+        ])->assertSessionHasNoErrors();
+
+        $this->assertSame(12, $batch->fresh()->quantity);
+
+        $this->actingAs($user)->get(route('medicines.mutations'))
+            ->assertOk()
+            ->assertSee('Selisih stok opname (lebih).');
+    }
+
+    public function test_stock_adjustment_rejects_over_deduction(): void
+    {
+        $user = $this->seedAdmin();
+
+        $medicine = Medicine::firstOrFail();
+
+        $this->actingAs($user)->post(route('medicine-stocks.store'), [
+            'medicine_id' => $medicine->id,
+            'batch_number' => 'BATCH-ADJ2',
+            'quantity' => 2,
+            'expiry_date' => now()->addMonths(6)->toDateString(),
+        ])->assertSessionHasNoErrors();
+
+        $this->actingAs($user)->post(route('medicine-stocks.adjust'), [
+            'medicine_id' => $medicine->id,
+            'batch_number' => 'BATCH-ADJ2',
+            'adjustment_type' => 'out',
+            'quantity' => 50,
+        ])->assertSessionHasErrors('quantity');
+
+        $this->assertSame(2, MedicineStock::where('medicine_id', $medicine->id)->where('batch_number', 'BATCH-ADJ2')->firstOrFail()->quantity);
+    }
+
     public function test_doctor_login_lands_on_my_patients(): void
     {
         $this->seed(DatabaseSeeder::class);

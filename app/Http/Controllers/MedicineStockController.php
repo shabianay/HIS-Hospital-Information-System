@@ -13,6 +13,7 @@ use App\Notifications\LowStockAlert;
 use App\Notifications\StockExpiringAlert;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Validation\ValidationException;
 
 class MedicineStockController extends Controller
 {
@@ -69,6 +70,54 @@ class MedicineStockController extends Controller
         $this->notifyNearExpiry($validated['medicine_id']);
 
         return redirect()->route('medicines.stock')->with('success', 'Stok berhasil ditambahkan.');
+    }
+
+    public function adjust(Request $request)
+    {
+        $this->authorize('update', MedicineStock::class);
+
+        $validated = $request->validate([
+            'medicine_id' => 'required|exists:medicines,id',
+            'batch_number' => 'nullable|string|max:100',
+            'quantity' => 'required|integer|min:1',
+            'adjustment_type' => 'required|in:in,out',
+            'notes' => 'nullable|string|max:500',
+        ]);
+
+        DB::transaction(function () use ($validated) {
+            $stock = MedicineStock::where('medicine_id', $validated['medicine_id'])
+                ->where('batch_number', $validated['batch_number'] ?? '')
+                ->lockForUpdate()
+                ->first();
+
+            if (! $stock) {
+                throw ValidationException::withMessages([
+                    'batch_number' => 'Batch tidak ditemukan untuk obat ini.',
+                ]);
+            }
+
+            if ($validated['adjustment_type'] === 'out' && $stock->quantity < $validated['quantity']) {
+                throw ValidationException::withMessages([
+                    'quantity' => 'Stok batch tidak mencukupi untuk pengurangan. Sisa: ' . $stock->quantity,
+                ]);
+            }
+
+            if ($validated['adjustment_type'] === 'in') {
+                $stock->increment('quantity', $validated['quantity']);
+            } else {
+                $stock->decrement('quantity', $validated['quantity']);
+            }
+
+            StockMutation::create([
+                'medicine_id' => $validated['medicine_id'],
+                'type' => $validated['adjustment_type'],
+                'quantity' => $validated['quantity'],
+                'reference' => 'adjustment',
+                'notes' => $validated['notes'] ?? 'Penyesuaian stok',
+            ]);
+        });
+
+        return redirect()->route('medicines.stock')->with('success', 'Penyesuaian stok berhasil dicatat.');
     }
 
     private function notifyNearExpiry(int $medicineId): void
