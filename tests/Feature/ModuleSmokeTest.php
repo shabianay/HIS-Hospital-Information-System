@@ -1005,6 +1005,45 @@ class ModuleSmokeTest extends TestCase
             ->assertHeader('Content-Type', 'application/pdf');
     }
 
+    public function test_medical_record_with_prescription_can_export_prescription_pdf(): void
+    {
+        $user = $this->seedAdmin();
+
+        $appointment = Appointment::first();
+        $medicine = Medicine::firstOrFail();
+
+        $medicalRecord = $appointment->medicalRecord()->create([
+            'patient_id' => $appointment->patient_id,
+            'doctor_id' => $appointment->doctor_id,
+            'chief_complaint' => 'Demam',
+            'subjective' => 'Demam 3 hari',
+            'objective' => 'Suhu 38C',
+            'assessment' => 'Dengue',
+            'plan' => 'Istirahat',
+            'status' => 'finalized',
+        ]);
+
+        $prescription = \App\Models\Prescription::create([
+            'medical_record_id' => $medicalRecord->id,
+            'medicine_id' => $medicine->id,
+            'quantity' => 10,
+            'dosage' => '3x1',
+            'frequency' => 'Sesudah makan',
+            'duration' => '5 hari',
+            'instructions' => 'Habiskan obat.',
+        ]);
+
+        $this->actingAs($user)->get(route('medical-records.show', $medicalRecord))
+            ->assertOk()
+            ->assertSee('Cetak Resep');
+
+        $this->actingAs($user)->get(route('medical-records.prescription', $medicalRecord))
+            ->assertOk()
+            ->assertHeader('Content-Type', 'application/pdf');
+
+        $prescription->delete();
+    }
+
     public function test_dispense_fails_gracefully_when_stock_insufficient(): void
     {
         $user = $this->seedAdmin();

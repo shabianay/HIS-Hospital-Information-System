@@ -274,6 +274,29 @@ class MedicalRecordController extends Controller
         return $pdf->download('surat-keterangan-sakit-' . str_pad($medicalRecord->id, 4, '0', STR_PAD_LEFT) . '.pdf');
     }
 
+    public function prescriptionPdf(MedicalRecord $medicalRecord)
+    {
+        $this->authorize('view', $medicalRecord);
+
+        $medicalRecord->load([
+            'appointment.patient',
+            'appointment.doctor',
+            'appointment.poli',
+            'prescriptions.medicine',
+        ]);
+
+        if ($medicalRecord->prescriptions->isEmpty()) {
+            return back()->with('error', 'Rekam medis ini tidak memiliki resep obat.');
+        }
+
+        $pdf = Pdf::loadView('medical-records.prescription', [
+            'medicalRecord' => $medicalRecord,
+            'generatedAt' => now()->format('d/m/Y H:i:s'),
+        ])->setPaper('a4');
+
+        return $pdf->download('resep-' . str_pad($medicalRecord->id, 4, '0', STR_PAD_LEFT) . '.pdf');
+    }
+
     private function numberToIndonesianWords(int $number): string
     {
         $units = ['', 'satu', 'dua', 'tiga', 'empat', 'lima', 'enam', 'tujuh', 'delapan', 'sembilan'];
