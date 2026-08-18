@@ -96,7 +96,14 @@ class LabController extends Controller
 
         $requests = $query->paginate(15)->withQueryString();
 
-        return view('lab.requests', compact('requests'));
+        $summary = [
+            'pending' => LabRequest::where('status', 'pending')->count(),
+            'in_progress' => LabRequest::where('status', 'in_progress')->count(),
+            'completed' => LabRequest::where('status', 'completed')->count(),
+            'urgent' => LabRequest::where('status', '!=', 'completed')->where('is_urgent', true)->count(),
+        ];
+
+        return view('lab.requests', compact('requests', 'summary'));
     }
 
     public function exportCsv(Request $request)

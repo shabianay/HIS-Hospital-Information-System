@@ -10,6 +10,25 @@
         </div>
     </div>
 
+    <div class="grid grid-cols-2 sm:grid-cols-4 gap-4">
+        <div class="bg-surface-light dark:bg-surface-dark p-5 rounded-2xl border border-border-light dark:border-border-dark shadow-glass-sm">
+            <p class="text-xs font-semibold uppercase tracking-wider text-text-secondary-light dark:text-text-secondary-dark">Menunggu</p>
+            <p class="mt-1 text-2xl font-bold text-warning-600 dark:text-warning-400">{{ $summary['pending'] }}</p>
+        </div>
+        <div class="bg-surface-light dark:bg-surface-dark p-5 rounded-2xl border border-border-light dark:border-border-dark shadow-glass-sm">
+            <p class="text-xs font-semibold uppercase tracking-wider text-text-secondary-light dark:text-text-secondary-dark">Diproses</p>
+            <p class="mt-1 text-2xl font-bold text-info-600 dark:text-info-400">{{ $summary['in_progress'] }}</p>
+        </div>
+        <div class="bg-surface-light dark:bg-surface-dark p-5 rounded-2xl border border-border-light dark:border-border-dark shadow-glass-sm">
+            <p class="text-xs font-semibold uppercase tracking-wider text-text-secondary-light dark:text-text-secondary-dark">Selesai</p>
+            <p class="mt-1 text-2xl font-bold text-success-600 dark:text-success-400">{{ $summary['completed'] }}</p>
+        </div>
+        <div class="bg-surface-light dark:bg-surface-dark p-5 rounded-2xl border border-border-light dark:border-border-dark shadow-glass-sm">
+            <p class="text-xs font-semibold uppercase tracking-wider text-text-secondary-light dark:text-text-secondary-dark">Urgent Menunggu</p>
+            <p class="mt-1 text-2xl font-bold {{ $summary['urgent'] > 0 ? 'text-danger-600 dark:text-danger-400' : 'text-text-primary-light dark:text-text-primary-dark' }}">{{ $summary['urgent'] }}</p>
+        </div>
+    </div>
+
     <div class="bg-surface-light dark:bg-surface-dark p-8 rounded-2xl border border-border-light dark:border-border-dark shadow-glass-sm">
         <form method="GET" action="{{ route('lab.requests') }}" class="mb-6 flex flex-col sm:flex-row gap-3">
             <select name="status" class="w-full sm:w-56 border border-border-light bg-surface-light px-4 py-3 text-sm text-text-primary-light focus:border-primary-500 focus:ring-2 focus:ring-primary-500/20 focus:outline-none rounded-xl shadow-glass-sm dark:border-border-dark dark:bg-surface-dark dark:text-text-primary-dark">

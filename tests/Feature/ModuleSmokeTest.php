@@ -1417,6 +1417,7 @@ class ModuleSmokeTest extends TestCase
         $registration = User::role('registration')->firstOrFail();
 
         $this->actingAs($labTech)->get(route('lab.requests'))->assertOk();
+        $this->actingAs($labTech)->get(route('lab.requests'))->assertSee('Urgent Menunggu');
         $this->actingAs($pharmacist)->get(route('prescriptions.pending'))->assertOk();
         $this->actingAs($cashier)->get(route('billings.index'))->assertOk();
         $this->actingAs($registration)->get(route('appointments.create'))->assertOk();
