@@ -120,7 +120,18 @@ class AppointmentController extends Controller
                 ->get();
         }
 
-        return view('appointments.create', compact('patients', 'doctors', 'polis', 'schedules'));
+        $todayAppointments = Appointment::whereDate('appointment_date', now()->toDateString())
+            ->where('status', '!=', 'cancelled')
+            ->get();
+        $queueSummary = [
+            'total' => $todayAppointments->count(),
+            'waiting' => $todayAppointments->where('status', 'waiting')->count(),
+            'checked_in' => $todayAppointments->where('status', 'checked_in')->count(),
+            'in_progress' => $todayAppointments->where('status', 'in_progress')->count(),
+            'completed' => $todayAppointments->where('status', 'completed')->count(),
+        ];
+
+        return view('appointments.create', compact('patients', 'doctors', 'polis', 'schedules', 'queueSummary'));
     }
 
     public function store(Request $request)

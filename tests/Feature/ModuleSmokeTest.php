@@ -1445,6 +1445,7 @@ class ModuleSmokeTest extends TestCase
         $this->actingAs($cashier)->get(route('billings.index'))->assertOk();
         $this->actingAs($cashier)->get(route('billings.index'))->assertSee('Piutang');
         $this->actingAs($registration)->get(route('appointments.create'))->assertOk();
+        $this->actingAs($registration)->get(route('appointments.create'))->assertSee('Antrian Hari Ini');
     }
 
     public function test_dashboard_shows_reminder_counts(): void

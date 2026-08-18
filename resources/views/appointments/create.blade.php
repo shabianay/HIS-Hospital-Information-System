@@ -2,6 +2,39 @@
 @section('title', 'Buat Janji Temu')
 @section('content')
 <div class="mx-auto max-w-4xl space-y-6">
+    {{-- Ringkasan Antrian Hari Ini --}}
+    <div class="bg-surface-light dark:bg-surface-dark p-6 rounded-2xl border border-border-light dark:border-border-dark shadow-glass-sm">
+        <div class="flex items-center justify-between gap-4">
+            <div>
+                <h2 class="text-lg font-bold text-text-primary-light dark:text-text-primary-dark">Antrian Hari Ini</h2>
+                <p class="mt-1 text-sm text-text-secondary-light dark:text-text-secondary-dark">{{ now()->translatedFormat('l, d F Y') }}</p>
+            </div>
+            <a href="{{ route('appointments.queue', ['date' => now()->toDateString()]) }}" class="text-sm font-semibold text-primary-600 hover:text-primary-800 dark:text-primary-400 dark:hover:text-primary-300">Lihat Antrian →</a>
+        </div>
+        <div class="mt-4 grid grid-cols-2 md:grid-cols-5 gap-3">
+            <div class="rounded-xl bg-primary-50 dark:bg-primary-900/10 border border-primary-200 dark:border-primary-800 px-4 py-3">
+                <p class="text-xs font-semibold uppercase tracking-wider text-text-secondary-light dark:text-text-secondary-dark">Total</p>
+                <p class="mt-1 text-2xl font-bold text-primary-600 dark:text-primary-400">{{ $queueSummary['total'] }}</p>
+            </div>
+            <div class="rounded-xl bg-yellow-50 dark:bg-yellow-900/10 border border-yellow-200 dark:border-yellow-800 px-4 py-3">
+                <p class="text-xs font-semibold uppercase tracking-wider text-text-secondary-light dark:text-text-secondary-dark">Menunggu</p>
+                <p class="mt-1 text-2xl font-bold text-yellow-600 dark:text-yellow-400">{{ $queueSummary['waiting'] }}</p>
+            </div>
+            <div class="rounded-xl bg-info-50 dark:bg-info-900/10 border border-info-200 dark:border-info-800 px-4 py-3">
+                <p class="text-xs font-semibold uppercase tracking-wider text-text-secondary-light dark:text-text-secondary-dark">Hadir</p>
+                <p class="mt-1 text-2xl font-bold text-info-600 dark:text-info-400">{{ $queueSummary['checked_in'] }}</p>
+            </div>
+            <div class="rounded-xl bg-warning-50 dark:bg-warning-900/10 border border-warning-200 dark:border-warning-800 px-4 py-3">
+                <p class="text-xs font-semibold uppercase tracking-wider text-text-secondary-light dark:text-text-secondary-dark">Diperiksa</p>
+                <p class="mt-1 text-2xl font-bold text-warning-600 dark:text-warning-400">{{ $queueSummary['in_progress'] }}</p>
+            </div>
+            <div class="rounded-xl bg-success-50 dark:bg-success-900/10 border border-success-200 dark:border-success-800 px-4 py-3">
+                <p class="text-xs font-semibold uppercase tracking-wider text-text-secondary-light dark:text-text-secondary-dark">Selesai</p>
+                <p class="mt-1 text-2xl font-bold text-success-600 dark:text-success-400">{{ $queueSummary['completed'] }}</p>
+            </div>
+        </div>
+    </div>
+
     {{-- Filter Jadwal --}}
     <div class="bg-surface-light dark:bg-surface-dark p-8 rounded-2xl border border-border-light dark:border-border-dark shadow-glass-sm">
         <h2 class="text-xl font-bold text-text-primary-light dark:text-text-primary-dark mb-6">Pilih Dokter, Poli & Tanggal</h2>
