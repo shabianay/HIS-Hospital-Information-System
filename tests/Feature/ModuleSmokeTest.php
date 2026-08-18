@@ -532,6 +532,23 @@ class ModuleSmokeTest extends TestCase
         $this->assertGreaterThan(0, $doctorUser->notifications()->where('type', \App\Notifications\PatientCalled::class)->count());
     }
 
+    public function test_public_queue_lookup_shows_patient_position(): void
+    {
+        $user = $this->seedAdmin();
+
+        $appointment = Appointment::first();
+
+        $this->get(route('queue.lookup'))->assertOk()->assertSee('Cek Status Antrian');
+
+        $this->post(route('queue.lookup.search'), [
+            'queue_number' => $appointment->queue_number,
+        ])->assertSessionHasNoErrors()->assertSee($appointment->patient->name);
+
+        $this->post(route('queue.lookup.search'), [
+            'queue_number' => 'Q-NOT-FOUND',
+        ])->assertSessionHas('error');
+    }
+
     public function test_lab_queue_display_accessible_to_authenticated_users(): void
     {
         $user = $this->seedAdmin();

@@ -6,6 +6,7 @@ use App\Models\Appointment;
 use App\Models\LabRequest;
 use App\Models\Prescription;
 use Carbon\Carbon;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cache;
 
 class QueueDisplayController extends Controller
@@ -18,6 +19,49 @@ class QueueDisplayController extends Controller
     public static function labCacheKey(Carbon $date = null): string
     {
         return 'queue.lab.display.' . ($date ?? Carbon::today())->format('Y-m-d');
+    }
+
+    public function lookupForm()
+    {
+        return view('queue.lookup');
+    }
+
+    public function lookup(Request $request)
+    {
+        $validated = $request->validate([
+            'queue_number' => 'required|string|max:50',
+        ]);
+
+        $appointment = Appointment::with(['patient', 'doctor', 'poli'])
+            ->whereDate('appointment_date', Carbon::today()->toDateString())
+            ->whereRaw('LOWER(queue_number) = ?', [mb_strtolower($validated['queue_number'])])
+            ->first();
+
+        if (! $appointment) {
+            return back()->withInput()->with('error', 'Nomor antrian tidak ditemukan untuk hari ini.');
+        }
+
+        $statusLabels = [
+            'waiting' => 'Menunggu',
+            'checked_in' => 'Sudah Hadir',
+            'in_progress' => 'Sedang Diperiksa',
+            'completed' => 'Selesai',
+            'cancelled' => 'Dibatalkan',
+        ];
+
+        $ahead = $appointment->status === 'waiting'
+            ? Appointment::whereDate('appointment_date', Carbon::today()->toDateString())
+                ->where('poli_id', $appointment->poli_id)
+                ->where('status', 'waiting')
+                ->where('queue_number', '<', $appointment->queue_number)
+                ->count()
+            : 0;
+
+        return view('queue.lookup', [
+            'result' => $appointment,
+            'statusLabel' => $statusLabels[$appointment->status] ?? $appointment->status,
+            'ahead' => $ahead,
+        ]);
     }
 
     public function index()

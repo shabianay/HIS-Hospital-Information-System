@@ -23,6 +23,10 @@ use Illuminate\Support\Facades\Route;
 // Redirect root to login or dashboard
 Route::get('/', fn () => redirect()->route('login'));
 
+// Public queue lookup (patient-facing)
+Route::get('/cek-antrian', [QueueDisplayController::class, 'lookupForm'])->name('queue.lookup');
+Route::post('/cek-antrian', [QueueDisplayController::class, 'lookup'])->name('queue.lookup.search');
+
 // Auth routes (from Breeze)
 require __DIR__.'/auth.php';
 
