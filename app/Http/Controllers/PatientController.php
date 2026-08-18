@@ -30,6 +30,54 @@ class PatientController extends Controller
         return view('patients.index', compact('patients'));
     }
 
+    public function indexCsv(Request $request)
+    {
+        $this->authorize('viewAny', Patient::class);
+
+        $query = Patient::query();
+
+        if ($request->filled('search')) {
+            $search = $request->search;
+            $query->where(function ($q) use ($search) {
+                $q->where('name', 'like', "%{$search}%")
+                    ->orWhere('nik', 'like', "%{$search}%")
+                    ->orWhere('phone_number', 'like', "%{$search}%");
+            });
+        }
+
+        $patients = $query->orderBy('name')->get();
+
+        $filename = 'data-pasien-' . now()->format('Ymd') . '.csv';
+
+        return response()->streamDownload(function () use ($patients) {
+            $handle = fopen('php://output', 'w');
+            fwrite($handle, "\xEF\xBB\xBF");
+
+            fputcsv($handle, ['DATA PASIEN RUMAH SAKIT HIS']);
+            fputcsv($handle, ['Dibuat', now()->format('d/m/Y H:i')]);
+            fputcsv($handle, []);
+
+            fputcsv($handle, ['No. RM', 'Nama', 'NIK', 'Tanggal Lahir', 'Usia', 'Jenis Kelamin', 'Alamat', 'Telepon', 'Dibuat Pada']);
+            foreach ($patients as $patient) {
+                fputcsv($handle, [
+                    $patient->rm_number,
+                    $patient->name,
+                    $patient->nik,
+                    $patient->date_of_birth?->format('d/m/Y'),
+                    $patient->date_of_birth ? $patient->date_of_birth->age : '',
+                    $patient->gender === 'L' ? 'Laki-laki' : ($patient->gender === 'P' ? 'Perempuan' : $patient->gender),
+                    $patient->address ?? '-',
+                    $patient->phone_number,
+                    $patient->created_at?->format('d/m/Y H:i'),
+                ]);
+            }
+            fputcsv($handle, []);
+            fputcsv($handle, ['TOTAL PASIEN', $patients->count()]);
+
+            fclose($handle);
+        }, $filename, ['Content-Type' => 'text/csv; charset=UTF-8']);
+    }
+
     public function create()
     {
         $this->authorize('create', Patient::class);

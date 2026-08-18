@@ -65,6 +65,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
     // Patients
     Route::resource('patients', PatientController::class);
+    Route::get('patients/index/csv', [PatientController::class, 'indexCsv'])->name('patients.index.csv');
     Route::get('patients/search/json', [PatientController::class, 'search'])->name('patients.search');
     Route::get('patients/{patient}/card', [PatientController::class, 'card'])->name('patients.card');
 

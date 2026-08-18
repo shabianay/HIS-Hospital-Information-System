@@ -1559,4 +1559,13 @@ class ModuleSmokeTest extends TestCase
         $pharmacist = User::where('email', 'apoteker@his.local')->firstOrFail();
         $this->assertGreaterThan(0, $pharmacist->notifications()->count());
     }
+
+    public function test_authenticated_user_can_export_patient_csv(): void
+    {
+        $user = $this->seedAdmin();
+
+        $this->actingAs($user)->get(route('patients.index.csv'))
+            ->assertOk()
+            ->assertHeader('Content-Type', 'text/csv; charset=utf-8');
+    }
 }
