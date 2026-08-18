@@ -13,6 +13,7 @@ use App\Notifications\LowStockAlert;
 use App\Notifications\PrescriptionDispensed;
 use App\Notifications\StockExpiringAlert;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\ValidationException;
 
@@ -70,6 +71,8 @@ class MedicineStockController extends Controller
 
         $this->notifyNearExpiry($validated['medicine_id']);
 
+        Cache::forget('dashboard.' . now()->format('Y-m-d'));
+
         return redirect()->route('medicines.stock')->with('success', 'Stok berhasil ditambahkan.');
     }
 
@@ -117,6 +120,8 @@ class MedicineStockController extends Controller
                 'notes' => $validated['notes'] ?? 'Penyesuaian stok',
             ]);
         });
+
+        Cache::forget('dashboard.' . now()->format('Y-m-d'));
 
         return redirect()->route('medicines.stock')->with('success', 'Penyesuaian stok berhasil dicatat.');
     }
@@ -205,6 +210,8 @@ class MedicineStockController extends Controller
         $this->notifyLowStock($prescription->medicine_id);
 
         $this->notifyCashiersOfDispense($prescription);
+
+        Cache::forget('dashboard.' . now()->format('Y-m-d'));
 
         return redirect()->back()->with('success', 'Resep berhasil didispensasi.');
     }

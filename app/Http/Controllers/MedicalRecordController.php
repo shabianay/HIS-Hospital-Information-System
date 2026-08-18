@@ -12,6 +12,7 @@ use App\Models\User;
 use App\Notifications\PrescriptionCreated;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 
 class MedicalRecordController extends Controller
@@ -143,6 +144,8 @@ class MedicalRecordController extends Controller
         });
 
         $this->notifyPharmacistsOfPendingPrescriptions($medicalRecord);
+
+        Cache::forget('dashboard.' . now()->format('Y-m-d'));
 
         return redirect()->route('medical-records.show', $medicalRecord)
             ->with('success', 'Rekam medis berhasil dibuat.');

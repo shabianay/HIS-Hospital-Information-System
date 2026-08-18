@@ -13,6 +13,7 @@ use App\Notifications\LabResultCompleted;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 
 class LabController extends Controller
@@ -224,6 +225,8 @@ class LabController extends Controller
             }
         }
 
+        $this->forgetDashboardCache();
+
         return redirect()->route('lab.requests.show', $labRequest)
             ->with('success', 'Permintaan laboratorium berhasil dibuat.');
     }
@@ -300,8 +303,15 @@ class LabController extends Controller
             }
         }
 
+        $this->forgetDashboardCache();
+
         return redirect()->route('lab.requests.show', $labRequest)
             ->with('success', 'Hasil laboratorium berhasil disimpan.');
+    }
+
+    private function forgetDashboardCache(): void
+    {
+        Cache::forget('dashboard.' . now()->format('Y-m-d'));
     }
 
     public function destroy(LabRequest $labRequest)
