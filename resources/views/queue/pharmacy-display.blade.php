@@ -90,6 +90,7 @@
                 queue: @json($initial['queue'] ?? []),
                 time: '',
                 timer: null,
+                lastAnnounced: '',
                 init() {
                     this.refreshClock();
                     setInterval(() => this.refreshClock(), 1000);
@@ -105,11 +106,27 @@
                         const res = await fetch('{{ route('queue.display.pharmacy.json') }}');
                         const data = await res.json();
                         if (data && Array.isArray(data.queue)) {
+                            const before = this.current ? this.current.patient_name : '';
                             this.queue = data.queue;
+                            const after = this.current ? this.current.patient_name : '';
+                            if (after && after !== before && after !== this.lastAnnounced) {
+                                this.lastAnnounced = after;
+                                this.announce(after, this.current.queue_number);
+                            }
                         }
                     } catch (e) {
                         // ignore transient network errors, keep current data
                     }
+                },
+                announce(name, queueNumber) {
+                    if (!('speechSynthesis' in window)) return;
+                    const msg = new SpeechSynthesisUtterance(
+                        'Silakan menuju apotek, nomor antrian ' + (queueNumber || '') + ', ' + name
+                    );
+                    msg.lang = 'id-ID';
+                    msg.rate = 0.9;
+                    window.speechSynthesis.cancel();
+                    window.speechSynthesis.speak(msg);
                 },
                 get current() {
                     return this.queue.length > 0 ? this.queue[0] : null;
