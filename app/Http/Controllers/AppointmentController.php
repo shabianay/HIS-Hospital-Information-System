@@ -10,6 +10,7 @@ use App\Models\Schedule;
 use App\Models\User;
 use App\Notifications\AppointmentCancelled;
 use App\Notifications\AppointmentCreated;
+use App\Notifications\PatientCalled;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cache;
@@ -206,6 +207,19 @@ class AppointmentController extends Controller
         $doctorUser->notify(new AppointmentCancelled($appointment));
     }
 
+    private function notifyDoctorOfPatientCalled(Appointment $appointment): void
+    {
+        $doctorUser = $appointment->doctor?->user;
+
+        if (! $doctorUser) {
+            return;
+        }
+
+        $appointment->load(['patient', 'poli']);
+
+        $doctorUser->notify(new PatientCalled($appointment));
+    }
+
     public function show(Appointment $appointment)
     {
         $this->authorize('view', $appointment);
@@ -343,6 +357,10 @@ class AppointmentController extends Controller
 
         if ($validated['status'] === 'cancelled') {
             $this->notifyDoctorOfCancellation($appointment);
+        }
+
+        if ($validated['status'] === 'in_progress') {
+            $this->notifyDoctorOfPatientCalled($appointment);
         }
 
         if ($request->boolean('back') && $request->input('back') === 'queue') {

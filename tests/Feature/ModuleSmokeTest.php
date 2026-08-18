@@ -513,6 +513,25 @@ class ModuleSmokeTest extends TestCase
         $this->assertGreaterThan(0, $doctorUser->notifications()->where('type', \App\Notifications\AppointmentCancelled::class)->count());
     }
 
+    public function test_calling_patient_notifies_doctor(): void
+    {
+        $user = $this->seedAdmin();
+
+        $appointment = Appointment::first();
+        $doctorUser = \App\Models\Doctor::find($appointment->doctor_id)?->user;
+
+        if (! $doctorUser) {
+            $this->assertTrue(true);
+            return;
+        }
+
+        $this->actingAs($user)->patch(route('appointments.status.update', $appointment), [
+            'status' => 'in_progress',
+        ])->assertSessionHasNoErrors();
+
+        $this->assertGreaterThan(0, $doctorUser->notifications()->where('type', \App\Notifications\PatientCalled::class)->count());
+    }
+
     public function test_lab_queue_display_accessible_to_authenticated_users(): void
     {
         $user = $this->seedAdmin();
