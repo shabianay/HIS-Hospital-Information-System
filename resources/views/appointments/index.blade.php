@@ -20,64 +20,104 @@
                 'color' => 'bg-danger-100 text-danger-800 dark:bg-danger-900/30 dark:text-danger-400',
             ],
         ];
+
+        $total = $appointments->total();
+        $counts = [
+            'waiting' => $appointments->where('status', 'waiting')->count(),
+            'in_progress' => $appointments->where('status', 'in_progress')->count(),
+            'completed' => $appointments->where('status', 'completed')->count(),
+            'cancelled' => $appointments->where('status', 'cancelled')->count(),
+        ];
     @endphp
 
-    <div
-        class="bg-surface-light dark:bg-surface-dark border border-border-light dark:border-border-dark rounded-2xl shadow-glass-sm overflow-hidden">
-        <div class="p-6 md:p-8">
-            <div class="mb-8 flex flex-col md:flex-row md:items-center justify-between gap-4">
-                <h3 class="text-xl font-bold text-text-primary-light dark:text-text-primary-dark">Pendaftaran Janji Temu</h3>
-                <div class="flex items-center gap-3">
-                    <a href="{{ route('appointments.index.csv', request()->query()) }}" class="inline-flex items-center justify-center px-5 py-2.5 border border-border-light dark:border-border-dark bg-surface-light dark:bg-surface-dark text-text-primary-light dark:text-text-primary-dark text-sm font-semibold rounded-xl shadow-glass-sm hover:bg-secondary-50 dark:hover:bg-secondary-800 transition-all duration-200">Export CSV</a>
-                    <a href="{{ route('appointments.create') }}"
-                        class="inline-flex items-center justify-center px-5 py-2.5 bg-primary-600 hover:bg-primary-700 text-white text-sm font-semibold rounded-xl shadow-glass-sm hover:shadow-glass-md transition-all duration-200">
-                        <svg class="w-5 h-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
-                        </svg>
-                        Daftar Janji Temu
-                    </a>
+    <div class="space-y-6">
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+            <div>
+                <h2 class="text-2xl font-bold text-text-primary-light dark:text-text-primary-dark">Pendaftaran Janji Temu</h2>
+                <p class="mt-1 text-sm text-text-secondary-light dark:text-text-secondary-dark">
+                    {{ \Carbon\Carbon::parse(request('date', now()->toDateString()))->translatedFormat('l, d F Y') }}
+                </p>
             </div>
+            <div class="flex items-center gap-3">
+                <a href="{{ route('appointments.index.csv', request()->query()) }}"
+                    class="inline-flex items-center justify-center px-5 py-2.5 bg-surface-light border border-border-light text-text-primary-light hover:bg-secondary-50 text-sm font-semibold rounded-xl shadow-glass-sm transition-all duration-200 dark:bg-surface-dark dark:border-border-dark dark:text-text-primary-dark dark:hover:bg-secondary-800">
+                    Export CSV
+                </a>
+                <a href="{{ route('appointments.create') }}"
+                    class="inline-flex items-center justify-center px-5 py-2.5 bg-primary-600 hover:bg-primary-700 text-white text-sm font-semibold rounded-xl shadow-glass-sm transition-all duration-200">
+                    <svg class="w-5 h-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+                    </svg>
+                    Daftar Janji Temu
+                </a>
+            </div>
+        </div>
 
-            <form method="GET" action="{{ route('appointments.index') }}"
-                class="mb-8 grid grid-cols-1 md:grid-cols-4 gap-6 p-6 bg-secondary-50 dark:bg-secondary-900/30 rounded-2xl border border-border-light dark:border-border-dark">
-                <div>
-                    <x-input-label for="date" value="Filter Tanggal" />
-                    <x-text-input type="date" name="date" id="date" value="{{ request('date', now()->toDateString()) }}" />
-                </div>
-                <div>
-                    <x-input-label for="poli_id" value="Filter Poli" />
-                    <select name="poli_id" id="poli_id"
-                        class="w-full border border-border-light bg-surface-light px-4 py-3 text-sm text-text-primary-light focus:border-primary-500 focus:ring-2 focus:ring-primary-500/20 focus:outline-none rounded-xl shadow-glass-sm transition-all duration-200 dark:border-border-dark dark:bg-surface-dark dark:text-text-primary-dark">
-                        <option value="">Semua Poli</option>
-                        @foreach ($polis as $poli)
-                            <option value="{{ $poli->id }}" {{ request('poli_id') == $poli->id ? 'selected' : '' }}>
-                                {{ $poli->name }}</option>
-                        @endforeach
-                    </select>
-                </div>
-                <div>
-                    <x-input-label for="status" value="Filter Status" />
-                    <select name="status" id="status"
-                        class="w-full border border-border-light bg-surface-light px-4 py-3 text-sm text-text-primary-light focus:border-primary-500 focus:ring-2 focus:ring-primary-500/20 focus:outline-none rounded-xl shadow-glass-sm transition-all duration-200 dark:border-border-dark dark:bg-surface-dark dark:text-text-primary-dark">
-                        <option value="">Semua Status</option>
-                        @foreach ($statuses as $key => $st)
-                            <option value="{{ $key }}" {{ request('status') == $key ? 'selected' : '' }}>
-                                {{ $st['label'] }}</option>
-                        @endforeach
-                    </select>
-                </div>
-                <div class="flex items-end">
-                    <button type="submit"
-                        class="w-full px-6 py-3 bg-primary-500 hover:bg-primary-600 text-white font-semibold text-sm rounded-xl transition-colors shadow-glass-sm">
-                        Terapkan Filter
-                    </button>
-                    <a href="{{ route('appointments.index') }}"
-                        class="ml-2 px-6 py-3 bg-surface-light dark:bg-surface-dark border border-border-light dark:border-border-dark text-text-primary-light dark:text-text-primary-dark font-semibold text-sm rounded-xl hover:bg-secondary-50 dark:hover:bg-secondary-700 transition-colors shadow-glass-sm">
-                        Reset
-                    </a>
-                </div>
-            </form>
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+            <div
+                class="bg-warning-100 dark:bg-warning-900/30 rounded-2xl px-5 py-4 border border-warning-200 dark:border-warning-800/40">
+                <p class="text-xs font-semibold uppercase tracking-wider text-warning-800 dark:text-warning-400">Menunggu</p>
+                <p class="mt-1 text-2xl font-bold text-warning-900 dark:text-warning-300">{{ $counts['waiting'] }}</p>
+            </div>
+            <div
+                class="bg-info-100 dark:bg-info-900/30 rounded-2xl px-5 py-4 border border-info-200 dark:border-info-800/40">
+                <p class="text-xs font-semibold uppercase tracking-wider text-info-800 dark:text-info-400">Sedang Diperiksa</p>
+                <p class="mt-1 text-2xl font-bold text-info-900 dark:text-info-300">{{ $counts['in_progress'] }}</p>
+            </div>
+            <div
+                class="bg-success-100 dark:bg-success-900/30 rounded-2xl px-5 py-4 border border-success-200 dark:border-success-800/40">
+                <p class="text-xs font-semibold uppercase tracking-wider text-success-800 dark:text-success-400">Selesai</p>
+                <p class="mt-1 text-2xl font-bold text-success-900 dark:text-success-300">{{ $counts['completed'] }}</p>
+            </div>
+            <div
+                class="bg-danger-100 dark:bg-danger-900/30 rounded-2xl px-5 py-4 border border-danger-200 dark:border-danger-800/40">
+                <p class="text-xs font-semibold uppercase tracking-wider text-danger-800 dark:text-danger-400">Dibatalkan</p>
+                <p class="mt-1 text-2xl font-bold text-danger-900 dark:text-danger-300">{{ $counts['cancelled'] }}</p>
+            </div>
+        </div>
 
+        <form method="GET" action="{{ route('appointments.index') }}"
+            class="grid grid-cols-1 md:grid-cols-4 gap-6 p-6 bg-secondary-50 dark:bg-secondary-900/30 rounded-2xl border border-border-light dark:border-border-dark shadow-glass-sm">
+            <div>
+                <x-input-label for="date" value="Filter Tanggal" />
+                <x-text-input type="date" name="date" id="date" value="{{ request('date', now()->toDateString()) }}" />
+            </div>
+            <div>
+                <x-input-label for="poli_id" value="Filter Poli" />
+                <select name="poli_id" id="poli_id"
+                    class="w-full border border-border-light bg-surface-light px-4 py-3 text-sm text-text-primary-light focus:border-primary-500 focus:ring-2 focus:ring-primary-500/20 focus:outline-none rounded-xl shadow-glass-sm transition-all duration-200 dark:border-border-dark dark:bg-surface-dark dark:text-text-primary-dark">
+                    <option value="">Semua Poli</option>
+                    @foreach ($polis as $poli)
+                        <option value="{{ $poli->id }}" {{ request('poli_id') == $poli->id ? 'selected' : '' }}>
+                            {{ $poli->name }}</option>
+                    @endforeach
+                </select>
+            </div>
+            <div>
+                <x-input-label for="status" value="Filter Status" />
+                <select name="status" id="status"
+                    class="w-full border border-border-light bg-surface-light px-4 py-3 text-sm text-text-primary-light focus:border-primary-500 focus:ring-2 focus:ring-primary-500/20 focus:outline-none rounded-xl shadow-glass-sm transition-all duration-200 dark:border-border-dark dark:bg-surface-dark dark:text-text-primary-dark">
+                    <option value="">Semua Status</option>
+                    @foreach ($statuses as $key => $st)
+                        <option value="{{ $key }}" {{ request('status') == $key ? 'selected' : '' }}>
+                            {{ $st['label'] }}</option>
+                    @endforeach
+                </select>
+            </div>
+            <div class="flex items-end">
+                <button type="submit"
+                    class="w-full px-6 py-3 bg-primary-500 hover:bg-primary-600 text-white font-semibold text-sm rounded-xl transition-colors shadow-glass-sm">
+                    Terapkan Filter
+                </button>
+                <a href="{{ route('appointments.index') }}"
+                    class="ml-2 px-6 py-3 bg-surface-light dark:bg-surface-dark border border-border-light dark:border-border-dark text-text-primary-light dark:text-text-primary-dark font-semibold text-sm rounded-xl hover:bg-secondary-50 dark:hover:bg-secondary-700 transition-colors shadow-glass-sm">
+                    Reset
+                </a>
+            </div>
+        </form>
+
+        <div
+            class="bg-surface-light dark:bg-surface-dark border border-border-light dark:border-border-dark rounded-2xl shadow-glass-sm overflow-hidden">
             <x-table placeholder="Cari pasien / dokter / poli..." class="overflow-hidden">
                 <x-slot name="head">
                     <tr
@@ -124,7 +164,7 @@
                 @endforelse
             </x-table>
 
-            <div class="mt-6">
+            <div class="px-6 py-4 border-t border-border-light dark:border-border-dark">
                 {{ $appointments->links() }}
             </div>
         </div>
