@@ -57,7 +57,7 @@ class PatientController extends Controller
             fputcsv($handle, ['Dibuat', now()->format('d/m/Y H:i')]);
             fputcsv($handle, []);
 
-            fputcsv($handle, ['No. RM', 'Nama', 'NIK', 'Tanggal Lahir', 'Usia', 'Jenis Kelamin', 'Alamat', 'Telepon', 'Dibuat Pada']);
+            fputcsv($handle, ['No. RM', 'Nama', 'NIK', 'Tanggal Lahir', 'Usia', 'Jenis Kelamin', 'Alamat', 'Telepon', 'Riwayat Alergi', 'Penyakit Kronis', 'Dibuat Pada']);
             foreach ($patients as $patient) {
                 fputcsv($handle, [
                     $patient->rm_number,
@@ -68,6 +68,8 @@ class PatientController extends Controller
                     $patient->gender === 'L' ? 'Laki-laki' : ($patient->gender === 'P' ? 'Perempuan' : $patient->gender),
                     $patient->address ?? '-',
                     $patient->phone_number,
+                    $patient->allergies ?? '-',
+                    $patient->chronic_conditions ?? '-',
                     $patient->created_at?->format('d/m/Y H:i'),
                 ]);
             }
@@ -124,6 +126,8 @@ class PatientController extends Controller
             'address' => 'nullable|string',
             'insurance_provider' => 'nullable|string|max:100',
             'insurance_number' => 'nullable|string|max:50',
+            'allergies' => 'nullable|string|max:1000',
+            'chronic_conditions' => 'nullable|string|max:1000',
         ]);
 
         $validated['rm_number'] = $this->generateRmNumber();
@@ -186,6 +190,8 @@ class PatientController extends Controller
             'address' => 'nullable|string',
             'insurance_provider' => 'nullable|string|max:100',
             'insurance_number' => 'nullable|string|max:50',
+            'allergies' => 'nullable|string|max:1000',
+            'chronic_conditions' => 'nullable|string|max:1000',
         ]);
 
         $patient->update($validated);

@@ -58,6 +58,23 @@
                 <span class="block text-base font-medium text-text-primary-light dark:text-text-primary-dark">{{ $patient->insurance_number ?: '-' }}</span>
             </div>
         </div>
+
+        @if($patient->allergies || $patient->chronic_conditions)
+            <div class="mt-8 grid grid-cols-1 md:grid-cols-2 gap-6 border-t border-border-light dark:border-border-dark pt-8">
+                @if($patient->allergies)
+                    <div class="rounded-xl border border-danger-200 dark:border-danger-800 bg-danger-50 dark:bg-danger-900/10 p-5">
+                        <p class="text-xs font-semibold uppercase tracking-wider text-danger-600 dark:text-danger-400">Riwayat Alergi</p>
+                        <p class="mt-2 text-sm font-medium text-text-primary-light dark:text-text-primary-dark">{{ $patient->allergies }}</p>
+                    </div>
+                @endif
+                @if($patient->chronic_conditions)
+                    <div class="rounded-xl border border-warning-200 dark:border-warning-800 bg-warning-50 dark:bg-warning-900/10 p-5">
+                        <p class="text-xs font-semibold uppercase tracking-wider text-warning-600 dark:text-warning-400">Penyakit Kronis</p>
+                        <p class="mt-2 text-sm font-medium text-text-primary-light dark:text-text-primary-dark">{{ $patient->chronic_conditions }}</p>
+                    </div>
+                @endif
+            </div>
+        @endif
     </div>
 
     <div class="bg-surface-light dark:bg-surface-dark p-8 rounded-2xl border border-border-light dark:border-border-dark shadow-glass-sm">

@@ -22,6 +22,8 @@ class Patient extends Model
         'phone_number',
         'insurance_provider',
         'insurance_number',
+        'allergies',
+        'chronic_conditions',
     ];
 
     protected $casts = [

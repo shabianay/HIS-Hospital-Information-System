@@ -27,37 +27,58 @@
                     <span class="block text-base font-medium text-text-primary-light dark:text-text-primary-dark">{{ $appointment->appointment_date?->format('d/m/Y') }}</span>
                 </div>
             </div>
+            @if($appointment->patient?->allergies || $appointment->patient?->chronic_conditions)
+                <div class="mt-4 grid grid-cols-1 gap-4 md:grid-cols-2">
+                    @if($appointment->patient?->allergies)
+                        <div class="rounded-xl border border-danger-200 dark:border-danger-800 bg-danger-50 dark:bg-danger-900/10 px-4 py-3 text-sm">
+                            <span class="text-xs font-semibold uppercase tracking-wider text-danger-600 dark:text-danger-400">Riwayat Alergi</span>
+                            <p class="mt-1 font-medium text-danger-800 dark:text-danger-400">{{ $appointment->patient->allergies }}</p>
+                        </div>
+                    @endif
+                    @if($appointment->patient?->chronic_conditions)
+                        <div class="rounded-xl border border-warning-200 dark:border-warning-800 bg-warning-50 dark:bg-warning-900/10 px-4 py-3 text-sm">
+                            <span class="text-xs font-semibold uppercase tracking-wider text-warning-600 dark:text-warning-400">Penyakit Kronis</span>
+                            <p class="mt-1 font-medium text-warning-800 dark:text-warning-400">{{ $appointment->patient->chronic_conditions }}</p>
+                        </div>
+                    @endif
+                </div>
+            @endif
         </div>
 
         <form action="{{ route('medical-records.store', $appointment) }}" method="POST">
             @csrf
             <div class="grid grid-cols-1 gap-6">
                 <div class="border-b border-border-light dark:border-border-dark pb-6">
-                    <h3 class="mb-4 text-lg font-semibold text-primary-800 dark:text-primary-400">Tanda-Tanda Vital (Vital Signs)</h3>
+                    <div class="mb-4 flex items-center justify-between">
+                        <h3 class="text-lg font-semibold text-primary-800 dark:text-primary-400">Tanda-Tanda Vital (Vital Signs)</h3>
+                        @if($appointment->vitalSign)
+                            <span class="inline-flex items-center rounded-full bg-success-100 dark:bg-success-900/30 px-3 py-1 text-xs font-semibold text-success-800 dark:text-success-400 border border-success-200 dark:border-success-800">Terisi dari perawat</span>
+                        @endif
+                    </div>
                     <div class="grid grid-cols-2 gap-4 md:grid-cols-3">
                         <div>
                             <x-input-label for="blood_pressure_systolic" value="Tekanan Darah Sistolik (mmHg)" />
-                            <x-text-input type="number" name="blood_pressure_systolic" value="{{ old('blood_pressure_systolic') }}" min="0" max="300" />
+                            <x-text-input type="number" name="blood_pressure_systolic" value="{{ old('blood_pressure_systolic', $appointment->vitalSign?->blood_pressure_systolic) }}" min="0" max="300" />
                         </div>
                         <div>
                             <x-input-label for="blood_pressure_diastolic" value="Tekanan Darah Diastolik (mmHg)" />
-                            <x-text-input type="number" name="blood_pressure_diastolic" value="{{ old('blood_pressure_diastolic') }}" min="0" max="300" />
+                            <x-text-input type="number" name="blood_pressure_diastolic" value="{{ old('blood_pressure_diastolic', $appointment->vitalSign?->blood_pressure_diastolic) }}" min="0" max="300" />
                         </div>
                         <div>
                             <x-input-label for="heart_rate" value="Detak Jantung (bpm)" />
-                            <x-text-input type="number" name="heart_rate" value="{{ old('heart_rate') }}" min="0" max="300" />
+                            <x-text-input type="number" name="heart_rate" value="{{ old('heart_rate', $appointment->vitalSign?->heart_rate) }}" min="0" max="300" />
                         </div>
                         <div>
                             <x-input-label for="temperature" value="Suhu Tubuh (°C)" />
-                            <x-text-input type="number" step="0.1" name="temperature" value="{{ old('temperature') }}" min="30" max="45" />
+                            <x-text-input type="number" step="0.1" name="temperature" value="{{ old('temperature', $appointment->vitalSign?->temperature) }}" min="30" max="45" />
                         </div>
                         <div>
                             <x-input-label for="weight" value="Berat Badan (kg)" />
-                            <x-text-input type="number" step="0.1" name="weight" value="{{ old('weight') }}" min="0" max="500" />
+                            <x-text-input type="number" step="0.1" name="weight" value="{{ old('weight', $appointment->vitalSign?->weight) }}" min="0" max="500" />
                         </div>
                         <div>
                             <x-input-label for="height" value="Tinggi Badan (cm)" />
-                            <x-text-input type="number" step="0.1" name="height" value="{{ old('height') }}" min="0" max="300" />
+                            <x-text-input type="number" step="0.1" name="height" value="{{ old('height', $appointment->vitalSign?->height) }}" min="0" max="300" />
                         </div>
                     </div>
                 </div>

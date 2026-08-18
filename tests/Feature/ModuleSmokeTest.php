@@ -625,6 +625,59 @@ class ModuleSmokeTest extends TestCase
             ->assertSee('36.5 °C');
     }
 
+    public function test_emr_create_prefills_nurse_vital_signs(): void
+    {
+        $user = $this->seedAdmin();
+        $appointment = Appointment::first();
+
+        $this->actingAs($user)->post(route('vital-signs.store', $appointment), [
+            'temperature' => 37.0,
+            'blood_pressure_systolic' => 130,
+            'blood_pressure_diastolic' => 85,
+            'heart_rate' => 75,
+            'respiratory_rate' => 16,
+            'weight' => 65.0,
+            'height' => 172.0,
+            'oxygen_saturation' => 99,
+        ])->assertSessionHasNoErrors();
+
+        $this->actingAs($user)->get(route('medical-records.create', $appointment))
+            ->assertOk()
+            ->assertSee('Terisi dari perawat')
+            ->assertSee('value="130"', false)
+            ->assertSee('value="75"', false);
+    }
+
+    public function test_patient_allergies_and_chronic_conditions_are_saved_and_displayed(): void
+    {
+        $user = $this->seedAdmin();
+        $patient = Patient::first();
+
+        $this->actingAs($user)->put(route('patients.update', $patient), [
+            'name' => $patient->name,
+            'nik' => $patient->nik,
+            'date_of_birth' => $patient->date_of_birth->format('Y-m-d'),
+            'gender' => $patient->gender,
+            'phone_number' => $patient->phone_number,
+            'address' => $patient->address,
+            'insurance_provider' => $patient->insurance_provider,
+            'insurance_number' => $patient->insurance_number,
+            'allergies' => 'Penisilin, Parasetamol',
+            'chronic_conditions' => 'Hipertensi, Diabetes Melitus',
+        ])->assertSessionHasNoErrors();
+
+        $this->assertDatabaseHas('patients', [
+            'id' => $patient->id,
+            'allergies' => 'Penisilin, Parasetamol',
+            'chronic_conditions' => 'Hipertensi, Diabetes Melitus',
+        ]);
+
+        $this->actingAs($user)->get(route('patients.show', $patient))
+            ->assertOk()
+            ->assertSee('Riwayat Alergi')
+            ->assertSee('Penyakit Kronis');
+    }
+
     public function test_public_queue_lookup_shows_patient_position(): void
     {
         $user = $this->seedAdmin();

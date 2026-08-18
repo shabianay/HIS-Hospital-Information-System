@@ -88,7 +88,7 @@ class MedicalRecordController extends Controller
     {
         $this->authorize('create', MedicalRecord::class);
 
-        $appointment = Appointment::with(['patient', 'doctor', 'poli'])
+        $appointment = Appointment::with(['patient', 'doctor', 'poli', 'vitalSign'])
             ->findOrFail($appointmentId);
 
         if ($appointment->medicalRecord) {
