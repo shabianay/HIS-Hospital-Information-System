@@ -5,7 +5,6 @@ namespace App\Http\Controllers;
 use App\Exceptions\InsufficientStockException;
 use App\Models\Medicine;
 use App\Models\MedicineStock;
-use App\Models\MedicalRecord;
 use App\Models\Prescription;
 use App\Models\StockMutation;
 use App\Models\User;
@@ -72,7 +71,7 @@ class MedicineStockController extends Controller
 
         $this->notifyNearExpiry($validated['medicine_id']);
 
-        Cache::forget('dashboard.' . now()->format('Y-m-d'));
+        Cache::forget('dashboard.'.now()->format('Y-m-d'));
 
         return redirect()->route('medicines.stock')->with('success', 'Stok berhasil ditambahkan.');
     }
@@ -103,7 +102,7 @@ class MedicineStockController extends Controller
 
             if ($validated['adjustment_type'] === 'out' && $stock->quantity < $validated['quantity']) {
                 throw ValidationException::withMessages([
-                    'quantity' => 'Stok batch tidak mencukupi untuk pengurangan. Sisa: ' . $stock->quantity,
+                    'quantity' => 'Stok batch tidak mencukupi untuk pengurangan. Sisa: '.$stock->quantity,
                 ]);
             }
 
@@ -122,9 +121,54 @@ class MedicineStockController extends Controller
             ]);
         });
 
-        Cache::forget('dashboard.' . now()->format('Y-m-d'));
+        Cache::forget('dashboard.'.now()->format('Y-m-d'));
 
         return redirect()->route('medicines.stock')->with('success', 'Penyesuaian stok berhasil dicatat.');
+    }
+
+    public function retur(Request $request)
+    {
+        $this->authorize('update', MedicineStock::class);
+
+        $validated = $request->validate([
+            'medicine_id' => 'required|exists:medicines,id',
+            'batch_number' => 'nullable|string|max:100',
+            'quantity' => 'required|integer|min:1',
+            'notes' => 'nullable|string|max:500',
+        ]);
+
+        DB::transaction(function () use ($validated) {
+            $stock = MedicineStock::where('medicine_id', $validated['medicine_id'])
+                ->where('batch_number', $validated['batch_number'] ?? '')
+                ->lockForUpdate()
+                ->first();
+
+            if (! $stock) {
+                throw ValidationException::withMessages([
+                    'batch_number' => 'Batch tidak ditemukan untuk obat ini.',
+                ]);
+            }
+
+            if ($stock->quantity < $validated['quantity']) {
+                throw ValidationException::withMessages([
+                    'quantity' => 'Stok batch tidak mencukupi untuk retur. Sisa: '.$stock->quantity,
+                ]);
+            }
+
+            $stock->decrement('quantity', $validated['quantity']);
+
+            StockMutation::create([
+                'medicine_id' => $validated['medicine_id'],
+                'type' => 'return',
+                'quantity' => $validated['quantity'],
+                'reference' => 'retur',
+                'notes' => $validated['notes'] ?? 'Retur ke pemasok',
+            ]);
+        });
+
+        Cache::forget('dashboard.'.now()->format('Y-m-d'));
+
+        return redirect()->route('medicines.stock')->with('success', 'Retur stok berhasil dicatat.');
     }
 
     private function notifyNearExpiry(int $medicineId): void
@@ -212,7 +256,7 @@ class MedicineStockController extends Controller
 
         $this->notifyCashiersOfDispense($prescription);
 
-        Cache::forget('dashboard.' . now()->format('Y-m-d'));
+        Cache::forget('dashboard.'.now()->format('Y-m-d'));
 
         return redirect()->back()->with('success', 'Resep berhasil didispensasi.');
     }

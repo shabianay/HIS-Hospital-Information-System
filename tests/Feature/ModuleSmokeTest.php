@@ -1889,6 +1889,108 @@ class ModuleSmokeTest extends TestCase
         $this->assertGreaterThan(0, $pharmacist->notifications()->count());
     }
 
+    public function test_retur_stock_records_return_mutation_and_deducts_quantity(): void
+    {
+        $user = $this->seedAdmin();
+
+        $medicine = Medicine::firstOrFail();
+
+        $this->actingAs($user)->post(route('medicine-stocks.store'), [
+            'medicine_id' => $medicine->id,
+            'batch_number' => 'BATCH-RETUR',
+            'quantity' => 20,
+            'expiry_date' => now()->addMonths(6)->toDateString(),
+        ])->assertSessionHasNoErrors();
+
+        $this->actingAs($user)->post(route('medicine-stocks.retur'), [
+            'medicine_id' => $medicine->id,
+            'batch_number' => 'BATCH-RETUR',
+            'quantity' => 5,
+            'notes' => 'Dikembalikan ke pemasok karena rusak.',
+        ])->assertSessionHasNoErrors();
+
+        $batch = MedicineStock::where('medicine_id', $medicine->id)->where('batch_number', 'BATCH-RETUR')->firstOrFail();
+        $this->assertSame(15, $batch->quantity);
+
+        $this->assertDatabaseHas('stock_mutations', [
+            'medicine_id' => $medicine->id,
+            'type' => 'return',
+            'quantity' => 5,
+        ]);
+
+        $this->actingAs($user)->get(route('medicines.mutations', ['type' => 'return']))
+            ->assertOk()
+            ->assertSee('Retur / Pengembalian')
+            ->assertSee('Dikembalikan ke pemasok karena rusak.');
+    }
+
+    public function test_retur_rejects_insufficient_stock(): void
+    {
+        $user = $this->seedAdmin();
+
+        $medicine = Medicine::firstOrFail();
+
+        $this->actingAs($user)->post(route('medicine-stocks.store'), [
+            'medicine_id' => $medicine->id,
+            'batch_number' => 'BATCH-RETUR2',
+            'quantity' => 3,
+            'expiry_date' => now()->addMonths(6)->toDateString(),
+        ])->assertSessionHasNoErrors();
+
+        $this->actingAs($user)->post(route('medicine-stocks.retur'), [
+            'medicine_id' => $medicine->id,
+            'batch_number' => 'BATCH-RETUR2',
+            'quantity' => 50,
+        ])->assertSessionHasErrors('quantity');
+
+        $batch = MedicineStock::where('medicine_id', $medicine->id)->where('batch_number', 'BATCH-RETUR2')->firstOrFail();
+        $this->assertSame(3, $batch->quantity);
+    }
+
+    public function test_retur_requires_existing_batch(): void
+    {
+        $user = $this->seedAdmin();
+
+        $medicine = Medicine::firstOrFail();
+
+        $this->actingAs($user)->post(route('medicine-stocks.retur'), [
+            'medicine_id' => $medicine->id,
+            'batch_number' => 'BATCH-TIDAK-ADA',
+            'quantity' => 1,
+        ])->assertSessionHasErrors('batch_number');
+    }
+
+    public function test_reports_support_period_aggregation(): void
+    {
+        $user = $this->seedAdmin();
+
+        $this->actingAs($user)->get(route('reports.index', ['period' => 'harian']))
+            ->assertOk()
+            ->assertSee('Tren Pendapatan & Kunjungan per Periode', false)
+            ->assertSee('Agregasi: Harian');
+
+        $this->actingAs($user)->get(route('reports.index', ['period' => 'mingguan']))
+            ->assertOk()
+            ->assertSee('Agregasi: Mingguan');
+
+        $this->actingAs($user)->get(route('reports.index', ['period' => 'bulanan']))
+            ->assertOk()
+            ->assertSee('Agregasi: Bulanan');
+    }
+
+    public function test_reports_period_aggregation_is_included_in_exports(): void
+    {
+        $user = $this->seedAdmin();
+
+        $this->actingAs($user)->get(route('reports.pdf', ['period' => 'bulanan']))
+            ->assertOk()
+            ->assertHeader('Content-Type', 'application/pdf');
+
+        $this->actingAs($user)->get(route('reports.csv', ['period' => 'mingguan']))
+            ->assertOk()
+            ->assertHeader('Content-Type', 'text/csv; charset=utf-8');
+    }
+
     public function test_authenticated_user_can_export_patient_csv(): void
     {
         $user = $this->seedAdmin();

@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Medicine;
+use App\Models\MedicineStock;
 use App\Models\StockMutation;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Http\Request;
@@ -45,7 +46,7 @@ class MedicineController extends Controller
 
         $medicines = $query->orderBy('name')->get();
 
-        $filename = 'katalog-obat-' . now()->format('Ymd') . '.csv';
+        $filename = 'katalog-obat-'.now()->format('Ymd').'.csv';
 
         return response()->streamDownload(function () use ($medicines) {
             $handle = fopen('php://output', 'w');
@@ -224,7 +225,7 @@ class MedicineController extends Controller
 
         $mutations = $query->get();
 
-        $filename = 'mutasi-stok-' . now()->format('Ymd-His') . '.csv';
+        $filename = 'mutasi-stok-'.now()->format('Ymd-His').'.csv';
 
         return response()->streamDownload(function () use ($mutations) {
             $handle = fopen('php://output', 'w');
@@ -233,11 +234,18 @@ class MedicineController extends Controller
             fputcsv($handle, ['Waktu', 'Obat', 'Tipe', 'Jumlah', 'Referensi', 'Catatan']);
 
             foreach ($mutations as $mutation) {
+                $typeLabel = match ($mutation->type) {
+                    'in' => 'Masuk',
+                    'return' => 'Retur',
+                    default => 'Keluar',
+                };
+                $sign = $mutation->type === 'in' ? '+' : '-';
+
                 fputcsv($handle, [
                     $mutation->created_at?->format('d/m/Y H:i'),
                     $mutation->medicine?->name ?? '-',
-                    $mutation->type === 'in' ? 'Masuk' : 'Keluar',
-                    ($mutation->type === 'in' ? '+' : '-') . $mutation->quantity,
+                    $typeLabel,
+                    $sign.$mutation->quantity,
                     $mutation->reference ?: '-',
                     $mutation->notes ?: '-',
                 ]);
@@ -267,7 +275,7 @@ class MedicineController extends Controller
         $pdf = Pdf::loadView('medicines.reorder-pdf', compact('lowStock', 'totalSuggestedCost'))
             ->setPaper('a4', 'portrait');
 
-        return $pdf->download('rekomendasi-pembelian-' . now()->format('Ymd') . '.pdf');
+        return $pdf->download('rekomendasi-pembelian-'.now()->format('Ymd').'.pdf');
     }
 
     private function buildReorderList()
@@ -298,13 +306,13 @@ class MedicineController extends Controller
     {
         $this->authorize('viewAny', Medicine::class);
 
-        $expiringStocks = \App\Models\MedicineStock::with('medicine')
+        $expiringStocks = MedicineStock::with('medicine')
             ->where('quantity', '>', 0)
             ->whereBetween('expiry_date', [now()->startOfDay(), now()->addDays(60)->endOfDay()])
             ->orderBy('expiry_date')
             ->get();
 
-        $expiredStocks = \App\Models\MedicineStock::with('medicine')
+        $expiredStocks = MedicineStock::with('medicine')
             ->where('quantity', '>', 0)
             ->where('expiry_date', '<', now()->startOfDay())
             ->orderBy('expiry_date')
@@ -348,7 +356,7 @@ class MedicineController extends Controller
                 'reference' => $mutation->reference,
                 'notes' => $mutation->notes,
                 'in' => $mutation->type === 'in' ? $mutation->quantity : null,
-                'out' => $mutation->type === 'out' ? $mutation->quantity : null,
+                'out' => in_array($mutation->type, ['out', 'return']) ? $mutation->quantity : null,
                 'balance' => $balance,
             ];
         }

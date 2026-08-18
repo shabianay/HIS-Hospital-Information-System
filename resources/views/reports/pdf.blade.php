@@ -20,7 +20,7 @@
 </head>
 <body>
     <h1>Laporan & Statistik</h1>
-    <div class="sub">Periode: {{ $start->translatedFormat('d M Y') }} — {{ $end->translatedFormat('d M Y') }} · Dicetak: {{ $generatedAt }}</div>
+    <div class="sub">Periode: {{ $start->translatedFormat('d M Y') }} — {{ $end->translatedFormat('d M Y') }} · Agregasi: {{ $period === 'mingguan' ? 'Mingguan' : ($period === 'bulanan' ? 'Bulanan' : 'Harian') }} · Dicetak: {{ $generatedAt }}</div>
 
     <table class="summary">
         <tr>
@@ -33,6 +33,18 @@
             <td><span class="label">Lunas</span><span class="value">{{ number_format($paidBilling) }}</span></td>
             <td><span class="label">Permintaan Lab</span><span class="value">{{ number_format($labTotal) }}</span></td>
         </tr>
+    </table>
+
+    <h2>Tren Pendapatan &amp; Kunjungan per Periode</h2>
+    <table class="data">
+        <thead><tr><th>Periode</th><th>Pendapatan (Lunas)</th><th>Kunjungan</th><th>Selesai</th><th>Pasien Baru</th></tr></thead>
+        <tbody>
+            @forelse($periodRows as $row)
+            <tr><td>{{ $row['label'] }}</td><td>Rp {{ number_format($row['revenue'], 0, ',', '.') }}</td><td>{{ number_format($row['visits']) }}</td><td>{{ number_format($row['completed']) }}</td><td>{{ number_format($row['new_patients']) }}</td></tr>
+            @empty
+            <tr><td colspan="5">Tidak ada data.</td></tr>
+            @endforelse
+        </tbody>
     </table>
 
     <h2>Kunjungan per Poli</h2>

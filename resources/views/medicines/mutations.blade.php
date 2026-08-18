@@ -15,6 +15,7 @@
                 <option value="">Semua Tipe</option>
                 <option value="in" {{ request('type') === 'in' ? 'selected' : '' }}>Stok Masuk</option>
                 <option value="out" {{ request('type') === 'out' ? 'selected' : '' }}>Stok Keluar</option>
+                <option value="return" {{ request('type') === 'return' ? 'selected' : '' }}>Retur / Pengembalian</option>
             </select>
             <select name="medicine_id" class="w-full sm:w-56 border border-border-light bg-surface-light px-4 py-3 text-sm text-text-primary-light focus:border-primary-500 focus:ring-2 focus:ring-primary-500/20 focus:outline-none rounded-xl shadow-glass-sm dark:border-border-dark dark:bg-surface-dark dark:text-text-primary-dark">
                 <option value="">Semua Obat</option>
@@ -44,6 +45,8 @@
                 <td class="py-4 px-4">
                     @if($mutation->type === 'in')
                         <span class="inline-flex items-center rounded-full bg-success-100 text-success-800 dark:bg-success-900/30 dark:text-success-400 px-3 py-1 text-xs font-semibold border border-success-200 dark:border-success-800">Masuk</span>
+                    @elseif($mutation->type === 'return')
+                        <span class="inline-flex items-center rounded-full bg-warning-100 text-warning-800 dark:bg-warning-900/30 dark:text-warning-400 px-3 py-1 text-xs font-semibold border border-warning-200 dark:border-warning-800">Retur</span>
                     @else
                         <span class="inline-flex items-center rounded-full bg-danger-100 text-danger-800 dark:bg-danger-900/30 dark:text-danger-400 px-3 py-1 text-xs font-semibold border border-danger-200 dark:border-danger-800">Keluar</span>
                     @endif

@@ -114,6 +114,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('medicine-stock-card', [MedicineController::class, 'stockCard'])->name('medicines.stock-card');
     Route::post('medicine-stocks', [MedicineStockController::class, 'store'])->name('medicine-stocks.store');
     Route::post('medicine-stocks/adjust', [MedicineStockController::class, 'adjust'])->name('medicine-stocks.adjust');
+    Route::post('medicine-stocks/retur', [MedicineStockController::class, 'retur'])->name('medicine-stocks.retur');
     Route::post('prescriptions/{prescription}/dispense', [MedicineStockController::class, 'dispense'])->name('prescriptions.dispense');
     Route::get('pharmacy/pending', [MedicineStockController::class, 'pending'])->name('prescriptions.pending');
 

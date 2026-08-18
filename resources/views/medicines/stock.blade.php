@@ -116,6 +116,45 @@
     </div>
 
     <div class="bg-surface-light dark:bg-surface-dark p-8 rounded-2xl border border-border-light dark:border-border-dark shadow-glass-sm overflow-hidden">
+        <h3 class="mb-6 text-lg font-bold text-warning-800 dark:text-warning-400">Retur / Pengembalian Stok ke Pemasok</h3>
+        <form action="{{ route('medicine-stocks.retur') }}" method="POST">
+            @csrf
+            <div class="grid grid-cols-1 gap-6 md:grid-cols-2">
+                <div>
+                    <x-input-label for="retur_medicine_id" :value="'Pilih Obat'" />
+                    <select name="medicine_id" id="retur_medicine_id" class="w-full border border-border-light bg-surface-light px-4 py-3 text-sm text-text-primary-light focus:border-primary-500 focus:ring-2 focus:ring-primary-500/20 focus:outline-none rounded-xl shadow-glass-sm transition-all duration-200 dark:border-border-dark dark:bg-surface-dark dark:text-text-primary-dark" required>
+                        <option value="">Pilih</option>
+                        @foreach($medicines as $medicine)
+                            <option value="{{ $medicine->id }}">
+                                {{ $medicine->name }}
+                            </option>
+                        @endforeach
+                    </select>
+                    <x-input-error :messages="$errors->get('medicine_id')" class="mt-2" />
+                </div>
+                <div>
+                    <x-input-label for="retur_batch_number" :value="'No. Batch (sesuai stok ada)'" />
+                    <x-text-input type="text" name="batch_number" id="retur_batch_number" value="{{ old('batch_number') }}" placeholder="BATCH-XXXX" />
+                    <x-input-error :messages="$errors->get('batch_number')" class="mt-2" />
+                </div>
+                <div>
+                    <x-input-label for="retur_quantity" :value="'Jumlah Retur (Qty)'" />
+                    <x-text-input type="number" name="quantity" id="retur_quantity" value="{{ old('quantity') }}" min="1" required />
+                    <x-input-error :messages="$errors->get('quantity')" class="mt-2" />
+                </div>
+                <div>
+                    <x-input-label for="retur_notes" :value="'Alasan / Catatan Retur'" />
+                    <x-text-input type="text" name="notes" id="retur_notes" value="{{ old('notes') }}" placeholder="Rusak / Kedaluwarsa / Dikembalikan" />
+                    <x-input-error :messages="$errors->get('notes')" class="mt-2" />
+                </div>
+            </div>
+            <div class="mt-6 flex justify-end gap-3">
+                <button type="submit" class="inline-flex items-center justify-center px-5 py-2.5 bg-warning-600 hover:bg-warning-700 text-white text-sm font-semibold rounded-xl shadow-glass-sm hover:shadow-glass-md transition-all duration-200">Proses Retur</button>
+            </div>
+        </form>
+    </div>
+
+    <div class="bg-surface-light dark:bg-surface-dark p-8 rounded-2xl border border-border-light dark:border-border-dark shadow-glass-sm overflow-hidden">
         <h3 class="mb-6 text-lg font-bold text-text-primary-light dark:text-text-primary-dark">Daftar Stok Obat</h3>
         <x-table placeholder="Cari obat / batch..." class="overflow-hidden">
             <x-slot name="head">

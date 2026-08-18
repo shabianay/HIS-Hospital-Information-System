@@ -6,11 +6,9 @@ use App\Models\Appointment;
 use App\Models\Billing;
 use App\Models\Diagnosis;
 use App\Models\LabRequest;
-use App\Models\MedicalRecord;
 use App\Models\Medicine;
 use App\Models\Patient;
 use App\Models\Prescription;
-use App\Models\StockMutation;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
@@ -24,10 +22,11 @@ class ReportController extends Controller
 
         $start = $request->filled('start') ? Carbon::parse($request->start)->startOfDay() : Carbon::today()->subDays(29)->startOfDay();
         $end = $request->filled('end') ? Carbon::parse($request->end)->endOfDay() : Carbon::today()->endOfDay();
+        $period = $this->validPeriod($request->input('period'));
 
-        $data = $this->buildReport($start, $end);
+        $data = $this->buildReport($start, $end, $period);
 
-        return view('reports.index', $data + ['start' => $start, 'end' => $end]);
+        return view('reports.index', $data + ['start' => $start, 'end' => $end, 'period' => $period]);
     }
 
     public function exportPdf(Request $request)
@@ -36,16 +35,18 @@ class ReportController extends Controller
 
         $start = $request->filled('start') ? Carbon::parse($request->start)->startOfDay() : Carbon::today()->subDays(29)->startOfDay();
         $end = $request->filled('end') ? Carbon::parse($request->end)->endOfDay() : Carbon::today()->endOfDay();
+        $period = $this->validPeriod($request->input('period'));
 
-        $data = $this->buildReport($start, $end);
+        $data = $this->buildReport($start, $end, $period);
 
         $pdf = Pdf::loadView('reports.pdf', $data + [
             'start' => $start,
             'end' => $end,
+            'period' => $period,
             'generatedAt' => now()->format('d/m/Y H:i:s'),
         ])->setPaper('a4', 'landscape');
 
-        return $pdf->download('laporan-' . $start->format('Ymd') . '-' . $end->format('Ymd') . '.pdf');
+        return $pdf->download('laporan-'.$start->format('Ymd').'-'.$end->format('Ymd').'.pdf');
     }
 
     public function exportCsv(Request $request)
@@ -54,16 +55,18 @@ class ReportController extends Controller
 
         $start = $request->filled('start') ? Carbon::parse($request->start)->startOfDay() : Carbon::today()->subDays(29)->startOfDay();
         $end = $request->filled('end') ? Carbon::parse($request->end)->endOfDay() : Carbon::today()->endOfDay();
+        $period = $this->validPeriod($request->input('period'));
 
-        $data = $this->buildReport($start, $end);
+        $data = $this->buildReport($start, $end, $period);
 
-        $filename = 'laporan-' . $start->format('Ymd') . '-' . $end->format('Ymd') . '.csv';
+        $filename = 'laporan-'.$start->format('Ymd').'-'.$end->format('Ymd').'.csv';
 
-        return response()->streamDownload(function () use ($data, $start, $end) {
+        return response()->streamDownload(function () use ($data, $start, $end, $period) {
             $handle = fopen('php://output', 'w');
 
             fputcsv($handle, ['LAPORAN RUMAH SAKIT HIS']);
             fputcsv($handle, ['Periode', $start->format('d/m/Y'), 's.d.', $end->format('d/m/Y')]);
+            fputcsv($handle, ['Agregasi', $this->periodLabel($period)]);
             fputcsv($handle, []);
             fputcsv($handle, ['RINGKASAN']);
             fputcsv($handle, ['Total Pendapatan (Lunas)', number_format($data['totalRevenue'], 2)]);
@@ -73,6 +76,13 @@ class ReportController extends Controller
             fputcsv($handle, ['Pasien Baru', $data['newPatients']]);
             fputcsv($handle, ['Total Tagihan', $data['totalBilling']]);
             fputcsv($handle, ['Tagihan Lunas', $data['paidBilling']]);
+            fputcsv($handle, []);
+
+            fputcsv($handle, ['TREN PERIODE']);
+            fputcsv($handle, ['Periode', 'Pendapatan', 'Kunjungan', 'Selesai', 'Pasien Baru']);
+            foreach ($data['periodRows'] as $row) {
+                fputcsv($handle, [$row['label'], number_format($row['revenue'], 2), $row['visits'], $row['completed'], $row['new_patients']]);
+            }
             fputcsv($handle, []);
 
             fputcsv($handle, ['KUNJUNGAN PER POLI']);
@@ -121,7 +131,7 @@ class ReportController extends Controller
         }, $filename, ['Content-Type' => 'text/csv']);
     }
 
-    private function buildReport(Carbon $start, Carbon $end): array
+    private function buildReport(Carbon $start, Carbon $end, string $period = 'harian'): array
     {
         // Summary
         $totalRevenue = (float) Billing::whereBetween('created_at', [$start, $end])
@@ -230,6 +240,8 @@ class ReportController extends Controller
             ->get()
             ->count();
 
+        $periodRows = $this->buildPeriodRows($start, $end, $period);
+
         return compact(
             'totalRevenue',
             'pendingRevenue',
@@ -247,7 +259,96 @@ class ReportController extends Controller
             'stockValuation',
             'stockValuationTotal',
             'expiringStockCount',
-            'lowStockCount'
+            'lowStockCount',
+            'periodRows'
         );
+    }
+
+    private function validPeriod(?string $period): string
+    {
+        return in_array($period, ['harian', 'mingguan', 'bulanan'], true) ? $period : 'harian';
+    }
+
+    private function periodLabel(string $period): string
+    {
+        return match ($period) {
+            'mingguan' => 'Mingguan',
+            'bulanan' => 'Bulanan',
+            default => 'Harian',
+        };
+    }
+
+    private function buildPeriodRows(Carbon $start, Carbon $end, string $period): array
+    {
+        $billingRows = DB::table('billings')
+            ->whereBetween('created_at', [$start, $end])
+            ->where('status', 'paid')
+            ->get(['created_at', 'paid_amount']);
+
+        $visitRows = DB::table('appointments')
+            ->whereBetween('appointment_date', [$start->toDateString(), $end->toDateString()])
+            ->get(['appointment_date', 'status']);
+
+        $patientRows = DB::table('patients')
+            ->whereBetween('created_at', [$start, $end])
+            ->get(['created_at']);
+
+        $key = function (Carbon $date) use ($period) {
+            return match ($period) {
+                'mingguan' => $date->copy()->startOfWeek()->format('Y-m-d'),
+                'bulanan' => $date->format('Y-m'),
+                default => $date->format('Y-m-d'),
+            };
+        };
+
+        $label = function (string $key) use ($period) {
+            return match ($period) {
+                'mingguan' => 'Minggu '.Carbon::parse($key)->format('d/m/Y'),
+                'bulanan' => Carbon::createFromFormat('Y-m', $key)->translatedFormat('F Y'),
+                default => Carbon::createFromFormat('Y-m-d', $key)->format('d/m/Y'),
+            };
+        };
+
+        $rows = [];
+
+        foreach ($billingRows as $row) {
+            $k = $key(Carbon::parse($row->created_at));
+            $rows[$k]['revenue'] = ($rows[$k]['revenue'] ?? 0) + (float) $row->paid_amount;
+            $rows[$k]['visits'] = $rows[$k]['visits'] ?? 0;
+            $rows[$k]['completed'] = $rows[$k]['completed'] ?? 0;
+            $rows[$k]['new_patients'] = $rows[$k]['new_patients'] ?? 0;
+        }
+
+        foreach ($visitRows as $row) {
+            $k = $key(Carbon::parse($row->appointment_date));
+            $rows[$k]['revenue'] = $rows[$k]['revenue'] ?? 0;
+            $rows[$k]['visits'] = ($rows[$k]['visits'] ?? 0) + 1;
+            $rows[$k]['completed'] = $rows[$k]['completed'] ?? 0;
+            $rows[$k]['new_patients'] = $rows[$k]['new_patients'] ?? 0;
+
+            if ($row->status === 'completed') {
+                $rows[$k]['completed'] = ($rows[$k]['completed'] ?? 0) + 1;
+            }
+        }
+
+        foreach ($patientRows as $row) {
+            $k = $key(Carbon::parse($row->created_at));
+            $rows[$k]['revenue'] = $rows[$k]['revenue'] ?? 0;
+            $rows[$k]['visits'] = $rows[$k]['visits'] ?? 0;
+            $rows[$k]['completed'] = $rows[$k]['completed'] ?? 0;
+            $rows[$k]['new_patients'] = ($rows[$k]['new_patients'] ?? 0) + 1;
+        }
+
+        ksort($rows);
+
+        return collect($rows)->map(function (array $data, string $k) use ($label) {
+            return [
+                'label' => $label($k),
+                'revenue' => round((float) ($data['revenue'] ?? 0), 2),
+                'visits' => (int) ($data['visits'] ?? 0),
+                'completed' => (int) ($data['completed'] ?? 0),
+                'new_patients' => (int) ($data['new_patients'] ?? 0),
+            ];
+        })->values()->all();
     }
 }
