@@ -4,9 +4,12 @@
 <div class="space-y-6">
     <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <h2 class="text-2xl font-bold text-text-primary-light dark:text-text-primary-dark">Master Tes Laboratorium</h2>
-        <button type="button" @click="$refs.addForm.showModal()" class="inline-flex items-center justify-center px-5 py-2.5 bg-primary-600 hover:bg-primary-700 text-white text-sm font-semibold rounded-xl shadow-glass-sm hover:shadow-glass-md transition-all duration-200">
-            Tambah Tes
-        </button>
+        <div class="flex gap-2">
+            <a href="{{ route('lab.tests.csv') }}" class="inline-flex items-center justify-center px-5 py-2.5 border border-border-light dark:border-border-dark bg-surface-light dark:bg-surface-dark text-text-primary-light dark:text-text-primary-dark text-sm font-semibold rounded-xl shadow-glass-sm transition-all duration-200 hover:bg-secondary-50 dark:hover:bg-secondary-900/30">Export CSV</a>
+            <button type="button" @click="$refs.addForm.showModal()" class="inline-flex items-center justify-center px-5 py-2.5 bg-primary-600 hover:bg-primary-700 text-white text-sm font-semibold rounded-xl shadow-glass-sm hover:shadow-glass-md transition-all duration-200">
+                Tambah Tes
+            </button>
+        </div>
     </div>
 
     <div x-data="{ showAdd: false }">

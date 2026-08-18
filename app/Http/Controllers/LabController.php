@@ -29,6 +29,40 @@ class LabController extends Controller
         return view('lab.tests', compact('tests'));
     }
 
+    public function testsCsv()
+    {
+        $this->authorize('viewAny', LabTest::class);
+
+        $tests = LabTest::orderBy('name')->get();
+
+        $filename = 'master-tes-lab-' . now()->format('Ymd') . '.csv';
+
+        return response()->streamDownload(function () use ($tests) {
+            $handle = fopen('php://output', 'w');
+            fwrite($handle, "\xEF\xBB\xBF");
+
+            fputcsv($handle, ['MASTER TES LABORATORIUM']);
+            fputcsv($handle, ['Dibuat', now()->format('d/m/Y H:i')]);
+            fputcsv($handle, []);
+
+            fputcsv($handle, ['Nama', 'Kategori', 'Satuan', 'Rentang Rujukan', 'Harga', 'Status']);
+            foreach ($tests as $test) {
+                fputcsv($handle, [
+                    $test->name,
+                    $test->category ?? '-',
+                    $test->unit ?? '-',
+                    $test->reference_range ?? '-',
+                    number_format((float) $test->price, 2),
+                    $test->is_active ? 'Aktif' : 'Nonaktif',
+                ]);
+            }
+            fputcsv($handle, []);
+            fputcsv($handle, ['TOTAL TES', $tests->count()]);
+
+            fclose($handle);
+        }, $filename, ['Content-Type' => 'text/csv; charset=UTF-8']);
+    }
+
     public function testsStore(Request $request)
     {
         $this->authorize('create', LabTest::class);

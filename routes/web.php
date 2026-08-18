@@ -126,6 +126,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
     // Laboratory
     Route::get('lab/tests', [LabController::class, 'tests'])->name('lab.tests');
+    Route::get('lab/tests/csv', [LabController::class, 'testsCsv'])->name('lab.tests.csv');
     Route::post('lab/tests', [LabController::class, 'testsStore'])->name('lab.tests.store');
     Route::put('lab/tests/{labTest}', [LabController::class, 'testsUpdate'])->name('lab.tests.update');
     Route::delete('lab/tests/{labTest}', [LabController::class, 'testsDestroy'])->name('lab.tests.destroy');

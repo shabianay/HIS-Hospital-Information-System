@@ -494,6 +494,17 @@ class ModuleSmokeTest extends TestCase
             ->assertHeader('Content-Type', 'text/csv; charset=utf-8');
     }
 
+    public function test_lab_tech_can_export_lab_tests_csv(): void
+    {
+        $this->seed(DatabaseSeeder::class);
+
+        $labTech = User::where('email', 'lab@his.local')->firstOrFail();
+
+        $this->actingAs($labTech)->get(route('lab.tests.csv'))
+            ->assertOk()
+            ->assertHeader('Content-Type', 'text/csv; charset=utf-8');
+    }
+
     public function test_cancelling_appointment_notifies_doctor(): void
     {
         $user = $this->seedAdmin();
