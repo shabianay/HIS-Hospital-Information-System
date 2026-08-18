@@ -6,13 +6,28 @@
         <div>
             <h2 class="text-2xl font-bold text-text-primary-light dark:text-text-primary-dark">Antrian Resep Obat</h2>
             <p class="mt-1 text-sm text-text-secondary-light dark:text-text-secondary-dark">
-                {{ $counts['total'] }} resep menunggu · {{ $counts['medicines'] }} obat berbeda
+                {{ $counts['total'] }} resep menunggu · {{ $counts['medicines'] }} obat berbeda · {{ $counts['patients'] }} pasien
             </p>
         </div>
         <a href="{{ route('medicines.index') }}"
             class="inline-flex items-center justify-center px-5 py-2.5 bg-surface-light border border-border-light text-text-primary-light hover:bg-secondary-50 text-sm font-semibold rounded-xl shadow-glass-sm transition-all duration-200 dark:bg-surface-dark dark:border-border-dark dark:text-text-primary-dark dark:hover:bg-secondary-800">
             Manajemen Obat
         </a>
+    </div>
+
+    <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+        <div class="bg-surface-light dark:bg-surface-dark p-5 rounded-2xl border border-border-light dark:border-border-dark shadow-glass-sm">
+            <p class="text-xs font-semibold uppercase tracking-wider text-text-secondary-light dark:text-text-secondary-dark">Resep Menunggu</p>
+            <p class="mt-1 text-2xl font-bold text-warning-600 dark:text-warning-400">{{ $counts['total'] }}</p>
+        </div>
+        <div class="bg-surface-light dark:bg-surface-dark p-5 rounded-2xl border border-border-light dark:border-border-dark shadow-glass-sm">
+            <p class="text-xs font-semibold uppercase tracking-wider text-text-secondary-light dark:text-text-secondary-dark">Obat Berbeda</p>
+            <p class="mt-1 text-2xl font-bold text-info-600 dark:text-info-400">{{ $counts['medicines'] }}</p>
+        </div>
+        <div class="bg-surface-light dark:bg-surface-dark p-5 rounded-2xl border border-border-light dark:border-border-dark shadow-glass-sm">
+            <p class="text-xs font-semibold uppercase tracking-wider text-text-secondary-light dark:text-text-secondary-dark">Pasien Menunggu</p>
+            <p class="mt-1 text-2xl font-bold text-primary-600 dark:text-primary-400">{{ $counts['patients'] }}</p>
+        </div>
     </div>
 
     <div class="bg-surface-light dark:bg-surface-dark p-8 rounded-2xl border border-border-light dark:border-border-dark shadow-glass-sm">

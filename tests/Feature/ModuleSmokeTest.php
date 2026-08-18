@@ -1441,6 +1441,7 @@ class ModuleSmokeTest extends TestCase
         $this->actingAs($labTech)->get(route('lab.requests'))->assertOk();
         $this->actingAs($labTech)->get(route('lab.requests'))->assertSee('Urgent Menunggu');
         $this->actingAs($pharmacist)->get(route('prescriptions.pending'))->assertOk();
+        $this->actingAs($pharmacist)->get(route('prescriptions.pending'))->assertSee('Pasien Menunggu');
         $this->actingAs($cashier)->get(route('billings.index'))->assertOk();
         $this->actingAs($cashier)->get(route('billings.index'))->assertSee('Piutang');
         $this->actingAs($registration)->get(route('appointments.create'))->assertOk();

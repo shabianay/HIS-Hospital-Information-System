@@ -32,6 +32,7 @@ class MedicineStockController extends Controller
         $counts = [
             'total' => $prescriptions->count(),
             'medicines' => $prescriptions->unique('medicine_id')->count(),
+            'patients' => $prescriptions->unique('medical_record_id')->count(),
         ];
 
         return view('pharmacy.pending', compact('prescriptions', 'counts'));
