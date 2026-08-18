@@ -28,6 +28,50 @@ class DoctorController extends Controller
         return view('doctors.index', compact('doctors'));
     }
 
+    public function indexCsv(Request $request)
+    {
+        $this->authorize('viewAny', Doctor::class);
+
+        $query = Doctor::with('user');
+
+        if ($request->filled('search')) {
+            $search = $request->search;
+            $query->where(function ($q) use ($search) {
+                $q->where('name', 'like', "%{$search}%")
+                    ->orWhere('specialization', 'like', "%{$search}%")
+                    ->orWhere('license_number', 'like', "%{$search}%");
+            });
+        }
+
+        $doctors = $query->orderBy('name')->get();
+
+        $filename = 'data-dokter-' . now()->format('Ymd') . '.csv';
+
+        return response()->streamDownload(function () use ($doctors) {
+            $handle = fopen('php://output', 'w');
+            fwrite($handle, "\xEF\xBB\xBF");
+
+            fputcsv($handle, ['DATA DOKTER RUMAH SAKIT HIS']);
+            fputcsv($handle, ['Dibuat', now()->format('d/m/Y H:i')]);
+            fputcsv($handle, []);
+
+            fputcsv($handle, ['Nama', 'Spesialisasi', 'No. SIP', 'Akun User', 'Status']);
+            foreach ($doctors as $doctor) {
+                fputcsv($handle, [
+                    $doctor->name,
+                    $doctor->specialization ?? '-',
+                    $doctor->license_number,
+                    $doctor->user?->email ?? '-',
+                    $doctor->is_active ? 'Aktif' : 'Nonaktif',
+                ]);
+            }
+            fputcsv($handle, []);
+            fputcsv($handle, ['TOTAL DOKTER', $doctors->count()]);
+
+            fclose($handle);
+        }, $filename, ['Content-Type' => 'text/csv; charset=UTF-8']);
+    }
+
     public function create()
     {
         $this->authorize('create', Doctor::class);

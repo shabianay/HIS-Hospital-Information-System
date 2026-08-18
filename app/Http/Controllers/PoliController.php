@@ -16,6 +16,39 @@ class PoliController extends Controller
         return view('polis.index', compact('polis'));
     }
 
+    public function indexCsv()
+    {
+        $this->authorize('viewAny', Poli::class);
+
+        $polis = Poli::orderBy('name')->get();
+
+        $filename = 'data-poli-' . now()->format('Ymd') . '.csv';
+
+        return response()->streamDownload(function () use ($polis) {
+            $handle = fopen('php://output', 'w');
+            fwrite($handle, "\xEF\xBB\xBF");
+
+            fputcsv($handle, ['DATA POLI RUMAH SAKIT HIS']);
+            fputcsv($handle, ['Dibuat', now()->format('d/m/Y H:i')]);
+            fputcsv($handle, []);
+
+            fputcsv($handle, ['Kode', 'Nama', 'Deskripsi', 'Status', 'Jumlah Jadwal']);
+            foreach ($polis as $poli) {
+                fputcsv($handle, [
+                    $poli->code,
+                    $poli->name,
+                    $poli->description ?? '-',
+                    $poli->is_active ? 'Aktif' : 'Nonaktif',
+                    $poli->schedules()->count(),
+                ]);
+            }
+            fputcsv($handle, []);
+            fputcsv($handle, ['TOTAL POLI', $polis->count()]);
+
+            fclose($handle);
+        }, $filename, ['Content-Type' => 'text/csv; charset=UTF-8']);
+    }
+
     public function create()
     {
         $this->authorize('create', Poli::class);

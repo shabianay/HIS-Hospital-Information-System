@@ -763,6 +763,19 @@ class ModuleSmokeTest extends TestCase
             ->assertHeader('Content-Type', 'text/csv; charset=utf-8');
     }
 
+    public function test_admin_can_export_polis_and_doctors_csv(): void
+    {
+        $user = $this->seedAdmin();
+
+        $this->actingAs($user)->get(route('polis.index.csv'))
+            ->assertOk()
+            ->assertHeader('Content-Type', 'text/csv; charset=utf-8');
+
+        $this->actingAs($user)->get(route('doctors.index.csv'))
+            ->assertOk()
+            ->assertHeader('Content-Type', 'text/csv; charset=utf-8');
+    }
+
     public function test_deactivated_user_cannot_login(): void
     {
         $this->seed(DatabaseSeeder::class);

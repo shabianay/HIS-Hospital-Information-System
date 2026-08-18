@@ -86,9 +86,11 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
     // Doctor routes - accessible to admin and registration staff
     Route::resource('doctors', DoctorController::class);
+    Route::get('doctors/index/csv', [DoctorController::class, 'indexCsv'])->name('doctors.index.csv');
 
     // Poli routes
     Route::resource('polis', PoliController::class);
+    Route::get('polis/index/csv', [PoliController::class, 'indexCsv'])->name('polis.index.csv');
 
     // Schedule routes
     Route::get('schedules/board', [ScheduleController::class, 'board'])->name('schedules.board');
