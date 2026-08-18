@@ -147,8 +147,6 @@
             @endforelse
         </x-table>
     </div>
-    </div>
-    </div>
 
     <div class="mt-8 grid grid-cols-1 gap-6 lg:grid-cols-3">
         <div

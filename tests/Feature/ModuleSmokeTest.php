@@ -84,6 +84,7 @@ class ModuleSmokeTest extends TestCase
         $patient = Patient::first();
 
         $this->actingAs($user)->get(route('patients.show', $patient))->assertOk();
+        $this->actingAs($user)->get(route('patients.show', $patient))->assertSee('Saldo Tagihan Belum Lunas');
         $this->actingAs($user)->get(route('patients.medical-history', $patient))->assertOk();
         $this->actingAs($user)->get(route('patients.medical-history.pdf', $patient))->assertOk();
         $this->actingAs($user)->get(route('patients.card', $patient))

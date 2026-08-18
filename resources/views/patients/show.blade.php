@@ -61,7 +61,41 @@
     </div>
 
     <div class="bg-surface-light dark:bg-surface-dark p-8 rounded-2xl border border-border-light dark:border-border-dark shadow-glass-sm">
-        <h3 class="mb-4 text-xl font-semibold text-text-primary-light dark:text-text-primary-dark">Kunjungan Terbaru</h3>
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-4">
+            <h3 class="text-xl font-semibold text-text-primary-light dark:text-text-primary-dark">Saldo Tagihan Belum Lunas</h3>
+            @if($unpaidBills->isNotEmpty())
+                <a href="{{ route('billings.show', $unpaidBills->first()) }}" class="inline-flex items-center justify-center px-4 py-2 bg-primary-600 hover:bg-primary-700 text-white text-sm font-semibold rounded-xl shadow-glass-sm transition-all duration-200">Lihat Tagihan</a>
+            @endif
+        </div>
+        @if($unpaidBills->isNotEmpty())
+            <div class="rounded-xl bg-danger-50 dark:bg-danger-900/10 border border-danger-200 dark:border-danger-800 px-5 py-4">
+                <p class="text-xs font-semibold uppercase tracking-wider text-danger-600 dark:text-danger-400">Total Piutang</p>
+                <p class="mt-1 text-3xl font-bold text-danger-700 dark:text-danger-400">Rp {{ number_format($outstandingTotal, 0, ',', '.') }}</p>
+            </div>
+            <div class="mt-4 space-y-3">
+                @foreach($unpaidBills as $billing)
+                    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 rounded-xl bg-secondary-50 dark:bg-secondary-900/30 border border-border-light dark:border-border-dark px-5 py-3">
+                        <div>
+                            <p class="text-sm font-semibold text-text-primary-light dark:text-text-primary-dark">Tagihan #{{ str_pad($billing->id, 4, '0', STR_PAD_LEFT) }} · {{ $billing->created_at?->format('d/m/Y') }}</p>
+                            <p class="text-xs text-text-secondary-light dark:text-text-secondary-dark">
+                                Status: {{ $billing->status === 'unpaid' ? 'Belum Dibayar' : 'Dibayar Sebagian' }}
+                            </p>
+                        </div>
+                        <div class="text-right">
+                            <p class="text-sm font-bold text-danger-600 dark:text-danger-400">Rp {{ number_format((float) $billing->total_amount - (float) $billing->paid_amount, 0, ',', '.') }}</p>
+                            <a href="{{ route('billings.show', $billing) }}" class="text-xs font-semibold text-primary-600 hover:text-primary-800 dark:text-primary-400">Detail →</a>
+                        </div>
+                    </div>
+                @endforeach
+            </div>
+        @else
+            <div class="rounded-xl bg-success-50 dark:bg-success-900/10 border border-success-200 dark:border-success-800 px-5 py-4 text-sm text-success-700 dark:text-success-400">
+                Tidak ada tagihan yang belum lunas. Seluruh tagihan pasien telah dibayar.
+            </div>
+        @endif
+    </div>
+
+    <div class="bg-surface-light dark:bg-surface-dark p-8 rounded-2xl border border-border-light dark:border-border-dark shadow-glass-sm">
         <x-table placeholder="Cari poli / dokter..." class="overflow-hidden">
             <x-slot name="head">
                 <tr class="text-xs uppercase tracking-wider text-text-secondary-light dark:text-text-secondary-dark border-b border-border-light dark:border-border-dark">

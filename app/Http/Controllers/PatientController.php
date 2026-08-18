@@ -145,7 +145,13 @@ class PatientController extends Controller
             ->limit(10)
             ->get();
 
-        return view('patients.show', compact('patient', 'recentVisits'));
+        $unpaidBills = $patient->billings()
+            ->whereIn('status', ['unpaid', 'partial'])
+            ->orderByDesc('created_at')
+            ->get();
+        $outstandingTotal = (float) $unpaidBills->sum(fn ($billing) => (float) $billing->total_amount - (float) $billing->paid_amount);
+
+        return view('patients.show', compact('patient', 'recentVisits', 'unpaidBills', 'outstandingTotal'));
     }
 
     public function card(Patient $patient)
