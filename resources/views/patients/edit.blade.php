@@ -22,6 +22,13 @@
                     <div>
                         <x-input-label for="date_of_birth" value="Tanggal Lahir" />
                         <x-text-input type="date" name="date_of_birth" value="{{ old('date_of_birth', $patient->date_of_birth ? \Carbon\Carbon::parse($patient->date_of_birth)->format('Y-m-d') : '') }}" required />
+                        @if(old('date_of_birth') || $patient->date_of_birth)
+                            @php $dob = old('date_of_birth', $patient->date_of_birth->format('Y-m-d')); @endphp
+                            <p class="mt-1.5 text-sm text-text-secondary-light dark:text-text-secondary-dark">
+                                {{ \Carbon\Carbon::parse($dob)->format('d/m/Y') }}
+                                <span class="text-xs">({{ \Carbon\Carbon::parse($dob)->age }} tahun)</span>
+                            </p>
+                        @endif
                         <x-input-error :messages="$errors->get('date_of_birth')" />
                     </div>
                     <div>
