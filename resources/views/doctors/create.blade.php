@@ -1,7 +1,7 @@
 @extends('layouts.app')
 @section('title', 'Tambah Dokter')
 @section('content')
-<div class="mx-auto max-w-2xl">
+<div class="w-full">
     <div class="bg-surface-light dark:bg-surface-dark p-8 rounded-2xl border border-border-light dark:border-border-dark shadow-glass-sm">
         <h2 class="text-2xl font-bold text-text-primary-light dark:text-text-primary-dark mb-8">Tambah Dokter Baru</h2>
         <form action="{{ route('doctors.store') }}" method="POST">

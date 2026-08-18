@@ -3,7 +3,7 @@
 @section('title', 'Input Tanda Vital')
 
 @section('content')
-<div class="max-w-4xl mx-auto">
+<div class="w-full">
     <div class="bg-surface-light dark:bg-surface-dark p-8 rounded-2xl border border-border-light dark:border-border-dark shadow-glass-sm">
         <div class="mb-8">
             <h2 class="text-2xl font-bold text-text-primary-light dark:text-text-primary-dark">Input Tanda Vital Pasien</h2>

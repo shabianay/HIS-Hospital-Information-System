@@ -1,7 +1,7 @@
 @extends('layouts.app')
 @section('title', 'Buat Permintaan Laboratorium')
 @section('content')
-<div class="mx-auto max-w-4xl space-y-6">
+<div class="w-full space-y-6">
     <h2 class="text-2xl font-bold text-text-primary-light dark:text-text-primary-dark">Buat Permintaan Laboratorium</h2>
 
     <form action="{{ route('lab.requests.store') }}" method="POST" x-data="{ urgent: false, selectedCount: 0 }" @change="selectedCount = document.querySelectorAll('input[name=\'lab_test_ids[]\']:checked').length">

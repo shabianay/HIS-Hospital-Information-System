@@ -1,7 +1,7 @@
 @extends('layouts.app')
 @section('title', 'Pencatatan Rekam Medis (EMR)')
 @section('content')
-<div class="mx-auto max-w-4xl" x-data="{ diagnoses: [{ icd_code: '', description: '', is_primary: '1' }], prescriptions: [{ medicine_id: '', quantity: 1, dosage: '', frequency: '', duration: '', instructions: '' }] }">
+<div class="w-full" x-data="{ diagnoses: [{ icd_code: '', description: '', is_primary: '1' }], prescriptions: [{ medicine_id: '', quantity: 1, dosage: '', frequency: '', duration: '', instructions: '' }] }">
     <div class="bg-surface-light dark:bg-surface-dark p-8 rounded-2xl border border-border-light dark:border-border-dark shadow-glass-sm">
         <div class="mb-8 pb-6 border-b border-border-light dark:border-border-dark">
             <h2 class="text-2xl font-bold text-text-primary-light dark:text-text-primary-dark">Pencatatan EMR (SOAP)</h2>

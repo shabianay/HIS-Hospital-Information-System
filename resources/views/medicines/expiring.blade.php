@@ -1,7 +1,7 @@
 @extends('layouts.app')
 @section('title', 'Stok Mendekati Kedaluwarsa')
 @section('content')
-<div class="mx-auto max-w-5xl space-y-6">
+<div class="w-full space-y-6">
     <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <h2 class="text-2xl font-bold text-text-primary-light dark:text-text-primary-dark">Stok Mendekati Kedaluwarsa</h2>
         <div class="flex items-center gap-2">

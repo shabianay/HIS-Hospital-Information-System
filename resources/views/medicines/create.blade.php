@@ -1,7 +1,7 @@
 @extends('layouts.app')
 @section('title', 'Tambah Obat')
 @section('content')
-<div class="mx-auto max-w-2xl">
+<div class="w-full">
     <div class="bg-surface-light dark:bg-surface-dark p-8 rounded-2xl border border-border-light dark:border-border-dark shadow-glass-sm">
         <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8 pb-6 border-b border-border-light dark:border-border-dark">
             <h2 class="text-2xl font-bold text-text-primary-light dark:text-text-primary-dark">Tambah Obat Baru</h2>

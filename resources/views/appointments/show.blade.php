@@ -10,7 +10,7 @@
     ];
     $badge = $statusBadge[$appointment->status] ?? $statusBadge['waiting'];
 @endphp
-<div class="mx-auto max-w-4xl space-y-6">
+<div class="w-full space-y-6">
     <div class="bg-surface-light dark:bg-surface-dark p-8 rounded-2xl border border-border-light dark:border-border-dark shadow-glass-sm">
         <div class="mb-8 flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-8 border-b border-border-light dark:border-border-dark">
             <div>

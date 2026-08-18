@@ -1,7 +1,7 @@
 @extends('layouts.app')
 @section('title', 'Manajemen Stok Obat')
 @section('content')
-<div class="mx-auto max-w-5xl space-y-6">
+<div class="w-full space-y-6">
     <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <h2 class="text-2xl font-bold text-text-primary-light dark:text-text-primary-dark">Manajemen Stok Obat</h2>
         <a href="{{ route('medicines.mutations') }}" class="inline-flex items-center px-4 py-2 text-sm font-semibold rounded-xl border border-border-light bg-surface-light text-text-primary-light hover:bg-primary-50 dark:border-border-dark dark:bg-surface-dark dark:text-text-primary-dark dark:hover:bg-primary-900/10 transition-colors">Riwayat Mutasi</a>
