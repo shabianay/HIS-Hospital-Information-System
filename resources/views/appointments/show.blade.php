@@ -141,31 +141,31 @@
             <div class="mt-8 pt-8 border-t border-border-light dark:border-border-dark">
                 <h3 class="text-xl font-bold text-text-primary-light dark:text-text-primary-dark mb-6">Tanda Vital Pasien</h3>
                 <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
-                    <div class="p-4 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800">
+                    <div class="p-4 rounded-xl bg-secondary-50 dark:bg-secondary-800/40 border border-border-light dark:border-border-dark">
                         <p class="text-xs text-text-secondary-light dark:text-text-secondary-dark">Suhu Tubuh</p>
                         <p class="font-bold text-lg">{{ $appointment->vitalSign->temperature }} °C</p>
                     </div>
-                    <div class="p-4 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800">
+                    <div class="p-4 rounded-xl bg-secondary-50 dark:bg-secondary-800/40 border border-border-light dark:border-border-dark">
                         <p class="text-xs text-text-secondary-light dark:text-text-secondary-dark">Tekanan Darah</p>
                         <p class="font-bold text-lg">{{ $appointment->vitalSign->blood_pressure_systolic }}/{{ $appointment->vitalSign->blood_pressure_diastolic }} mmHg</p>
                     </div>
-                    <div class="p-4 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800">
+                    <div class="p-4 rounded-xl bg-secondary-50 dark:bg-secondary-800/40 border border-border-light dark:border-border-dark">
                         <p class="text-xs text-text-secondary-light dark:text-text-secondary-dark">Nadi</p>
                         <p class="font-bold text-lg">{{ $appointment->vitalSign->heart_rate }} bpm</p>
                     </div>
-                    <div class="p-4 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800">
+                    <div class="p-4 rounded-xl bg-secondary-50 dark:bg-secondary-800/40 border border-border-light dark:border-border-dark">
                         <p class="text-xs text-text-secondary-light dark:text-text-secondary-dark">Respirasi</p>
                         <p class="font-bold text-lg">{{ $appointment->vitalSign->respiratory_rate }} x/menit</p>
                     </div>
-                    <div class="p-4 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800">
+                    <div class="p-4 rounded-xl bg-secondary-50 dark:bg-secondary-800/40 border border-border-light dark:border-border-dark">
                         <p class="text-xs text-text-secondary-light dark:text-text-secondary-dark">Berat Badan</p>
                         <p class="font-bold text-lg">{{ $appointment->vitalSign->weight }} kg</p>
                     </div>
-                    <div class="p-4 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800">
+                    <div class="p-4 rounded-xl bg-secondary-50 dark:bg-secondary-800/40 border border-border-light dark:border-border-dark">
                         <p class="text-xs text-text-secondary-light dark:text-text-secondary-dark">Tinggi Badan</p>
                         <p class="font-bold text-lg">{{ $appointment->vitalSign->height }} cm</p>
                     </div>
-                    <div class="p-4 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800">
+                    <div class="p-4 rounded-xl bg-secondary-50 dark:bg-secondary-800/40 border border-border-light dark:border-border-dark">
                         <p class="text-xs text-text-secondary-light dark:text-text-secondary-dark">Saturasi Oksigen</p>
                         <p class="font-bold text-lg">{{ $appointment->vitalSign->oxygen_saturation }} %</p>
                     </div>

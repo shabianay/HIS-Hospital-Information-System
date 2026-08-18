@@ -72,7 +72,7 @@
                         Terapkan Filter
                     </button>
                     <a href="{{ route('appointments.index') }}"
-                        class="ml-2 px-6 py-3 bg-white dark:bg-secondary-800 border border-border-light dark:border-border-dark text-text-primary-light dark:text-text-primary-dark font-semibold text-sm rounded-xl hover:bg-secondary-50 dark:hover:bg-secondary-700 transition-colors shadow-glass-sm">
+                        class="ml-2 px-6 py-3 bg-surface-light dark:bg-surface-dark border border-border-light dark:border-border-dark text-text-primary-light dark:text-text-primary-dark font-semibold text-sm rounded-xl hover:bg-secondary-50 dark:hover:bg-secondary-700 transition-colors shadow-glass-sm">
                         Reset
                     </a>
                 </div>

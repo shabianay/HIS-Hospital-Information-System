@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <title>Kuitansi Pembayaran #{{ $billing->invoice_number }}</title>
-    <script src="https://cdn.tailwindcss.com"></script>
+    @vite(['resources/css/app.css'])
     <style>
         @media print {
             body {
@@ -19,15 +19,15 @@
     </style>
 </head>
 
-<body class="bg-gray-100 p-8">
-    <div class="mx-auto max-w-md bg-white p-6 shadow-md border border-gray-200">
+<body class="bg-background-light p-8">
+    <div class="mx-auto max-w-md bg-surface-light p-6 shadow-glass-md border border-border-light">
         <div class="mb-6 text-center">
-            <h2 class="text-xl font-bold text-gray-900">RUMAH SAKIT HIS</h2>
-            <p class="text-xs text-gray-500">Jl. Kesehatan No. 12, Jakarta</p>
-            <p class="text-xs text-gray-500">Telp: (021) 1234567</p>
+            <h2 class="text-xl font-bold text-text-primary-light">RUMAH SAKIT HIS</h2>
+            <p class="text-xs text-text-secondary-light">Jl. Kesehatan No. 12, Jakarta</p>
+            <p class="text-xs text-text-secondary-light">Telp: (021) 1234567</p>
         </div>
 
-        <div class="mb-4 space-y-1 border-b border-dashed border-gray-300 pb-4 text-xs">
+        <div class="mb-4 space-y-1 border-b border-dashed border-border-light pb-4 text-xs">
             <div class="flex justify-between"><span>No. Tagihan:</span><strong>{{ $billing->invoice_number }}</strong>
             </div>
             <div class="flex justify-between">
@@ -45,7 +45,7 @@
                     Antrian:</span><span>{{ $billing->appointment?->queue_number }}</span></div>
         </div>
 
-        <div class="mb-4 space-y-2 border-b border-dashed border-gray-300 pb-4 text-xs">
+        <div class="mb-4 space-y-2 border-b border-dashed border-border-light pb-4 text-xs">
             @forelse($billing->billingItems as $item)
                 <div class="flex justify-between">
                     <span>{{ $item->description }}</span>
@@ -84,29 +84,29 @@
                 </span>
             </div>
             @if ($billing->status !== 'paid')
-                <div class="flex justify-between font-bold text-red-600"><span>Sisa Tagihan:</span><span>Rp
+                <div class="flex justify-between font-bold text-danger-600"><span>Sisa Tagihan:</span><span>Rp
                         {{ number_format(max(0, $billing->total_amount - $billing->paid_amount), 0, ',', '.') }}</span>
                 </div>
             @endif
         </div>
 
-        <div class="mt-8 border-t border-dashed border-gray-300 pt-4 text-center text-xs text-gray-500">
+        <div class="mt-8 border-t border-dashed border-border-light pt-4 text-center text-xs text-text-secondary-light">
             <p>Terima Kasih Atas Kunjungan Anda</p>
             <p>Semoga Lekas Sembuh</p>
         </div>
 
         @if ($billing->notes)
-            <div class="mt-4 rounded-lg bg-gray-50 p-3 text-xs text-gray-600 border border-gray-200">
+            <div class="mt-4 rounded-lg bg-secondary-50 p-3 text-xs text-text-secondary-light border border-border-light">
                 <strong>Catatan:</strong> {{ $billing->notes }}
             </div>
         @endif
 
         <div class="no-print mt-6 flex justify-center gap-2">
             <button onclick="window.print()"
-                class="inline-flex items-center gap-2 rounded-xl border border-border-light bg-surface-light px-5 py-2.5 text-xs font-semibold text-text-primary-light hover:bg-primary-50 dark:border-border-dark dark:bg-surface-dark dark:text-text-primary-dark dark:hover:bg-primary-900/10 transition-all duration-200">Cetak
+                class="inline-flex items-center gap-2 rounded-xl border border-border-light bg-surface-light px-5 py-2.5 text-xs font-semibold text-text-primary-light hover:bg-primary-50 transition-all duration-200">Cetak
                 Kuitansi</button>
             <a href="{{ route('billings.show', $billing) }}"
-                class="inline-flex items-center gap-2 rounded-xl border border-border-light bg-surface-light px-5 py-2.5 text-xs font-semibold text-text-primary-light hover:bg-primary-50 dark:border-border-dark dark:bg-surface-dark dark:text-text-primary-dark dark:hover:bg-primary-900/10 transition-all duration-200">Kembali</a>
+                class="inline-flex items-center gap-2 rounded-xl border border-border-light bg-surface-light px-5 py-2.5 text-xs font-semibold text-text-primary-light hover:bg-primary-50 transition-all duration-200">Kembali</a>
         </div>
     </div>
 </body>

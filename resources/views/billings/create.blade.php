@@ -116,9 +116,9 @@
                             </div>
                         </div>
                         <div class="flex flex-wrap items-center justify-between gap-4">
-                            <span class="text-sm font-medium text-red-600 dark:text-red-400">Diskon / Potongan</span>
+                            <span class="text-sm font-medium text-danger-600 dark:text-danger-400">Diskon / Potongan</span>
                             <div class="w-full md:w-48">
-                                <input type="number" x-model.number="discount" name="discount" class="w-full border border-border-light bg-surface-light px-4 py-3 text-sm text-red-600 dark:text-red-400 focus:border-primary-500 focus:ring-2 focus:ring-primary-500/20 focus:outline-none rounded-xl shadow-glass-sm transition-all duration-200 dark:border-border-dark dark:bg-surface-dark text-right">
+                                <input type="number" x-model.number="discount" name="discount" class="w-full border border-border-light bg-surface-light px-4 py-3 text-sm text-danger-600 dark:text-danger-400 focus:border-primary-500 focus:ring-2 focus:ring-primary-500/20 focus:outline-none rounded-xl shadow-glass-sm transition-all duration-200 dark:border-border-dark dark:bg-surface-dark text-right">
                             </div>
                         </div>
                         <div>

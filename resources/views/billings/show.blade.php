@@ -70,7 +70,7 @@
                     @endforelse
                     <tr class="border-b border-border-light dark:border-border-dark font-semibold">
                         <td class="py-3 text-primary-800 dark:text-primary-400">Diskon</td>
-                        <td class="py-3 text-right text-red-600 dark:text-red-400">- Rp {{ number_format($billing->discount, 0, ',', '.') }}</td>
+                        <td class="py-3 text-right text-danger-600 dark:text-danger-400">- Rp {{ number_format($billing->discount, 0, ',', '.') }}</td>
                     </tr>
                     <tr class="font-bold">
                         <td class="py-3 text-primary-800 dark:text-primary-400">Total Tagihan</td>
@@ -159,7 +159,7 @@
                                     <input type="text" name="payments[][reference]" x-model="payment.reference" placeholder="Opsional" class="w-full border border-border-light bg-surface-light px-4 py-3 text-sm text-text-primary-light placeholder:text-text-secondary-light focus:border-primary-500 focus:ring-2 focus:ring-primary-500/20 focus:outline-none rounded-xl shadow-glass-sm transition-all duration-200 dark:border-border-dark dark:bg-surface-dark dark:text-text-primary-dark">
                                 </div>
                                 <div class="flex items-end justify-end md:col-span-1">
-                                    <button type="button" @click="payments.splice(index, 1)" class="text-red-600 hover:text-red-800 dark:text-red-400 dark:hover:text-red-300">
+                                    <button type="button" @click="payments.splice(index, 1)" class="text-danger-600 hover:text-danger-800 dark:text-danger-400 dark:hover:text-danger-300">
                                         <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
                                     </button>
                                 </div>

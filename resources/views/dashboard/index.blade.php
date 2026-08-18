@@ -27,7 +27,7 @@
             class="bg-surface-light dark:bg-surface-dark p-6 rounded-2xl border border-border-light dark:border-border-dark shadow-glass-sm hover:bg-secondary-50 dark:hover:bg-secondary-900/30 transition-colors">
             <div class="text-sm font-semibold text-text-secondary-light dark:text-text-secondary-dark mb-2">Stok Obat
                 Menipis</div>
-            <div class="text-3xl font-bold text-red-600 dark:text-red-400">{{ number_format($lowStockCount) }}</div>
+            <div class="text-3xl font-bold text-danger-600 dark:text-danger-400">{{ number_format($lowStockCount) }}</div>
         </a>
     </div>
 
