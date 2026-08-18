@@ -445,16 +445,55 @@ class ModuleSmokeTest extends TestCase
 
         $registration = User::where('email', 'pendaftaran@his.local')->firstOrFail();
         $cashier = User::where('email', 'kasir@his.local')->firstOrFail();
+        $nurse = User::where('email', 'perawat@his.local')->firstOrFail();
+        $doctor = User::where('email', 'dokter@his.local')->firstOrFail();
+        $pharmacist = User::where('email', 'apoteker@his.local')->firstOrFail();
+        $labTech = User::where('email', 'lab@his.local')->firstOrFail();
 
         $regResponse = $this->actingAs($registration)->get(route('dashboard'));
         $regResponse->assertOk()
             ->assertSee('Antrian Hari Ini')
-            ->assertDontSee('Kasir / Billing');
+            ->assertSee('Display Antrian')
+            ->assertDontSee('Kasir / Billing')
+            ->assertDontSee('Display Lab')
+            ->assertDontSee('Display Farmasi')
+            ->assertDontSee('Laporan');
 
         $cashierResponse = $this->actingAs($cashier)->get(route('dashboard'));
         $cashierResponse->assertOk()
             ->assertSee('Kasir / Billing')
-            ->assertDontSee('Antrian Hari Ini');
+            ->assertDontSee('Antrian Hari Ini')
+            ->assertDontSee('Laporan');
+
+        $nurseResponse = $this->actingAs($nurse)->get(route('dashboard'));
+        $nurseResponse->assertOk()
+            ->assertSee('Antrian Hari Ini')
+            ->assertSee('Rekam Medis')
+            ->assertDontSee('Pasien Saya')
+            ->assertDontSee('Laporan');
+
+        $doctorResponse = $this->actingAs($doctor)->get(route('dashboard'));
+        $doctorResponse->assertOk()
+            ->assertSee('Rekam Medis')
+            ->assertSee('Pasien Saya')
+            ->assertDontSee('Antrian Hari Ini')
+            ->assertDontSee('Laporan');
+
+        $pharmacistResponse = $this->actingAs($pharmacist)->get(route('dashboard'));
+        $pharmacistResponse->assertOk()
+            ->assertSee('Farmasi')
+            ->assertSee('Display Farmasi')
+            ->assertDontSee('Display Antrian')
+            ->assertDontSee('Display Lab')
+            ->assertDontSee('Laporan');
+
+        $labTechResponse = $this->actingAs($labTech)->get(route('dashboard'));
+        $labTechResponse->assertOk()
+            ->assertSee('Laboratorium')
+            ->assertSee('Display Lab')
+            ->assertDontSee('Display Antrian')
+            ->assertDontSee('Display Farmasi')
+            ->assertDontSee('Laporan');
     }
 
     public function test_admin_can_export_audit_csv_and_pdf(): void
