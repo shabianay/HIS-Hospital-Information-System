@@ -18,6 +18,7 @@ use App\Http\Controllers\ReportController;
 use App\Http\Controllers\ScheduleController;
 use App\Http\Controllers\TariffController;
 use App\Http\Controllers\UserController;
+use App\Http\Controllers\VitalSignController;
 use Illuminate\Support\Facades\Route;
 
 // Redirect root to login or dashboard
@@ -83,6 +84,10 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('medical-records/{medicalRecord}/referral', [MedicalRecordController::class, 'referralPdf'])->name('medical-records.referral');
     Route::get('medical-records/{medicalRecord}/edit', [MedicalRecordController::class, 'edit'])->name('medical-records.edit');
     Route::put('medical-records/{medicalRecord}', [MedicalRecordController::class, 'update'])->name('medical-records.update');
+
+    // Vital Signs (Tanda Vital) - input by nurse/registration
+    Route::get('appointments/{appointment}/vital-sign', [VitalSignController::class, 'create'])->name('vital-signs.create');
+    Route::post('appointments/{appointment}/vital-sign', [VitalSignController::class, 'store'])->name('vital-signs.store');
 
     // Doctor routes - accessible to admin and registration staff
     Route::resource('doctors', DoctorController::class);

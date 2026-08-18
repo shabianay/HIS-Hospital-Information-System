@@ -63,4 +63,9 @@ class Appointment extends Model
     {
         return $this->hasMany(LabRequest::class);
     }
+
+    public function vitalSign()
+    {
+        return $this->hasOne(VitalSign::class);
+    }
 }

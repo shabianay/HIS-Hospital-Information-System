@@ -595,6 +595,36 @@ class ModuleSmokeTest extends TestCase
         $this->assertGreaterThan(0, $pharmacist->notifications()->count());
     }
 
+    public function test_nurse_can_input_vital_signs(): void
+    {
+        $user = $this->seedAdmin();
+        $appointment = Appointment::first();
+
+        $this->actingAs($user)->get(route('vital-signs.create', $appointment))->assertOk();
+
+        $this->actingAs($user)->post(route('vital-signs.store', $appointment), [
+            'temperature' => 36.5,
+            'blood_pressure_systolic' => 120,
+            'blood_pressure_diastolic' => 80,
+            'heart_rate' => 70,
+            'respiratory_rate' => 18,
+            'weight' => 60.0,
+            'height' => 170.0,
+            'oxygen_saturation' => 98,
+            'notes' => 'Pasien stabil.',
+        ])->assertSessionHasNoErrors();
+
+        $this->assertDatabaseHas('vital_signs', [
+            'appointment_id' => $appointment->id,
+            'temperature' => 36.5,
+        ]);
+
+        $this->actingAs($user)->get(route('appointments.show', $appointment))
+            ->assertOk()
+            ->assertSee('Tanda Vital Pasien')
+            ->assertSee('36.5 °C');
+    }
+
     public function test_public_queue_lookup_shows_patient_position(): void
     {
         $user = $this->seedAdmin();

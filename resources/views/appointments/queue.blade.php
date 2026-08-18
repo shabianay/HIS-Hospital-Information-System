@@ -78,6 +78,9 @@
 
                         <div class="flex items-center gap-2 shrink-0">
                             @if($appointment->status === 'waiting')
+                                <a href="{{ route('vital-signs.create', $appointment) }}" class="inline-flex items-center justify-center px-4 py-2 bg-warning-600 hover:bg-warning-700 text-white text-xs font-semibold rounded-lg shadow-glass-sm transition-all duration-200">
+                                    Tanda Vital
+                                </a>
                                 <form action="{{ route('appointments.status.update', $appointment) }}" method="POST">
                                     @csrf
                                     @method('PATCH')

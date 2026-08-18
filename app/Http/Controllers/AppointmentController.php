@@ -224,7 +224,7 @@ class AppointmentController extends Controller
     {
         $this->authorize('view', $appointment);
 
-        $appointment->load(['patient', 'doctor', 'poli', 'schedule', 'medicalRecord']);
+        $appointment->load(['patient', 'doctor', 'poli', 'schedule', 'medicalRecord', 'vitalSign.recordedBy']);
 
         return view('appointments.show', compact('appointment'));
     }
@@ -246,7 +246,7 @@ class AppointmentController extends Controller
         $dayStart = $today->copy()->startOfDay();
         $dayEnd = $today->copy()->endOfDay();
 
-        $appointments = Appointment::with(['patient', 'doctor', 'poli'])
+        $appointments = Appointment::with(['patient', 'doctor', 'poli', 'vitalSign'])
             ->whereBetween('appointment_date', [$dayStart, $dayEnd])
             ->where('status', '!=', 'cancelled')
             ->orderBy('appointment_date')
