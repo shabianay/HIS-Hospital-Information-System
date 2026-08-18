@@ -1875,7 +1875,7 @@ class ModuleSmokeTest extends TestCase
             ['lab_tech', 'lab.requests'],
             ['pharmacist', 'prescriptions.pending'],
             ['cashier', 'billings.index'],
-            ['registration', 'appointments.create'],
+            ['registration', 'dashboard'],
         ];
 
         foreach ($cases as [$role, $route]) {

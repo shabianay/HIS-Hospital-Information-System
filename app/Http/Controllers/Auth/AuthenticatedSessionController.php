@@ -35,7 +35,7 @@ class AuthenticatedSessionController extends Controller
             $user->hasRole('lab_tech') => route('lab.requests'),
             $user->hasRole('pharmacist') => route('prescriptions.pending'),
             $user->hasRole('cashier') => route('billings.index'),
-            $user->hasRole('registration') => route('appointments.create'),
+            $user->hasRole('registration') => route('dashboard'),
             default => route('dashboard'),
         };
 
