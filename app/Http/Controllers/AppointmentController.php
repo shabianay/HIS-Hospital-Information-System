@@ -105,8 +105,15 @@ class AppointmentController extends Controller
         $this->authorize('create', Appointment::class);
 
         $patients = $this->resolvePatientsForCreate();
-        $doctors = Doctor::where('is_active', true)->orderBy('name')->get();
         $polis = Poli::where('is_active', true)->orderBy('name')->get();
+
+        $doctors = collect();
+        if ($request->filled('poli_id')) {
+            $doctors = Doctor::where('is_active', true)
+                ->whereHas('schedules', fn ($q) => $q->where('poli_id', $request->poli_id)->where('is_active', true))
+                ->orderBy('name')
+                ->get();
+        }
 
         $schedules = collect();
         if ($request->filled('doctor_id') && $request->filled('poli_id') && $request->filled('appointment_date')) {

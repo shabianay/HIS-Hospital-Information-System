@@ -51,10 +51,14 @@
             <div>
                 <x-input-label for="doctor_id" value="Dokter" />
                 <select name="doctor_id" onchange="this.form.submit()" class="w-full border border-border-light bg-surface-light px-4 py-3 text-sm text-text-primary-light focus:border-primary-500 focus:ring-2 focus:ring-primary-500/20 focus:outline-none rounded-xl shadow-glass-sm transition-all duration-200 dark:border-border-dark dark:bg-surface-dark dark:text-text-primary-dark">
-                    <option value="">Pilih Dokter</option>
-                    @foreach($doctors as $doctor)
-                        <option value="{{ $doctor->id }}" {{ request('doctor_id') == $doctor->id ? 'selected' : '' }}>{{ $doctor->name }}</option>
-                    @endforeach
+                    @if(! request('poli_id'))
+                        <option value="">Pilih Poli terlebih dahulu</option>
+                    @else
+                        <option value="">Pilih Dokter</option>
+                        @foreach($doctors as $doctor)
+                            <option value="{{ $doctor->id }}" {{ request('doctor_id') == $doctor->id ? 'selected' : '' }}>{{ $doctor->name }}</option>
+                        @endforeach
+                    @endif
                 </select>
             </div>
             <div>
@@ -98,10 +102,14 @@
                     <div>
                         <x-input-label for="doctor_id" value="Dokter" />
                         <select name="doctor_id" class="w-full border border-border-light bg-surface-light px-4 py-3 text-sm text-text-primary-light focus:border-primary-500 focus:ring-2 focus:ring-primary-500/20 focus:outline-none rounded-xl shadow-glass-sm transition-all duration-200 dark:border-border-dark dark:bg-surface-dark dark:text-text-primary-dark" required>
-                            <option value="">Pilih Dokter</option>
-                            @foreach($doctors as $doctor)
-                                <option value="{{ $doctor->id }}" {{ (old('doctor_id') ?? request('doctor_id')) == $doctor->id ? 'selected' : '' }}>{{ $doctor->name }}</option>
-                            @endforeach
+                            @if(! request('poli_id'))
+                                <option value="">Pilih Poli terlebih dahulu</option>
+                            @else
+                                <option value="">Pilih Dokter</option>
+                                @foreach($doctors as $doctor)
+                                    <option value="{{ $doctor->id }}" {{ (old('doctor_id') ?? request('doctor_id')) == $doctor->id ? 'selected' : '' }}>{{ $doctor->name }}</option>
+                                @endforeach
+                            @endif
                         </select>
                         <x-input-error :messages="$errors->get('doctor_id')" />
                     </div>
