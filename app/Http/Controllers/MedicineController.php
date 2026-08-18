@@ -221,4 +221,49 @@ class MedicineController extends Controller
 
         return view('medicines.expiring', compact('expiringStocks', 'expiredStocks'));
     }
+
+    public function stockCard(Request $request)
+    {
+        $this->authorize('viewAny', Medicine::class);
+
+        $medicines = Medicine::orderBy('name')->get();
+
+        $medicineId = $request->filled('medicine_id')
+            ? (int) $request->input('medicine_id')
+            : $medicines->first()?->id;
+
+        $mutations = collect();
+
+        if ($medicineId) {
+            $mutations = StockMutation::with('medicine')
+                ->where('medicine_id', $medicineId)
+                ->orderBy('created_at')
+                ->orderBy('id')
+                ->get()
+                ->map(function ($mutation) {
+                    $mutation->running_balance = $mutation->type === 'in' ? $mutation->quantity : -$mutation->quantity;
+
+                    return $mutation;
+                });
+        }
+
+        $balance = 0;
+        $entries = [];
+
+        foreach ($mutations as $mutation) {
+            $balance += $mutation->running_balance;
+            $entries[] = [
+                'created_at' => $mutation->created_at,
+                'reference' => $mutation->reference,
+                'notes' => $mutation->notes,
+                'in' => $mutation->type === 'in' ? $mutation->quantity : null,
+                'out' => $mutation->type === 'out' ? $mutation->quantity : null,
+                'balance' => $balance,
+            ];
+        }
+
+        $medicine = $medicineId ? Medicine::find($medicineId) : null;
+
+        return view('medicines.stock-card', compact('medicines', 'medicine', 'medicineId', 'entries', 'balance'));
+    }
 }

@@ -435,6 +435,25 @@ class ModuleSmokeTest extends TestCase
         $this->actingAs($user)->get(route('medicines.reorder.pdf'))->assertOk();
     }
 
+    public function test_pharmacist_can_view_stock_card(): void
+    {
+        $user = $this->seedAdmin();
+
+        $medicine = \App\Models\Medicine::firstOrFail();
+
+        $this->actingAs($user)->post(route('medicine-stocks.store'), [
+            'medicine_id' => $medicine->id,
+            'batch_number' => 'CARD-001',
+            'quantity' => 10,
+            'expiry_date' => now()->addYear()->toDateString(),
+        ])->assertSessionHasNoErrors();
+
+        $this->actingAs($user)->get(route('medicines.stock-card', ['medicine_id' => $medicine->id]))
+            ->assertOk()
+            ->assertSee('Kartu Stok Obat')
+            ->assertSee($medicine->name);
+    }
+
     public function test_pharmacist_can_view_expiring_stock_report(): void
     {
         $user = $this->seedAdmin();

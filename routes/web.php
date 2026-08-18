@@ -94,6 +94,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('medicine-reorder', [MedicineController::class, 'reorder'])->name('medicines.reorder');
     Route::get('medicine-reorder/pdf', [MedicineController::class, 'reorderPdf'])->name('medicines.reorder.pdf');
     Route::get('medicine-expiring', [MedicineController::class, 'expiring'])->name('medicines.expiring');
+    Route::get('medicine-stock-card', [MedicineController::class, 'stockCard'])->name('medicines.stock-card');
     Route::post('medicine-stocks', [MedicineStockController::class, 'store'])->name('medicine-stocks.store');
     Route::post('medicine-stocks/adjust', [MedicineStockController::class, 'adjust'])->name('medicine-stocks.adjust');
     Route::post('prescriptions/{prescription}/dispense', [MedicineStockController::class, 'dispense'])->name('prescriptions.dispense');
