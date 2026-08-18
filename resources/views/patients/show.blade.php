@@ -35,7 +35,14 @@
             </div>
             <div>
                 <span class="block text-xs font-semibold text-text-secondary-light dark:text-text-secondary-dark uppercase mb-1">Tanggal Lahir</span>
-                <span class="block text-base font-medium text-text-primary-light dark:text-text-primary-dark">{{ $patient->date_of_birth ? \Carbon\Carbon::parse($patient->date_of_birth)->format('d/m/Y') . ' <span class="text-xs text-text-secondary-light dark:text-text-secondary-dark">(' . \Carbon\Carbon::parse($patient->date_of_birth)->age . ' tahun)</span>' : '-' }}</span>
+                <span class="block text-base font-medium text-text-primary-light dark:text-text-primary-dark">
+                    @if($patient->date_of_birth)
+                        {{ \Carbon\Carbon::parse($patient->date_of_birth)->format('d/m/Y') }}
+                        <span class="text-xs text-text-secondary-light dark:text-text-secondary-dark">({{ \Carbon\Carbon::parse($patient->date_of_birth)->age }} tahun)</span>
+                    @else
+                        -
+                    @endif
+                </span>
             </div>
             <div>
                 <span class="block text-xs font-semibold text-text-secondary-light dark:text-text-secondary-dark uppercase mb-1">Jenis Kelamin</span>
