@@ -10,7 +10,7 @@ class VitalSignController extends Controller
 {
     public function create(Appointment $appointment)
     {
-        $this->authorize('update', $appointment);
+        $this->authorize('viewVitals', $appointment);
 
         $vitalSign = $appointment->vitalSign;
 
@@ -19,7 +19,7 @@ class VitalSignController extends Controller
 
     public function store(Request $request, Appointment $appointment)
     {
-        $this->authorize('update', $appointment);
+        $this->authorize('viewVitals', $appointment);
 
         $validated = $request->validate([
             'temperature' => 'required|numeric',
@@ -37,6 +37,6 @@ class VitalSignController extends Controller
 
         $appointment->vitalSign()->updateOrCreate([], $validated);
 
-        return redirect()->route('appointments.show', $appointment)->with('success', 'Tanda vital berhasil disimpan.');
+        return redirect()->route('appointments.queue')->with('success', 'Tanda vital berhasil disimpan.');
     }
 }

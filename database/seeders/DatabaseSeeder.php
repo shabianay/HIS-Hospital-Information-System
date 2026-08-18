@@ -27,6 +27,7 @@ class DatabaseSeeder extends Seeder
             'manage-master-data', 'manage-patients', 'manage-appointments',
             'manage-emr', 'manage-pharmacy', 'manage-billing',
             'manage-users', 'view-dashboard', 'manage-lab',
+            'input-vital-signs',
         ];
         foreach ($permissions as $permission) {
             Permission::firstOrCreate(['name' => $permission]);
@@ -45,7 +46,7 @@ class DatabaseSeeder extends Seeder
         $rolePermissionMap = [
             'registration' => ['manage-patients', 'manage-appointments', 'view-dashboard'],
             'doctor' => ['manage-emr', 'view-dashboard'],
-            'nurse' => ['manage-emr', 'view-dashboard'],
+            'nurse' => ['manage-emr', 'view-dashboard', 'input-vital-signs'],
             'pharmacist' => ['manage-pharmacy', 'view-dashboard'],
             'cashier' => ['manage-billing', 'view-dashboard'],
             'lab_tech' => ['manage-lab', 'view-dashboard'],
@@ -79,6 +80,18 @@ class DatabaseSeeder extends Seeder
         );
         if (! $registration->hasRole('registration')) {
             $registration->assignRole('registration');
+        }
+
+        // Nurse User
+        $nurse = User::firstOrCreate(
+            ['email' => 'perawat@his.local'],
+            [
+                'name' => 'Eka Staff Perawat',
+                'password' => Hash::make('password'),
+            ]
+        );
+        if (! $nurse->hasRole('nurse')) {
+            $nurse->assignRole('nurse');
         }
 
         // Doctor User

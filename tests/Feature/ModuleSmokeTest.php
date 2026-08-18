@@ -24,6 +24,13 @@ class ModuleSmokeTest extends TestCase
         return User::where('email', 'admin@his.local')->firstOrFail();
     }
 
+    private function seedNurse(): User
+    {
+        $this->seed(DatabaseSeeder::class);
+
+        return User::where('email', 'perawat@his.local')->firstOrFail();
+    }
+
     public function test_admin_can_open_every_module_index_page(): void
     {
         $user = $this->seedAdmin();
@@ -771,8 +778,10 @@ class ModuleSmokeTest extends TestCase
 
     public function test_nurse_can_input_vital_signs(): void
     {
-        $user = $this->seedAdmin();
+        $user = $this->seedNurse();
         $appointment = Appointment::first();
+
+        $this->actingAs($user)->get(route('appointments.queue'))->assertOk();
 
         $this->actingAs($user)->get(route('vital-signs.create', $appointment))->assertOk();
 
@@ -786,14 +795,15 @@ class ModuleSmokeTest extends TestCase
             'height' => 170.0,
             'oxygen_saturation' => 98,
             'notes' => 'Pasien stabil.',
-        ])->assertSessionHasNoErrors();
+        ])->assertRedirect(route('appointments.queue'));
 
         $this->assertDatabaseHas('vital_signs', [
             'appointment_id' => $appointment->id,
             'temperature' => 36.5,
         ]);
 
-        $this->actingAs($user)->get(route('appointments.show', $appointment))
+        $admin = $this->seedAdmin();
+        $this->actingAs($admin)->get(route('appointments.show', $appointment))
             ->assertOk()
             ->assertSee('Tanda Vital Pasien')
             ->assertSee('36.5 °C');

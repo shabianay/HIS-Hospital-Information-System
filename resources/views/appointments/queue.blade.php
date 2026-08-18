@@ -27,6 +27,7 @@
             </p>
         </div>
         <div class="flex items-center gap-3">
+            @can('viewAny', \App\Models\Appointment::class)
             <a href="{{ route('appointments.queue.csv', ['date' => $today->toDateString()]) }}" class="inline-flex items-center justify-center px-5 py-2.5 bg-surface-light border border-border-light text-text-primary-light hover:bg-secondary-50 text-sm font-semibold rounded-xl shadow-glass-sm transition-all duration-200 dark:bg-surface-dark dark:border-border-dark dark:text-text-primary-dark dark:hover:bg-secondary-800">
                 Export CSV
             </a>
@@ -38,6 +39,7 @@
                 class="inline-flex items-center justify-center px-5 py-2.5 bg-primary-600 hover:bg-primary-700 text-white text-sm font-semibold rounded-xl shadow-glass-sm transition-all duration-200">
                 Daftar Pasien Baru
             </a>
+            @endcan
         </div>
     </div>
 
@@ -81,6 +83,7 @@
                                 <a href="{{ route('vital-signs.create', $appointment) }}" class="inline-flex items-center justify-center px-4 py-2 bg-warning-600 hover:bg-warning-700 text-white text-xs font-semibold rounded-lg shadow-glass-sm transition-all duration-200">
                                     Tanda Vital
                                 </a>
+                                @can('update', $appointment)
                                 <form action="{{ route('appointments.status.update', $appointment) }}" method="POST">
                                     @csrf
                                     @method('PATCH')
@@ -90,8 +93,10 @@
                                         Panggil
                                     </button>
                                 </form>
+                                @endcan
                             @endif
                             @if($appointment->status === 'in_progress')
+                                @can('update', $appointment)
                                 <form action="{{ route('appointments.status.update', $appointment) }}" method="POST">
                                     @csrf
                                     @method('PATCH')
@@ -101,6 +106,7 @@
                                         Selesai
                                     </button>
                                 </form>
+                                @endcan
                             @endif
                             <a href="{{ route('appointments.ticket', $appointment) }}" target="_blank"
                                 class="inline-flex items-center justify-center px-4 py-2 border border-border-light dark:border-border-dark rounded-lg text-xs font-medium text-text-primary-light dark:text-text-primary-dark hover:bg-secondary-100 dark:hover:bg-secondary-800 transition-all">
@@ -119,10 +125,12 @@
         <div class="bg-surface-light dark:bg-surface-dark p-10 rounded-2xl border border-border-light dark:border-border-dark text-center shadow-glass-sm">
             <p class="font-semibold text-text-primary-light dark:text-text-primary-dark">Belum ada antrian hari ini.</p>
             <p class="mt-1 text-sm text-text-secondary-light dark:text-text-secondary-dark">Daftarkan pasien baru untuk memulai antrian.</p>
+            @can('create', \App\Models\Appointment::class)
             <a href="{{ route('appointments.create') }}"
                 class="mt-6 inline-flex items-center justify-center px-5 py-2.5 bg-primary-600 hover:bg-primary-700 text-white text-sm font-semibold rounded-xl shadow-glass-sm transition-all duration-200">
                 Daftar Pasien
             </a>
+            @endcan
         </div>
     @endforelse
 </div>

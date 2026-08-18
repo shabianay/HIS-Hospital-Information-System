@@ -240,7 +240,7 @@ class AppointmentController extends Controller
 
     public function queue()
     {
-        $this->authorize('viewAny', Appointment::class);
+        $this->authorize('viewVitals', Appointment::class);
 
         $today = Carbon::today();
         $dayStart = $today->copy()->startOfDay();
