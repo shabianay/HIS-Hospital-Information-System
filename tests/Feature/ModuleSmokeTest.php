@@ -532,6 +532,42 @@ class ModuleSmokeTest extends TestCase
         $this->assertGreaterThan(0, $doctorUser->notifications()->where('type', \App\Notifications\PatientCalled::class)->count());
     }
 
+    public function test_appointment_reminder_command_notifies_doctor(): void
+    {
+        $user = $this->seedAdmin();
+
+        $tomorrow = now()->addDay()->toDateString();
+        $schedule = Schedule::first();
+        $patient = Patient::first();
+
+        if (! $schedule || ! $patient) {
+            $this->assertTrue(true);
+            return;
+        }
+
+        $appointment = Appointment::create([
+            'queue_number' => 'QUMU-' . str_replace('-', '', $tomorrow) . '-001',
+            'patient_id' => $patient->id,
+            'doctor_id' => $schedule->doctor_id,
+            'poli_id' => $schedule->poli_id,
+            'schedule_id' => $schedule->id,
+            'appointment_date' => $tomorrow,
+            'status' => 'waiting',
+            'consultation_fee' => $schedule->consultation_fee,
+        ]);
+
+        $doctorUser = $appointment->doctor?->user;
+
+        if (! $doctorUser) {
+            $this->assertTrue(true);
+            return;
+        }
+
+        $this->artisan('appointments:remind')->assertSuccessful();
+
+        $this->assertGreaterThan(0, $doctorUser->notifications()->where('type', \App\Notifications\AppointmentReminder::class)->count());
+    }
+
     public function test_public_queue_lookup_shows_patient_position(): void
     {
         $user = $this->seedAdmin();
