@@ -29,6 +29,54 @@ class MedicineController extends Controller
         return view('medicines.index', compact('medicines'));
     }
 
+    public function indexCsv(Request $request)
+    {
+        $this->authorize('viewAny', Medicine::class);
+
+        $query = Medicine::withSum('stocks as total_stock', 'quantity');
+
+        if ($request->filled('search')) {
+            $search = $request->search;
+            $query->where(function ($q) use ($search) {
+                $q->where('name', 'like', "%{$search}%")
+                    ->orWhere('generic_name', 'like', "%{$search}%");
+            });
+        }
+
+        $medicines = $query->orderBy('name')->get();
+
+        $filename = 'katalog-obat-' . now()->format('Ymd') . '.csv';
+
+        return response()->streamDownload(function () use ($medicines) {
+            $handle = fopen('php://output', 'w');
+            fwrite($handle, "\xEF\xBB\xBF");
+
+            fputcsv($handle, ['KATALOG OBAT RUMAH SAKIT HIS']);
+            fputcsv($handle, ['Dibuat', now()->format('d/m/Y H:i')]);
+            fputcsv($handle, []);
+
+            fputcsv($handle, ['Nama', 'Nama Generik', 'Kategori', 'Satuan', 'Harga Beli', 'Harga Jual', 'Stok Total', 'Stok Minimum', 'Status']);
+            foreach ($medicines as $medicine) {
+                $status = (float) $medicine->total_stock <= $medicine->minimum_stock ? 'PERLU RESTOCK' : 'Tersedia';
+                fputcsv($handle, [
+                    $medicine->name,
+                    $medicine->generic_name ?? '-',
+                    $medicine->category ?? '-',
+                    $medicine->unit,
+                    number_format((float) $medicine->buy_price, 2),
+                    number_format((float) $medicine->sell_price, 2),
+                    (float) $medicine->total_stock,
+                    $medicine->minimum_stock,
+                    $status,
+                ]);
+            }
+            fputcsv($handle, []);
+            fputcsv($handle, ['TOTAL ITEM', $medicines->count()]);
+
+            fclose($handle);
+        }, $filename, ['Content-Type' => 'text/csv; charset=UTF-8']);
+    }
+
     public function create()
     {
         $this->authorize('create', Medicine::class);

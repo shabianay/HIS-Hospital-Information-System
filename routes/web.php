@@ -94,6 +94,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
     // Medicines & Pharmacy
     Route::resource('medicines', MedicineController::class);
+    Route::get('medicines/index/csv', [MedicineController::class, 'indexCsv'])->name('medicines.index.csv');
     Route::get('medicines-stock', [MedicineController::class, 'stock'])->name('medicines.stock');
     Route::get('medicine-mutations', [MedicineController::class, 'mutations'])->name('medicines.mutations');
     Route::get('medicine-mutations/csv', [MedicineController::class, 'mutationsCsv'])->name('medicines.mutations.csv');
