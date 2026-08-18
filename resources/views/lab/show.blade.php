@@ -12,19 +12,21 @@
         $labels = ['pending' => 'Menunggu', 'in_progress' => 'Dikerjakan', 'completed' => 'Selesai', 'cancelled' => 'Dibatalkan'];
     @endphp
 
-    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-        <div class="flex items-center gap-3">
+    <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
+        <div class="flex flex-wrap items-center gap-3">
             <h2 class="text-2xl font-bold text-text-primary-light dark:text-text-primary-dark">Permintaan Lab #{{ str_pad($labRequest->id, 4, '0', STR_PAD_LEFT) }}</h2>
             <span class="inline-flex items-center rounded-full px-3 py-1 text-xs font-semibold {{ $badges[$labRequest->status] }}">{{ $labels[$labRequest->status] }}</span>
             @if($labRequest->is_urgent)<span class="inline-flex items-center rounded-full px-3 py-1 text-xs font-bold bg-danger-100 text-danger-800 dark:bg-danger-900/30 dark:text-danger-400">PRIORITAS</span>@endif
         </div>
-        <a href="{{ route('lab.requests.pdf', $labRequest) }}" class="inline-flex items-center gap-2 rounded-xl border border-primary-300 dark:border-primary-700 bg-primary-50 dark:bg-primary-900/20 px-5 py-2.5 text-sm font-semibold text-primary-700 dark:text-primary-300 hover:bg-primary-100 dark:hover:bg-primary-900/40 transition-all duration-200">Cetak PDF</a>
-        @can('create', App\Models\Billing::class)
-            @if($labRequest->appointment && ! $labRequest->appointment->billing)
-            <a href="{{ route('billings.create', $labRequest->appointment) }}" class="inline-flex items-center gap-2 rounded-xl bg-primary-600 hover:bg-primary-700 text-white px-5 py-2.5 text-sm font-semibold shadow-glass-sm hover:shadow-glass-md transition-all duration-200">Buat Tagihan</a>
-            @endif
-        @endcan
-        <a href="{{ route('lab.requests') }}" class="text-sm font-semibold text-primary-600 hover:text-primary-800 dark:text-primary-400 dark:hover:text-primary-300">← Kembali</a>
+        <div class="flex flex-wrap items-center gap-3">
+            <a href="{{ route('lab.requests.pdf', $labRequest) }}" class="inline-flex items-center gap-2 rounded-xl border border-primary-300 dark:border-primary-700 bg-primary-50 dark:bg-primary-900/20 px-5 py-2.5 text-sm font-semibold text-primary-700 dark:text-primary-300 hover:bg-primary-100 dark:hover:bg-primary-900/40 transition-all duration-200">Cetak PDF</a>
+            @can('create', App\Models\Billing::class)
+                @if($labRequest->appointment && ! $labRequest->appointment->billing)
+                <a href="{{ route('billings.create', $labRequest->appointment) }}" class="inline-flex items-center gap-2 rounded-xl bg-primary-600 hover:bg-primary-700 text-white px-5 py-2.5 text-sm font-semibold shadow-glass-sm hover:shadow-glass-md transition-all duration-200">Buat Tagihan</a>
+                @endif
+            @endcan
+            <a href="{{ route('lab.requests') }}" class="inline-flex items-center rounded-xl border border-border-light dark:border-border-dark px-5 py-2.5 text-sm font-semibold text-text-secondary-light dark:text-text-secondary-dark hover:bg-secondary-50 dark:hover:bg-secondary-800/50 transition-all duration-200">← Kembali</a>
+        </div>
     </div>
 
     <div class="bg-surface-light dark:bg-surface-dark p-8 rounded-2xl border border-border-light dark:border-border-dark shadow-glass-sm">
@@ -98,15 +100,18 @@
                     </select>
                 </div>
                 <div class="flex gap-3">
-                    <form method="POST" action="{{ route('lab.requests.destroy', $labRequest) }}" onsubmit="return confirm('Hapus permintaan ini?')" class="inline">
-                        @csrf
-                        @method('DELETE')
-                        <button type="submit" class="px-5 py-2.5 border border-danger-200 dark:border-danger-800 text-danger-700 dark:text-danger-400 text-sm font-semibold rounded-xl hover:bg-danger-50 dark:hover:bg-danger-900/20 transition-all duration-200">Hapus</button>
-                    </form>
                     <x-primary-button type="submit">Simpan Hasil</x-primary-button>
                 </div>
             </div>
         </div>
     </form>
+
+    <div class="flex justify-end">
+        <form method="POST" action="{{ route('lab.requests.destroy', $labRequest) }}" onsubmit="return confirm('Hapus permintaan ini?')" class="inline">
+            @csrf
+            @method('DELETE')
+            <button type="submit" class="px-5 py-2.5 border border-danger-200 dark:border-danger-800 text-danger-700 dark:text-danger-400 text-sm font-semibold rounded-xl hover:bg-danger-50 dark:hover:bg-danger-900/20 transition-all duration-200">Hapus Permintaan</button>
+        </form>
+    </div>
 </div>
 @endsection
