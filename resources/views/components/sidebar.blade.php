@@ -81,8 +81,4 @@
         @endforeach
     </nav>
 
-    {{-- Footer --}}
-    <div class="border-t border-primary-700 px-4 py-4">
-        <p class="text-xs text-primary">© {{ date('Y') }} HIS Rumah Sakit</p>
-    </div>
 </aside>

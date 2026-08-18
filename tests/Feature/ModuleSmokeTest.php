@@ -1579,4 +1579,13 @@ class ModuleSmokeTest extends TestCase
             ->assertOk()
             ->assertHeader('Content-Type', 'text/csv; charset=utf-8');
     }
+
+    public function test_authenticated_user_can_export_medical_records_csv(): void
+    {
+        $user = $this->seedAdmin();
+
+        $this->actingAs($user)->get(route('medical-records.index.csv'))
+            ->assertOk()
+            ->assertHeader('Content-Type', 'text/csv; charset=utf-8');
+    }
 }

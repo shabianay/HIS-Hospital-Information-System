@@ -71,6 +71,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
     // Medical Records
     Route::get('medical-records', [MedicalRecordController::class, 'index'])->name('medical-records.index');
+    Route::get('medical-records/index/csv', [MedicalRecordController::class, 'indexCsv'])->name('medical-records.index.csv');
     Route::get('patients/{patient}/medical-history', [MedicalRecordController::class, 'history'])->name('patients.medical-history');
     Route::get('patients/{patient}/medical-history/pdf', [MedicalRecordController::class, 'historyPdf'])->name('patients.medical-history.pdf');
     Route::get('appointments/{appointment}/medical-record/create', [MedicalRecordController::class, 'create'])->name('medical-records.create');

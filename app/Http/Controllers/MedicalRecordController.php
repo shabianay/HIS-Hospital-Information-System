@@ -29,6 +29,45 @@ class MedicalRecordController extends Controller
         return view('medical-records.index', compact('records'));
     }
 
+    public function indexCsv()
+    {
+        $this->authorize('viewAny', MedicalRecord::class);
+
+        $records = MedicalRecord::with(['appointment.patient', 'appointment.doctor', 'appointment.poli'])
+            ->latest()
+            ->get();
+
+        $filename = 'rekam-medis-' . now()->format('Ymd') . '.csv';
+
+        return response()->streamDownload(function () use ($records) {
+            $handle = fopen('php://output', 'w');
+            fwrite($handle, "\xEF\xBB\xBF");
+
+            fputcsv($handle, ['DATA REKAM MEDIS RUMAH SAKIT HIS']);
+            fputcsv($handle, ['Dibuat', now()->format('d/m/Y H:i')]);
+            fputcsv($handle, []);
+
+            fputcsv($handle, ['Tanggal', 'No. RM', 'Pasien', 'Poli', 'Dokter', 'Keluhan', 'Diagnosa', 'Jumlah Obat']);
+            foreach ($records as $record) {
+                $diagnoses = $record->diagnoses->pluck('description')->implode('; ');
+                fputcsv($handle, [
+                    $record->appointment?->appointment_date?->format('d/m/Y'),
+                    $record->appointment?->patient?->rm_number ?? '-',
+                    $record->appointment?->patient?->name ?? '-',
+                    $record->appointment?->poli?->name ?? '-',
+                    $record->appointment?->doctor?->name ?? '-',
+                    $record->complaints ?? '',
+                    $diagnoses,
+                    $record->prescriptions()->count(),
+                ]);
+            }
+            fputcsv($handle, []);
+            fputcsv($handle, ['TOTAL REKAM MEDIS', $records->count()]);
+
+            fclose($handle);
+        }, $filename, ['Content-Type' => 'text/csv; charset=UTF-8']);
+    }
+
     public function show(MedicalRecord $medicalRecord)
     {
         $this->authorize('view', $medicalRecord);
