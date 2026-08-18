@@ -49,7 +49,7 @@
             $groups = [
                 'Utama' => [
                     ['label' => 'Dashboard', 'route' => 'dashboard', 'permission' => 'view-dashboard', 'icon' => 'M3.75 6A2.25 2.25 0 0 1 6 3.75h2.25A2.25 2.25 0 0 1 10.5 6v2.25a2.25 2.25 0 0 1-2.25 2.25H6a2.25 2.25 0 0 1-2.25-2.25V6ZM3.75 15.75A2.25 2.25 0 0 1 6 13.5h2.25a2.25 2.25 0 0 1 2.25 2.25V18a2.25 2.25 0 0 1-2.25 2.25H6A2.25 2.25 0 0 1 3.75 18v-2.25ZM13.5 6a2.25 2.25 0 0 1 2.25-2.25H18A2.25 2.25 0 0 1 20.25 6v2.25A2.25 2.25 0 0 1 18 10.5h-2.25a2.25 2.25 0 0 1-2.25-2.25V6ZM13.5 15.75a2.25 2.25 0 0 1 2.25-2.25H18a2.25 2.25 0 0 1 2.25 2.25V18A2.25 2.25 0 0 1 18 20.25h-2.25A2.25 2.25 0 0 1 13.5 18v-2.25Z'],
-                    ['label' => 'Notifikasi', 'route' => 'notifications.index', 'permission' => 'view-dashboard', 'icon' => 'M14.857 17.082a23.848 23.848 0 0 0 5.454-1.31A8.967 8.967 0 0 1 18 9.75V9A6 6 0 0 0 6 9v.75a8.967 8.967 0 0 1-2.312 6.022c1.733.64 3.56 1.085 5.455 1.31m5.714 0a24.255 24.255 0 0 1-5.714 0m5.714 0a3 3 0 1 1-5.714 0'],
+                    ['label' => 'Notifikasi', 'route' => 'notifications.index', 'permission' => 'view-dashboard', 'icon' => 'M14.857 17.082a23.848 23.848 0 0 0 5.454-1.31A8.967 8.967 0 0 1 18 9.75V9A6 6 0 0 0 6 9v.75a8.967 8.967 0 0 1-2.312 6.022c1.733.64 3.56 1.085 5.455 1.31m5.714 0a24.255 24.255 0 0 1-5.714 0m5.714 0a3 3 0 1 1-5.714 0', 'badge' => true],
                 ],
                 'Pendaftaran & Antrian' => [
                     ['label' => 'Antrian Hari Ini', 'route' => 'appointments.queue', 'permission' => 'manage-appointments', 'icon' => 'M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 0 1 2.25-2.25h13.5A2.25 2.25 0 0 1 21 7.5v11.25m-18 0A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75m-18 0v-7.5A2.25 2.25 0 0 1 5.25 9h13.5A2.25 2.25 0 0 1 21 11.25v7.5', 'permissions' => ['manage-appointments', 'input-vital-signs']],
@@ -105,6 +105,7 @@
             @foreach ($visibleItems as $item)
                 <a href="{{ route($item['route']) }}"
                     @click="mobileMenu = false"
+                    @if(!empty($item['badge'])) x-data="unreadNotifier()" x-init="init()" @endif
                     class="{{ request()->routeIs($item['route'] . '*') 
                         ? 'bg-primary-100 dark:bg-primary-900 text-primary-700 dark:text-primary-300' 
                         : 'text-text-secondary-light dark:text-text-secondary-dark hover:bg-secondary-50 dark:hover:bg-secondary-800/50 hover:text-primary-600 dark:hover:text-primary-200' 
@@ -113,7 +114,10 @@
                         stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" d="{{ $item['icon'] }}" />
                     </svg>
-                    <span>{{ $item['label'] }}</span>
+                    <span class="flex-1">{{ $item['label'] }}</span>
+                    @if(!empty($item['badge']))
+                        <span x-show="count > 0" x-cloak class="inline-flex h-4 min-w-4 items-center justify-center rounded-full bg-danger-600 px-1 text-[10px] font-bold leading-none text-white" x-text="Math.min(count, 99)"></span>
+                    @endif
                 </a>
             @endforeach
         @endforeach
