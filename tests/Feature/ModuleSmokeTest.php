@@ -580,6 +580,21 @@ class ModuleSmokeTest extends TestCase
         $this->assertGreaterThan(0, $doctorUser->notifications()->where('type', \App\Notifications\AppointmentReminder::class)->count());
     }
 
+    public function test_stock_digest_command_notifies_pharmacist(): void
+    {
+        $user = $this->seedAdmin();
+
+        $medicine = Medicine::firstOrFail();
+        MedicineStock::where('medicine_id', $medicine->id)->update(['quantity' => 1]);
+
+        $pharmacist = User::where('email', 'apoteker@his.local')->firstOrFail();
+        $pharmacist->notifications()->delete();
+
+        $this->artisan('stock:digest')->assertSuccessful();
+
+        $this->assertGreaterThan(0, $pharmacist->notifications()->count());
+    }
+
     public function test_public_queue_lookup_shows_patient_position(): void
     {
         $user = $this->seedAdmin();
