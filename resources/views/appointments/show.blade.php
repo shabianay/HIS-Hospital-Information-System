@@ -116,6 +116,14 @@
                 </a>
             @endif
 
+            @if(!$appointment->vitalSign)
+                @can('update', $appointment)
+                    <a href="{{ route('vital-signs.create', $appointment) }}" class="inline-flex items-center justify-center px-5 py-2.5 bg-warning-600 hover:bg-warning-700 text-white text-sm font-semibold rounded-xl shadow-glass-sm hover:shadow-glass-md transition-all duration-200">
+                        Input Tanda Vital
+                    </a>
+                @endcan
+            @endif
+
             @if($appointment->status === 'cancelled' || $appointment->status === 'waiting')
                 @if(!$appointment->medicalRecord && !$appointment->billing)
                     <form action="{{ route('appointments.destroy', $appointment) }}" method="POST" onsubmit="return confirm('Hapus janji temu ini? Tindakan ini permanen.')">
@@ -138,8 +146,11 @@
         </div>
 
         @if($appointment->vitalSign)
-            <div class="mt-8 pt-8 border-t border-border-light dark:border-border-dark">
-                <h3 class="text-xl font-bold text-text-primary-light dark:text-text-primary-dark mb-6">Tanda Vital Pasien</h3>
+            <div class="bg-surface-light dark:bg-surface-dark p-6 rounded-2xl border border-border-light dark:border-border-dark shadow-glass-sm">
+                <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-6">
+                    <h3 class="text-xl font-bold text-text-primary-light dark:text-text-primary-dark">Tanda Vital Pasien</h3>
+                    <a href="{{ route('vital-signs.create', $appointment) }}" class="inline-flex items-center px-4 py-2 border border-border-light dark:border-border-dark rounded-xl text-sm font-medium text-text-primary-light dark:text-text-primary-dark hover:bg-secondary-100 dark:hover:bg-secondary-800">Edit Tanda Vital</a>
+                </div>
                 <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
                     <div class="p-4 rounded-xl bg-secondary-50 dark:bg-secondary-800/40 border border-border-light dark:border-border-dark">
                         <p class="text-xs text-text-secondary-light dark:text-text-secondary-dark">Suhu Tubuh</p>
@@ -171,16 +182,7 @@
                     </div>
                 </div>
                 <p class="mt-4 text-xs text-text-secondary-light dark:text-text-secondary-dark">Dicatat oleh: {{ $appointment->vitalSign->recordedBy?->name ?? 'Sistem' }} pada {{ $appointment->vitalSign->created_at->format('d/m/Y H:i') }}</p>
-                <div class="mt-4">
-                    <a href="{{ route('vital-signs.create', $appointment) }}" class="inline-flex items-center px-4 py-2 border border-border-light dark:border-border-dark rounded-xl text-sm font-medium text-text-primary-light dark:text-text-primary-dark hover:bg-secondary-100 dark:hover:bg-secondary-800">Edit Tanda Vital</a>
-                </div>
             </div>
-        @else
-            @can('update', $appointment)
-                <div class="mt-8 pt-8 border-t border-border-light dark:border-border-dark">
-                    <a href="{{ route('vital-signs.create', $appointment) }}" class="inline-flex items-center px-5 py-2.5 bg-warning-600 hover:bg-warning-700 text-white text-sm font-semibold rounded-xl shadow-glass-sm hover:shadow-glass-md transition-all duration-200">Input Tanda Vital</a>
-                </div>
-            @endcan
         @endif
     </div>
 @endsection
