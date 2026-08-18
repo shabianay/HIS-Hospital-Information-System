@@ -27,13 +27,15 @@
         <div class="p-6 md:p-8">
             <div class="mb-8 flex flex-col md:flex-row md:items-center justify-between gap-4">
                 <h3 class="text-xl font-bold text-text-primary-light dark:text-text-primary-dark">Pendaftaran Janji Temu</h3>
-                <a href="{{ route('appointments.create') }}"
-                    class="inline-flex items-center justify-center px-5 py-2.5 bg-primary-600 hover:bg-primary-700 text-white text-sm font-semibold rounded-xl shadow-glass-sm hover:shadow-glass-md transition-all duration-200">
-                    <svg class="w-5 h-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
-                    </svg>
-                    Daftar Janji Temu
-                </a>
+                <div class="flex items-center gap-3">
+                    <a href="{{ route('appointments.index.csv', request()->query()) }}" class="inline-flex items-center justify-center px-5 py-2.5 border border-border-light dark:border-border-dark bg-surface-light dark:bg-surface-dark text-text-primary-light dark:text-text-primary-dark text-sm font-semibold rounded-xl shadow-glass-sm hover:bg-secondary-50 dark:hover:bg-secondary-800 transition-all duration-200">Export CSV</a>
+                    <a href="{{ route('appointments.create') }}"
+                        class="inline-flex items-center justify-center px-5 py-2.5 bg-primary-600 hover:bg-primary-700 text-white text-sm font-semibold rounded-xl shadow-glass-sm hover:shadow-glass-md transition-all duration-200">
+                        <svg class="w-5 h-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+                        </svg>
+                        Daftar Janji Temu
+                    </a>
             </div>
 
             <form method="GET" action="{{ route('appointments.index') }}"

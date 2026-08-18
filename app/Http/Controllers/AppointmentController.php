@@ -45,6 +45,60 @@ class AppointmentController extends Controller
         return view('appointments.index', compact('appointments', 'polis'));
     }
 
+    public function indexCsv(Request $request)
+    {
+        $this->authorize('viewAny', Appointment::class);
+
+        $query = Appointment::with(['patient', 'doctor', 'poli']);
+
+        $date = $request->get('date', Carbon::today()->toDateString());
+        if ($date) {
+            $dayStart = Carbon::parse($date)->startOfDay();
+            $dayEnd = Carbon::parse($date)->endOfDay();
+            $query->whereBetween('appointment_date', [$dayStart, $dayEnd]);
+        }
+
+        if ($request->filled('status')) {
+            $query->where('status', $request->status);
+        }
+
+        if ($request->filled('poli_id')) {
+            $query->where('poli_id', $request->poli_id);
+        }
+
+        $appointments = $query->latest('appointment_date')->get();
+
+        $statusLabels = [
+            'waiting' => 'Menunggu',
+            'in_progress' => 'Sedang Diperiksa',
+            'completed' => 'Selesai',
+            'cancelled' => 'Dibatalkan',
+        ];
+
+        $filename = 'daftar-janji-' . Carbon::parse($date)->format('Ymd') . '.csv';
+
+        return response()->streamDownload(function () use ($appointments, $statusLabels, $date) {
+            $handle = fopen('php://output', 'w');
+
+            fputcsv($handle, ['DAFTAR JANJI TEMU ' . Carbon::parse($date)->format('d/m/Y')]);
+            fputcsv($handle, ['No. Antrian', 'Pasien', 'NIK', 'Poli', 'Dokter', 'Status', 'Jadwal']);
+
+            foreach ($appointments as $appointment) {
+                fputcsv($handle, [
+                    $appointment->queue_number,
+                    $appointment->patient?->name ?? '-',
+                    $appointment->patient?->nik ?? '-',
+                    $appointment->poli?->name ?? '-',
+                    $appointment->doctor?->name ?? '-',
+                    $statusLabels[$appointment->status] ?? $appointment->status,
+                    $appointment->appointment_date?->format('d/m/Y H:i') ?? '-',
+                ]);
+            }
+
+            fclose($handle);
+        }, $filename, ['Content-Type' => 'text/csv']);
+    }
+
     public function create(Request $request)
     {
         $this->authorize('create', Appointment::class);

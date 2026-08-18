@@ -413,6 +413,17 @@ class ModuleSmokeTest extends TestCase
             ->assertHeader('Content-Type', 'text/csv; charset=utf-8');
     }
 
+    public function test_authenticated_user_can_export_appointment_list_csv(): void
+    {
+        $this->seed(DatabaseSeeder::class);
+
+        $registration = User::where('email', 'pendaftaran@his.local')->firstOrFail();
+
+        $this->actingAs($registration)->get(route('appointments.index.csv'))
+            ->assertOk()
+            ->assertHeader('Content-Type', 'text/csv; charset=utf-8');
+    }
+
     public function test_pharmacist_can_view_reorder_recommendations(): void
     {
         $user = $this->seedAdmin();
