@@ -95,6 +95,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
     // Schedule routes
     Route::get('schedules/board', [ScheduleController::class, 'board'])->name('schedules.board');
     Route::resource('schedules', ScheduleController::class);
+    Route::get('schedules/index/csv', [ScheduleController::class, 'indexCsv'])->name('schedules.index.csv');
 
     // Medicines & Pharmacy
     Route::resource('medicines', MedicineController::class);
@@ -126,6 +127,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
     // Tariffs
     Route::resource('tariffs', TariffController::class);
+    Route::get('tariffs/index/csv', [TariffController::class, 'indexCsv'])->name('tariffs.index.csv');
 
     // Laboratory
     Route::get('lab/tests', [LabController::class, 'tests'])->name('lab.tests');

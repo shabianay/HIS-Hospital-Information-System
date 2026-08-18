@@ -18,6 +18,45 @@ class ScheduleController extends Controller
         return view('schedules.index', compact('schedules'));
     }
 
+    public function indexCsv()
+    {
+        $this->authorize('viewAny', Schedule::class);
+
+        $schedules = Schedule::with(['doctor', 'poli'])
+            ->orderBy('day_of_week')
+            ->orderBy('start_time')
+            ->get();
+
+        $filename = 'data-jadwal-' . now()->format('Ymd') . '.csv';
+
+        return response()->streamDownload(function () use ($schedules) {
+            $handle = fopen('php://output', 'w');
+            fwrite($handle, "\xEF\xBB\xBF");
+
+            fputcsv($handle, ['DATA JADWAL PRAKTIK RUMAH SAKIT HIS']);
+            fputcsv($handle, ['Dibuat', now()->format('d/m/Y H:i')]);
+            fputcsv($handle, []);
+
+            fputcsv($handle, ['Dokter', 'Poli', 'Hari', 'Mulai', 'Selesai', 'Kuota Harian', 'Biaya Konsultasi', 'Status']);
+            foreach ($schedules as $schedule) {
+                fputcsv($handle, [
+                    $schedule->doctor?->name ?? '-',
+                    $schedule->poli?->name ?? '-',
+                    ucfirst($schedule->day_of_week),
+                    $schedule->start_time?->format('H:i'),
+                    $schedule->end_time?->format('H:i'),
+                    $schedule->daily_quota,
+                    number_format((float) $schedule->consultation_fee, 2),
+                    $schedule->is_active ? 'Aktif' : 'Nonaktif',
+                ]);
+            }
+            fputcsv($handle, []);
+            fputcsv($handle, ['TOTAL JADWAL', $schedules->count()]);
+
+            fclose($handle);
+        }, $filename, ['Content-Type' => 'text/csv; charset=UTF-8']);
+    }
+
     public function board()
     {
         $this->authorize('viewAny', Schedule::class);

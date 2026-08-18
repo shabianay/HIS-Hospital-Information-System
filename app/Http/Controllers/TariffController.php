@@ -17,6 +17,41 @@ class TariffController extends Controller
         return view('tariffs.index', compact('tariffs'));
     }
 
+    public function indexCsv()
+    {
+        $this->authorize('viewAny', Tariff::class);
+
+        $tariffs = Tariff::with('poli')->orderBy('name')->get();
+
+        $filename = 'data-tarif-' . now()->format('Ymd') . '.csv';
+
+        return response()->streamDownload(function () use ($tariffs) {
+            $handle = fopen('php://output', 'w');
+            fwrite($handle, "\xEF\xBB\xBF");
+
+            fputcsv($handle, ['DATA TARIF RUMAH SAKIT HIS']);
+            fputcsv($handle, ['Dibuat', now()->format('d/m/Y H:i')]);
+            fputcsv($handle, []);
+
+            $typeLabels = ['konsultasi' => 'Konsultasi', 'tindakan' => 'Tindakan', 'penunjang' => 'Penunjang', 'lainnya' => 'Lainnya'];
+
+            fputcsv($handle, ['Nama', 'Poli', 'Jenis', 'Harga', 'Status']);
+            foreach ($tariffs as $tariff) {
+                fputcsv($handle, [
+                    $tariff->name,
+                    $tariff->poli?->name ?? '-',
+                    $typeLabels[$tariff->type] ?? $tariff->type,
+                    number_format((float) $tariff->price, 2),
+                    $tariff->is_active ? 'Aktif' : 'Nonaktif',
+                ]);
+            }
+            fputcsv($handle, []);
+            fputcsv($handle, ['TOTAL TARIF', $tariffs->count()]);
+
+            fclose($handle);
+        }, $filename, ['Content-Type' => 'text/csv; charset=UTF-8']);
+    }
+
     public function create()
     {
         $this->authorize('create', Tariff::class);
