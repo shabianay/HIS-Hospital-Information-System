@@ -18,6 +18,39 @@ class UserController extends Controller
         return view('users.index', compact('users'));
     }
 
+    public function indexCsv()
+    {
+        $this->authorize('viewAny', User::class);
+
+        $users = User::with('roles')->orderBy('name')->get();
+
+        $filename = 'data-pengguna-' . now()->format('Ymd') . '.csv';
+
+        return response()->streamDownload(function () use ($users) {
+            $handle = fopen('php://output', 'w');
+            fwrite($handle, "\xEF\xBB\xBF");
+
+            fputcsv($handle, ['DATA PENGGUNA SISTEM HIS']);
+            fputcsv($handle, ['Dibuat', now()->format('d/m/Y H:i')]);
+            fputcsv($handle, []);
+
+            fputcsv($handle, ['Nama', 'Email', 'Peran', 'Status', 'Dibuat Pada']);
+            foreach ($users as $user) {
+                fputcsv($handle, [
+                    $user->name,
+                    $user->email,
+                    $user->roles->pluck('name')->implode(', '),
+                    $user->is_active ? 'Aktif' : 'Nonaktif',
+                    $user->created_at?->format('d/m/Y H:i'),
+                ]);
+            }
+            fputcsv($handle, []);
+            fputcsv($handle, ['TOTAL PENGGUNA', $users->count()]);
+
+            fclose($handle);
+        }, $filename, ['Content-Type' => 'text/csv; charset=UTF-8']);
+    }
+
     public function create()
     {
         $this->authorize('create', User::class);

@@ -143,6 +143,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
     // Admin: User Management
     Route::resource('users', UserController::class);
+    Route::get('users/index/csv', [UserController::class, 'indexCsv'])->name('users.index.csv');
     Route::patch('users/{user}/toggle-active', [UserController::class, 'toggleActive'])->name('users.toggle-active');
     Route::get('audit', [AuditController::class, 'index'])->name('audit.index');
     Route::get('audit/export/csv', [AuditController::class, 'exportCsv'])->name('audit.export.csv');

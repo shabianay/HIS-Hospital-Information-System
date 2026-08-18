@@ -754,6 +754,15 @@ class ModuleSmokeTest extends TestCase
         $this->assertTrue($target->fresh()->is_active);
     }
 
+    public function test_admin_can_export_users_csv(): void
+    {
+        $user = $this->seedAdmin();
+
+        $this->actingAs($user)->get(route('users.index.csv'))
+            ->assertOk()
+            ->assertHeader('Content-Type', 'text/csv; charset=utf-8');
+    }
+
     public function test_deactivated_user_cannot_login(): void
     {
         $this->seed(DatabaseSeeder::class);
