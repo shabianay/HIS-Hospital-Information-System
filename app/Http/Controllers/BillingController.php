@@ -38,7 +38,14 @@ class BillingController extends Controller
 
         $billings = $query->latest()->paginate(20)->withQueryString();
 
-        return view('billings.index', compact('billings'));
+        $summary = [
+            'unpaid' => Billing::where('status', 'unpaid')->count(),
+            'partial' => Billing::where('status', 'partial')->count(),
+            'paid' => Billing::where('status', 'paid')->count(),
+            'uncollected' => Billing::whereIn('status', ['unpaid', 'partial'])->sum(DB::raw('total_amount - paid_amount')),
+        ];
+
+        return view('billings.index', compact('billings', 'summary'));
     }
 
     public function create(Appointment $appointment)

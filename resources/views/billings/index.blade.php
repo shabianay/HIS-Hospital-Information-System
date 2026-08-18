@@ -42,6 +42,25 @@
                     Harian</a>
             </div>
 
+            <div class="mb-8 grid grid-cols-2 lg:grid-cols-4 gap-4">
+                <div class="rounded-2xl border border-border-light dark:border-border-dark bg-surface-light dark:bg-surface-dark p-5 shadow-glass-sm">
+                    <p class="text-xs font-semibold uppercase tracking-wider text-text-secondary-light dark:text-text-secondary-dark">Belum Lunas</p>
+                    <p class="mt-1 text-2xl font-bold text-danger-600 dark:text-danger-400">{{ $summary['unpaid'] }}</p>
+                </div>
+                <div class="rounded-2xl border border-border-light dark:border-border-dark bg-surface-light dark:bg-surface-dark p-5 shadow-glass-sm">
+                    <p class="text-xs font-semibold uppercase tracking-wider text-text-secondary-light dark:text-text-secondary-dark">Sebagian</p>
+                    <p class="mt-1 text-2xl font-bold text-warning-600 dark:text-warning-400">{{ $summary['partial'] }}</p>
+                </div>
+                <div class="rounded-2xl border border-border-light dark:border-border-dark bg-surface-light dark:bg-surface-dark p-5 shadow-glass-sm">
+                    <p class="text-xs font-semibold uppercase tracking-wider text-text-secondary-light dark:text-text-secondary-dark">Lunas</p>
+                    <p class="mt-1 text-2xl font-bold text-success-600 dark:text-success-400">{{ $summary['paid'] }}</p>
+                </div>
+                <div class="rounded-2xl border border-border-light dark:border-border-dark bg-surface-light dark:bg-surface-dark p-5 shadow-glass-sm">
+                    <p class="text-xs font-semibold uppercase tracking-wider text-text-secondary-light dark:text-text-secondary-dark">Piutang</p>
+                    <p class="mt-1 text-2xl font-bold text-primary-600 dark:text-primary-400">Rp {{ number_format($summary['uncollected'], 0, ',', '.') }}</p>
+                </div>
+            </div>
+
             <form method="GET" action="{{ route('billings.index') }}"
                 class="mb-8 grid grid-cols-1 md:grid-cols-4 gap-6 p-6 bg-secondary-50 dark:bg-secondary-900/30 rounded-2xl border border-border-light dark:border-border-dark">
                 <div>
