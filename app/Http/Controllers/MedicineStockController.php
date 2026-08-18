@@ -10,6 +10,7 @@ use App\Models\Prescription;
 use App\Models\StockMutation;
 use App\Models\User;
 use App\Notifications\LowStockAlert;
+use App\Notifications\PrescriptionDispensed;
 use App\Notifications\StockExpiringAlert;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -203,7 +204,20 @@ class MedicineStockController extends Controller
 
         $this->notifyLowStock($prescription->medicine_id);
 
+        $this->notifyCashiersOfDispense($prescription);
+
         return redirect()->back()->with('success', 'Resep berhasil didispensasi.');
+    }
+
+    private function notifyCashiersOfDispense(Prescription $prescription): void
+    {
+        $cashiers = User::role('cashier')->get();
+
+        foreach ($cashiers as $cashier) {
+            if ($cashier->id !== auth()->id()) {
+                $cashier->notify(new PrescriptionDispensed($prescription));
+            }
+        }
     }
 
     private function notifyLowStock(int $medicineId): void

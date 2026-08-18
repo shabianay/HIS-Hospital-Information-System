@@ -757,6 +757,44 @@ class ModuleSmokeTest extends TestCase
         $this->assertGreaterThan(0, $cashier->notifications()->count());
     }
 
+    public function test_dispensing_prescription_notifies_cashiers(): void
+    {
+        $user = $this->seedAdmin();
+
+        $appointment = Appointment::first();
+        $medicine = Medicine::first();
+
+        $this->actingAs($user)->post(route('medical-records.store', $appointment), [
+            'subjective' => 'Demam.',
+            'objective' => 'Suhu 37,8.',
+            'assessment' => 'ISPA.',
+            'plan' => 'Obat simptomatik.',
+            'chief_complaint' => 'Demam',
+            'diagnoses' => [
+                ['icd_code' => 'J00', 'description' => 'Acute nasopharyngitis', 'is_primary' => 1],
+            ],
+            'prescriptions' => [
+                [
+                    'medicine_id' => $medicine->id,
+                    'quantity' => 3,
+                    'dosage' => '3x1',
+                    'frequency' => 'Sesudah makan',
+                    'duration' => '1 hari',
+                ],
+            ],
+        ])->assertSessionHasNoErrors();
+
+        $record = MedicalRecord::where('appointment_id', $appointment->id)->firstOrFail();
+
+        $cashier = User::where('email', 'kasir@his.local')->firstOrFail();
+        $before = $cashier->notifications()->count();
+
+        $this->actingAs($user)->post(route('prescriptions.dispense', $record->prescriptions()->first()))
+            ->assertSessionHasNoErrors();
+
+        $this->assertGreaterThan($before, $cashier->notifications()->count());
+    }
+
     public function test_billing_includes_lab_fees(): void
     {
         $user = $this->seedAdmin();
