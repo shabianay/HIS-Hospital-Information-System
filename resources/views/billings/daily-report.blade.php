@@ -52,7 +52,7 @@
     </div>
 
     <div class="bg-surface-light dark:bg-surface-dark p-8 rounded-2xl border border-border-light dark:border-border-dark shadow-glass-sm">
-        <h4 class="mb-4 text-lg font-bold text-text-primary-light dark:text-text-primary-dark">Rincian Metode Pembayaran (Transaksi Lunas)</h4>
+        <h4 class="mb-4 text-lg font-bold text-text-primary-light dark:text-text-primary-dark">Rincian Metode Pembayaran</h4>
         <x-table :searchable="false">
             <x-slot name="head">
                 <tr class="border-b border-border-light dark:border-border-dark text-xs uppercase tracking-wider text-text-secondary-light dark:text-text-secondary-dark">

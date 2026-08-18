@@ -46,4 +46,21 @@ class Billing extends Model
     {
         return $this->hasMany(BillingItem::class);
     }
+
+    public function payments()
+    {
+        return $this->hasMany(BillingPayment::class);
+    }
+
+    public function getPaymentBreakdownAttribute()
+    {
+        return $this->payments
+            ->groupBy('payment_method')
+            ->mapWithKeys(fn ($items, $method) => [
+                $method => [
+                    'count' => $items->count(),
+                    'total' => (float) $items->sum('amount'),
+                ],
+            ]);
+    }
 }

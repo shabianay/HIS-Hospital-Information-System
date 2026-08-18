@@ -72,7 +72,16 @@
                     {{ number_format($billing->paid_amount, 0, ',', '.') }}</span></div>
             <div class="flex justify-between">
                 <span>Metode:</span>
-                <span class="capitalize">{{ $billing->payment_method ?: '-' }}</span>
+                <span class="text-right">
+                    @php $labels = ['cash' => 'Tunai', 'card' => 'Kartu', 'qris' => 'QRIS', 'bpjs' => 'BPJS', 'insurance' => 'Asuransi']; @endphp
+                    @if($billing->payments->isNotEmpty())
+                        @foreach($billing->payment_breakdown as $method => $info)
+                            <div>{{ $labels[$method] ?? $method }} (Rp {{ number_format($info['total'], 0, ',', '.') }})</div>
+                        @endforeach
+                    @else
+                        <span class="capitalize">{{ $billing->payment_method ?: '-' }}</span>
+                    @endif
+                </span>
             </div>
             @if ($billing->status !== 'paid')
                 <div class="flex justify-between font-bold text-red-600"><span>Sisa Tagihan:</span><span>Rp

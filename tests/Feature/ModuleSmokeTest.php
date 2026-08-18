@@ -205,14 +205,80 @@ class ModuleSmokeTest extends TestCase
         $this->assertGreaterThan(0, (float) $billing->total_amount);
 
         $this->actingAs($user)->patch(route('billings.payment', $billing), [
-            'payment_method' => 'cash',
-            'paid_amount' => $billing->total_amount,
+            'payments' => [
+                ['method' => 'cash', 'amount' => $billing->total_amount],
+            ],
         ])->assertSessionHasNoErrors();
 
         $billing->refresh();
         $this->assertEquals('paid', $billing->status);
 
         $this->actingAs($user)->get(route('billings.receipt', $billing))->assertOk();
+    }
+
+    public function test_billing_payment_can_be_split_across_multiple_methods(): void
+    {
+        $user = $this->seedAdmin();
+        $appointment = Appointment::first();
+
+        $this->actingAs($user)->post(route('billings.store'), [
+            'appointment_id' => $appointment->id,
+            'consultation_fee' => $appointment->consultation_fee ?? 50000,
+            'medicine_fee' => 0,
+            'action_fee' => 0,
+            'discount' => 0,
+        ])->assertSessionHasNoErrors();
+
+        $billing = $appointment->billing;
+        $total = (float) $billing->total_amount;
+        $this->assertGreaterThan(0, $total);
+
+        $cash = round($total / 2, 2);
+        $qris = $total - $cash;
+
+        $this->actingAs($user)->patch(route('billings.payment', $billing), [
+            'payments' => [
+                ['method' => 'cash', 'amount' => $cash],
+                ['method' => 'qris', 'amount' => $qris],
+            ],
+        ])->assertSessionHasNoErrors();
+
+        $billing->refresh();
+        $this->assertEquals('paid', $billing->status);
+        $this->assertEquals($total, (float) $billing->paid_amount);
+        $this->assertDatabaseHas('billing_payments', ['billing_id' => $billing->id, 'payment_method' => 'cash', 'amount' => $cash]);
+        $this->assertDatabaseHas('billing_payments', ['billing_id' => $billing->id, 'payment_method' => 'qris', 'amount' => $qris]);
+
+        $this->actingAs($user)->get(route('billings.show', $billing))
+            ->assertOk()
+            ->assertSee('Tunai (Cash)')
+            ->assertSee('QRIS / E-Wallet');
+    }
+
+    public function test_billing_payment_rejects_overpayment(): void
+    {
+        $user = $this->seedAdmin();
+        $appointment = Appointment::first();
+
+        $this->actingAs($user)->post(route('billings.store'), [
+            'appointment_id' => $appointment->id,
+            'consultation_fee' => $appointment->consultation_fee ?? 50000,
+            'medicine_fee' => 0,
+            'action_fee' => 0,
+            'discount' => 0,
+        ])->assertSessionHasNoErrors();
+
+        $billing = $appointment->billing;
+        $total = (float) $billing->total_amount;
+
+        $this->actingAs($user)->patch(route('billings.payment', $billing), [
+            'payments' => [
+                ['method' => 'cash', 'amount' => $total + 1000],
+            ],
+        ])->assertSessionHasErrors('payments');
+
+        $billing->refresh();
+        $this->assertEquals('unpaid', $billing->status);
     }
 
     public function test_daily_quota_is_enforced_atomically(): void

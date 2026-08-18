@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Appointment;
 use App\Models\Billing;
 use App\Models\BillingItem;
+use App\Models\BillingPayment;
 use App\Models\Tariff;
 use App\Models\User;
 use App\Notifications\BillingCreated;
@@ -229,6 +230,7 @@ class BillingController extends Controller
             'appointment.poli',
             'appointment.medicalRecord.prescriptions.medicine',
             'billingItems',
+            'payments.processedBy',
         ]);
 
         return view('billings.show', compact('billing'));
@@ -266,33 +268,48 @@ class BillingController extends Controller
         $this->authorize('update', $billing);
 
         $validated = $request->validate([
-            'payment_method' => 'required|in:cash,card,qris,bpjs,insurance',
-            'paid_amount' => 'required|numeric|min:0',
+            'payments' => 'required|array|min:1',
+            'payments.*.method' => 'required|in:cash,card,qris,bpjs,insurance',
+            'payments.*.amount' => 'required|numeric|min:0',
+            'payments.*.reference' => 'nullable|string|max:100',
         ]);
 
-        if ($validated['paid_amount'] < $billing->total_amount) {
-            $billing->update([
-                'paid_amount' => $validated['paid_amount'],
-                'payment_method' => $validated['payment_method'],
-                'status' => 'partial',
-                'paid_at' => now(),
-            ]);
+        $totalPaid = array_sum(array_map('floatval', array_column($validated['payments'], 'amount')));
 
-            return redirect()->route('billings.show', $billing)
-                ->with('success', 'Pembayaran sebagian berhasil dicatat.');
+        if ($totalPaid <= 0) {
+            return back()->withErrors(['payments' => 'Nominal pembayaran harus lebih dari 0.'])->withInput();
         }
 
-        $billing->update([
-            'paid_amount' => $billing->total_amount,
-            'payment_method' => $validated['payment_method'],
-            'status' => 'paid',
-            'paid_at' => now(),
-        ]);
+        $remaining = (float) $billing->total_amount - (float) $billing->paid_amount;
+        if ($totalPaid > $remaining) {
+            return back()->withErrors(['payments' => 'Total pembayaran melebihi sisa tagihan.'])->withInput();
+        }
+
+        $status = $totalPaid >= $remaining ? 'paid' : 'partial';
+
+        DB::transaction(function () use ($validated, $billing, $totalPaid, $status) {
+            foreach ($validated['payments'] as $payment) {
+                BillingPayment::create([
+                    'billing_id' => $billing->id,
+                    'payment_method' => $payment['method'],
+                    'amount' => $payment['amount'],
+                    'reference' => $payment['reference'] ?? null,
+                    'processed_by' => auth()->id(),
+                ]);
+            }
+
+            $billing->update([
+                'paid_amount' => (float) $billing->paid_amount + $totalPaid,
+                'payment_method' => $validated['payments'][0]['method'],
+                'status' => $status,
+                'paid_at' => now(),
+            ]);
+        });
 
         $this->forgetDashboardCache(Carbon::parse($billing->created_at));
 
         return redirect()->route('billings.show', $billing)
-            ->with('success', 'Pembayaran berhasil, tagihan lunas.');
+            ->with('success', $status === 'paid' ? 'Pembayaran berhasil, tagihan lunas.' : 'Pembayaran sebagian berhasil dicatat.');
     }
 
     public function receipt(Billing $billing)
@@ -305,6 +322,7 @@ class BillingController extends Controller
             'appointment.poli',
             'appointment.medicalRecord.prescriptions.medicine',
             'billingItems',
+            'payments',
         ]);
 
         return view('billings.receipt', compact('billing'));
@@ -320,6 +338,7 @@ class BillingController extends Controller
             'appointment.poli',
             'appointment.medicalRecord.prescriptions.medicine',
             'billingItems',
+            'payments',
         ]);
 
         $paymentLabels = ['cash' => 'Tunai', 'card' => 'Kartu', 'qris' => 'QRIS', 'bpjs' => 'BPJS', 'insurance' => 'Asuransi'];
@@ -338,7 +357,7 @@ class BillingController extends Controller
         $dayStart = Carbon::parse($date)->startOfDay();
         $dayEnd = Carbon::parse($date)->endOfDay();
 
-        $billings = Billing::with(['appointment.patient', 'appointment.doctor'])
+        $billings = Billing::with(['appointment.patient', 'appointment.doctor', 'payments'])
             ->whereBetween('created_at', [$dayStart, $dayEnd])
             ->get();
 
@@ -348,14 +367,12 @@ class BillingController extends Controller
         $totalTransactions = $billings->count();
         $paidTransactions = $billings->where('status', 'paid')->count();
 
-        $paymentMethodBreakdown = $billings->where('status', 'paid')
+        $paymentMethodBreakdown = $billings->flatMap(fn ($billing) => $billing->payments)
             ->groupBy('payment_method')
-            ->map(function ($items) {
-                return [
-                    'count' => $items->count(),
-                    'total' => $items->sum('paid_amount'),
-                ];
-            });
+            ->map(fn ($items) => [
+                'count' => $items->count(),
+                'total' => $items->sum('amount'),
+            ]);
 
         return view('billings.daily-report', compact(
             'date',
@@ -377,7 +394,7 @@ class BillingController extends Controller
         $dayStart = Carbon::parse($date)->startOfDay();
         $dayEnd = Carbon::parse($date)->endOfDay();
 
-        $billings = Billing::with(['appointment.patient', 'appointment.doctor'])
+        $billings = Billing::with(['appointment.patient', 'appointment.doctor', 'payments'])
             ->whereBetween('created_at', [$dayStart, $dayEnd])
             ->get();
 
@@ -387,11 +404,11 @@ class BillingController extends Controller
         $totalTransactions = $billings->count();
         $paidTransactions = $billings->where('status', 'paid')->count();
 
-        $paymentMethodBreakdown = $billings->where('status', 'paid')
+        $paymentMethodBreakdown = $billings->flatMap(fn ($billing) => $billing->payments)
             ->groupBy('payment_method')
             ->map(fn ($items) => [
                 'count' => $items->count(),
-                'total' => $items->sum('paid_amount'),
+                'total' => $items->sum('amount'),
             ]);
 
         $pdf = Pdf::loadView('billings.daily-report-pdf', compact(

@@ -61,7 +61,15 @@
         @endif
         <div class="row" style="font-weight:bold"><span>Total Tagihan</span><span>Rp {{ number_format($billing->total_amount, 0, ',', '.') }}</span></div>
         <div class="row"><span>Dibayar</span><span>Rp {{ number_format($billing->paid_amount, 0, ',', '.') }}</span></div>
-        <div class="row"><span>Metode</span><span>{{ $paymentLabels[$billing->payment_method] ?? ($billing->payment_method ?: '-') }}</span></div>
+        <div class="row"><span>Metode</span><span>
+            @if($billing->payments->isNotEmpty())
+                @foreach($billing->payment_breakdown as $method => $info)
+                    {{ $paymentLabels[$method] ?? $method }} (Rp {{ number_format($info['total'], 0, ',', '.') }})@if(!$loop->last), @endif
+                @endforeach
+            @else
+                {{ $paymentLabels[$billing->payment_method] ?? ($billing->payment_method ?: '-') }}
+            @endif
+        </span></div>
         @if ($billing->status !== 'paid')
             <div class="row" style="font-weight:bold; color:#b91c1c"><span>Sisa Tagihan</span><span>Rp {{ number_format(max(0, $billing->total_amount - $billing->paid_amount), 0, ',', '.') }}</span></div>
         @endif
