@@ -117,18 +117,18 @@
         </form>
 
         <div
-            class="bg-surface-light dark:bg-surface-dark border border-border-light dark:border-border-dark rounded-2xl shadow-glass-sm overflow-hidden">
-            <x-table placeholder="Cari pasien / dokter / poli..." class="overflow-hidden">
+            class="bg-surface-light dark:bg-surface-dark p-6 md:p-8 border border-border-light dark:border-border-dark rounded-2xl shadow-glass-sm">
+            <x-table placeholder="Cari pasien / dokter / poli...">
                 <x-slot name="head">
                     <tr
                         class="text-xs uppercase tracking-wider text-text-secondary-light dark:text-text-secondary-dark border-b border-border-light dark:border-border-dark">
-                        <th class="pb-4 px-4 font-semibold">No. Antrian</th>
-                        <th class="pb-4 px-4 font-semibold">Tanggal</th>
-                        <th class="pb-4 px-4 font-semibold">Pasien</th>
-                        <th class="pb-4 px-4 font-semibold">Poli</th>
-                        <th class="pb-4 px-4 font-semibold">Dokter</th>
-                        <th class="pb-4 px-4 font-semibold">Status</th>
-                        <th class="pb-4 px-4 font-semibold text-right">Aksi</th>
+                        <th class="pb-4 pt-1 px-4 font-semibold">No. Antrian</th>
+                        <th class="pb-4 pt-1 px-4 font-semibold">Tanggal</th>
+                        <th class="pb-4 pt-1 px-4 font-semibold">Pasien</th>
+                        <th class="pb-4 pt-1 px-4 font-semibold">Poli</th>
+                        <th class="pb-4 pt-1 px-4 font-semibold">Dokter</th>
+                        <th class="pb-4 pt-1 px-4 font-semibold">Status</th>
+                        <th class="pb-4 pt-1 px-4 font-semibold text-right">Aksi</th>
                     </tr>
                 </x-slot>
                 @forelse($appointments as $appointment)
@@ -137,7 +137,7 @@
                         <td
                             class="py-4 px-4 font-mono text-sm font-medium text-text-primary-light dark:text-text-primary-dark">
                             {{ $appointment->queue_number }}</td>
-                        <td class="py-4 px-4 text-sm text-text-secondary-light dark:text-text-secondary-dark">
+                        <td class="py-4 px-4 text-sm text-text-secondary-light dark:text-text-secondary-dark whitespace-nowrap">
                             {{ $appointment->appointment_date?->format('d/m/Y') }}</td>
                         <td class="py-4 px-4 text-sm text-text-primary-light dark:text-text-primary-dark">
                             {{ $appointment->patient?->name }}</td>
@@ -145,12 +145,12 @@
                             {{ $appointment->poli?->name }}</td>
                         <td class="py-4 px-4 text-sm text-text-secondary-light dark:text-text-secondary-dark">
                             {{ $appointment->doctor?->name }}</td>
-                        <td class="py-4 px-4">
+                        <td class="py-4 px-4 whitespace-nowrap">
                             @php $st = $statuses[$appointment->status] ?? $statuses['waiting']; @endphp
                             <span
                                 class="inline-flex items-center rounded-full px-3 py-1 text-xs font-semibold {{ $st['color'] }}">{{ $st['label'] }}</span>
                         </td>
-                        <td class="py-4 px-4 text-right">
+                        <td class="py-4 px-4 text-right whitespace-nowrap">
                             <a href="{{ route('appointments.show', $appointment) }}"
                                 class="inline-flex items-center justify-center px-3 py-1.5 border border-border-light dark:border-border-dark rounded-lg text-xs font-medium text-text-primary-light dark:text-text-primary-dark hover:bg-secondary-100 dark:hover:bg-secondary-800 transition-all">Detail</a>
                         </td>
@@ -164,7 +164,7 @@
                 @endforelse
             </x-table>
 
-            <div class="px-6 py-4 border-t border-border-light dark:border-border-dark">
+            <div class="mt-6 pt-6 border-t border-border-light dark:border-border-dark">
                 {{ $appointments->links() }}
             </div>
         </div>
