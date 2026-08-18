@@ -40,6 +40,9 @@
                 <a href="{{ route('billings.daily-report') }}"
                     class="inline-flex items-center justify-center px-5 py-2.5 border border-border-light dark:border-border-dark bg-primary-500 hover:bg-primary-600 text-white text-sm font-semibold rounded-xl shadow-glass-sm hover:shadow-glass-md transition-all duration-200">Laporan
                     Harian</a>
+                <a href="{{ route('billings.reconciliation') }}"
+                    class="inline-flex items-center justify-center px-5 py-2.5 border border-border-light dark:border-border-dark bg-primary-500 hover:bg-primary-600 text-white text-sm font-semibold rounded-xl shadow-glass-sm hover:shadow-glass-md transition-all duration-200">Rekonsiliasi
+                    Kas</a>
             </div>
 
             <div class="mb-8 grid grid-cols-2 lg:grid-cols-4 gap-4">

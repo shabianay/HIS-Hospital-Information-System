@@ -6,6 +6,7 @@ use App\Models\Appointment;
 use App\Models\Billing;
 use App\Models\BillingItem;
 use App\Models\BillingPayment;
+use App\Models\ShiftReconciliation;
 use App\Models\Tariff;
 use App\Models\User;
 use App\Notifications\BillingCreated;
@@ -477,6 +478,116 @@ class BillingController extends Controller
 
             fclose($handle);
         }, $filename, ['Content-Type' => 'text/csv']);
+    }
+
+    public function cashReconciliation(Request $request)
+    {
+        $this->authorize('viewAny', Billing::class);
+
+        $date = $request->get('date', Carbon::today()->format('Y-m-d'));
+        $dayStart = Carbon::parse($date)->startOfDay();
+        $dayEnd = Carbon::parse($date)->endOfDay();
+
+        $reconciliations = ShiftReconciliation::with('preparedBy')
+            ->whereDate('reconciliation_date', $date)
+            ->orderBy('shift')
+            ->get()
+            ->keyBy('shift');
+
+        $shiftStats = [];
+        foreach (ShiftReconciliation::SHIFTS as $shift => $label) {
+            $range = $this->shiftRange($shift, $date);
+
+            $cashTotal = BillingPayment::where('payment_method', 'cash')
+                ->whereBetween('created_at', $range)
+                ->sum('amount');
+
+            $txCount = BillingPayment::where('payment_method', 'cash')
+                ->whereBetween('created_at', $range)
+                ->count();
+
+            $shiftStats[$shift] = [
+                'label' => $label,
+                'expected_cash' => (float) $cashTotal,
+                'transaction_count' => $txCount,
+                'reconciled' => $reconciliations->get($shift),
+            ];
+        }
+
+        return view('billings.reconciliation', compact('date', 'shiftStats'));
+    }
+
+    public function cashReconciliationStore(Request $request, string $shift)
+    {
+        $this->authorize('viewAny', Billing::class);
+
+        if (! array_key_exists($shift, ShiftReconciliation::SHIFTS)) {
+            abort(404);
+        }
+
+        $validated = $request->validate([
+            'date' => 'required|date',
+            'counted_cash' => 'required|numeric|min:0',
+            'notes' => 'nullable|string|max:1000',
+        ]);
+
+        $range = $this->shiftRange($shift, $validated['date']);
+        $expectedCash = (float) BillingPayment::where('payment_method', 'cash')
+            ->whereBetween('created_at', $range)
+            ->sum('amount');
+        $txCount = BillingPayment::where('payment_method', 'cash')
+            ->whereBetween('created_at', $range)
+            ->count();
+
+        $previous = $this->previousShiftEndingCash($shift, $validated['date']);
+        $openingCash = $previous ?? 0;
+        $countedCash = (float) $validated['counted_cash'];
+        $difference = round($countedCash - ($openingCash + $expectedCash), 2);
+
+        ShiftReconciliation::updateOrCreate(
+            ['reconciliation_date' => $validated['date'], 'shift' => $shift],
+            [
+                'opening_cash' => $openingCash,
+                'expected_cash' => $expectedCash,
+                'counted_cash' => $countedCash,
+                'difference' => $difference,
+                'transaction_count' => $txCount,
+                'notes' => $validated['notes'] ?? null,
+                'prepared_by' => auth()->id(),
+                'reconciled_at' => now(),
+            ]
+        );
+
+        return redirect()->route('billings.reconciliation', ['date' => $validated['date']])
+            ->with('success', 'Rekonsiliasi kas shift ' . $shift . ' berhasil disimpan.');
+    }
+
+    private function shiftRange(string $shift, string $date): array
+    {
+        $day = Carbon::parse($date);
+
+        return match ($shift) {
+            'pagi' => [$day->copy()->setTime(7, 0), $day->copy()->setTime(13, 59, 59)],
+            'siang' => [$day->copy()->setTime(14, 0), $day->copy()->setTime(20, 59, 59)],
+            'malam' => [$day->copy()->setTime(21, 0), $day->copy()->addDay()->setTime(6, 59, 59)],
+        };
+    }
+
+    private function previousShiftEndingCash(string $shift, string $date): ?float
+    {
+        $previousShift = match ($shift) {
+            'pagi' => 'malam',
+            'siang' => 'pagi',
+            'malam' => 'siang',
+        };
+
+        $previousDate = $shift === 'pagi' ? Carbon::parse($date)->subDay()->format('Y-m-d') : $date;
+
+        $previous = ShiftReconciliation::where('reconciliation_date', $previousDate)
+            ->where('shift', $previousShift)
+            ->first();
+
+        return $previous ? (float) $previous->counted_cash : null;
     }
 
     private function generateInvoiceNumber()

@@ -129,6 +129,8 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('billing/daily-report', [BillingController::class, 'dailyReport'])->name('billings.daily-report');
     Route::get('billing/daily-report/pdf', [BillingController::class, 'dailyReportPdf'])->name('billings.daily-report.pdf');
     Route::get('billing/daily-report/csv', [BillingController::class, 'dailyReportCsv'])->name('billings.daily-report.csv');
+    Route::get('billing/cash-reconciliation', [BillingController::class, 'cashReconciliation'])->name('billings.reconciliation');
+    Route::post('billing/cash-reconciliation/{shift}', [BillingController::class, 'cashReconciliationStore'])->name('billings.reconciliation.store');
 
     // Tariffs
     Route::resource('tariffs', TariffController::class);

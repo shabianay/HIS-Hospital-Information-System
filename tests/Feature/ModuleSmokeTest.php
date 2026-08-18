@@ -281,6 +281,114 @@ class ModuleSmokeTest extends TestCase
         $this->assertEquals('unpaid', $billing->status);
     }
 
+    public function test_cash_reconciliation_per_shift_records_difference(): void
+    {
+        $user = $this->seedAdmin();
+        $appointment = Appointment::first();
+
+        $this->actingAs($user)->post(route('billings.store'), [
+            'appointment_id' => $appointment->id,
+            'consultation_fee' => $appointment->consultation_fee ?? 50000,
+            'medicine_fee' => 0,
+            'action_fee' => 0,
+            'discount' => 0,
+        ])->assertSessionHasNoErrors();
+
+        $billing = $appointment->billing;
+        $total = (float) $billing->total_amount;
+
+        $this->actingAs($user)->patch(route('billings.payment', $billing), [
+            'payments' => [
+                ['method' => 'cash', 'amount' => $total],
+            ],
+        ])->assertSessionHasNoErrors();
+
+        $payment = $billing->payments()->where('payment_method', 'cash')->first();
+        $this->assertNotNull($payment);
+
+        $shift = $this->shiftForHour((int) $payment->created_at->format('H'));
+        $today = now()->format('Y-m-d');
+
+        $this->actingAs($user)->get(route('billings.reconciliation', ['date' => $today]))
+            ->assertOk()
+            ->assertSee('Rekonsiliasi Kas per Shift');
+
+        $this->actingAs($user)->post(route('billings.reconciliation.store', $shift), [
+            'date' => $today,
+            'counted_cash' => $total,
+        ])->assertSessionHasNoErrors();
+
+        $this->assertDatabaseHas('shift_reconciliations', [
+            'shift' => $shift,
+            'expected_cash' => $total,
+            'counted_cash' => $total,
+            'difference' => 0,
+            'transaction_count' => 1,
+        ]);
+
+        $reconciliation = \App\Models\ShiftReconciliation::where('shift', $shift)->first();
+        $this->assertNotNull($reconciliation);
+        $this->assertEquals($today, $reconciliation->reconciliation_date->format('Y-m-d'));
+
+        $this->actingAs($user)->get(route('billings.reconciliation', ['date' => $today]))
+            ->assertOk()
+            ->assertSee('Selesai Rekonsiliasi');
+    }
+
+    public function test_cash_reconciliation_marks_mismatch(): void
+    {
+        $user = $this->seedAdmin();
+        $appointment = Appointment::first();
+
+        $this->actingAs($user)->post(route('billings.store'), [
+            'appointment_id' => $appointment->id,
+            'consultation_fee' => $appointment->consultation_fee ?? 50000,
+            'medicine_fee' => 0,
+            'action_fee' => 0,
+            'discount' => 0,
+        ])->assertSessionHasNoErrors();
+
+        $billing = $appointment->billing;
+        $total = (float) $billing->total_amount;
+
+        $this->actingAs($user)->patch(route('billings.payment', $billing), [
+            'payments' => [
+                ['method' => 'cash', 'amount' => $total],
+            ],
+        ])->assertSessionHasNoErrors();
+
+        $payment = $billing->payments()->where('payment_method', 'cash')->first();
+        $shift = $this->shiftForHour((int) $payment->created_at->format('H'));
+        $today = now()->format('Y-m-d');
+
+        $this->actingAs($user)->post(route('billings.reconciliation.store', $shift), [
+            'date' => $today,
+            'counted_cash' => $total - 5000,
+        ])->assertSessionHasNoErrors();
+
+        $this->assertDatabaseHas('shift_reconciliations', [
+            'shift' => $shift,
+            'expected_cash' => $total,
+            'difference' => -5000,
+        ]);
+
+        $this->actingAs($user)->get(route('billings.reconciliation', ['date' => $today]))
+            ->assertOk()
+            ->assertSee('kurang');
+    }
+
+    private function shiftForHour(int $hour): string
+    {
+        if ($hour >= 7 && $hour < 14) {
+            return 'pagi';
+        }
+        if ($hour >= 14 && $hour < 21) {
+            return 'siang';
+        }
+
+        return 'malam';
+    }
+
     public function test_daily_quota_is_enforced_atomically(): void
     {
         $user = $this->seedAdmin();
