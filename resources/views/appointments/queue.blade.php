@@ -99,6 +99,10 @@
                                     </button>
                                 </form>
                             @endif
+                            <a href="{{ route('appointments.ticket', $appointment) }}" target="_blank"
+                                class="inline-flex items-center justify-center px-4 py-2 border border-border-light dark:border-border-dark rounded-lg text-xs font-medium text-text-primary-light dark:text-text-primary-dark hover:bg-secondary-100 dark:hover:bg-secondary-800 transition-all">
+                                Cetak Tiket
+                            </a>
                             <a href="{{ route('appointments.show', $appointment) }}"
                                 class="inline-flex items-center justify-center px-4 py-2 border border-border-light dark:border-border-dark rounded-lg text-xs font-medium text-text-primary-light dark:text-text-primary-dark hover:bg-secondary-100 dark:hover:bg-secondary-800 transition-all">
                                 Detail

@@ -586,7 +586,9 @@ class ModuleSmokeTest extends TestCase
 
         $registration = User::where('email', 'pendaftaran@his.local')->firstOrFail();
 
-        $this->actingAs($registration)->get(route('appointments.queue'))->assertOk();
+        $this->actingAs($registration)->get(route('appointments.queue'))
+            ->assertOk()
+            ->assertSee('Cetak Tiket');
     }
 
     public function test_call_patient_from_queue_board_updates_status(): void
