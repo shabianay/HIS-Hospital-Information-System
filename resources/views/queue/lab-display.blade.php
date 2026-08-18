@@ -97,6 +97,7 @@
                 waiting: @json($initial['waiting'] ?? []),
                 time: '',
                 timer: null,
+                lastAnnounced: '',
                 init() {
                     this.refreshClock();
                     setInterval(() => this.refreshClock(), 1000);
@@ -112,12 +113,28 @@
                         const res = await fetch('{{ route('queue.display.lab.json') }}');
                         const data = await res.json();
                         if (data && Array.isArray(data.waiting)) {
+                            const before = this.current ? this.current.patient_name : '';
                             this.in_progress = data.in_progress;
                             this.waiting = data.waiting;
+                            const after = this.current ? this.current.patient_name : '';
+                            if (after && after !== before && after !== this.lastAnnounced) {
+                                this.lastAnnounced = after;
+                                this.announce(after);
+                            }
                         }
                     } catch (e) {
                         // ignore transient network errors, keep current data
                     }
+                },
+                announce(name) {
+                    if (!('speechSynthesis' in window)) return;
+                    const msg = new SpeechSynthesisUtterance(
+                        'Silakan menuju loket laboratorium, ' + name
+                    );
+                    msg.lang = 'id-ID';
+                    msg.rate = 0.9;
+                    window.speechSynthesis.cancel();
+                    window.speechSynthesis.speak(msg);
                 },
                 get current() {
                     return this.in_progress || null;
