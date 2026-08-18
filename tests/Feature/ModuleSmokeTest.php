@@ -961,7 +961,11 @@ class ModuleSmokeTest extends TestCase
 
         $doctorUser = User::where('email', 'dokter@his.local')->firstOrFail();
 
-        $this->actingAs($doctorUser)->get(route('appointments.my-patients'))->assertOk();
+        $this->actingAs($doctorUser)->get(route('appointments.my-patients'))
+            ->assertOk()
+            ->assertSee('Menunggu')
+            ->assertSee('Sedang Diperiksa')
+            ->assertSee('Total Pasien');
     }
 
     public function test_doctor_my_patients_shows_lab_status(): void

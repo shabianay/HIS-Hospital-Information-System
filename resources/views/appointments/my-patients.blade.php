@@ -28,6 +28,25 @@
         </div>
     </div>
 
+    <div class="grid grid-cols-2 sm:grid-cols-4 gap-4">
+        <div class="bg-surface-light dark:bg-surface-dark p-5 rounded-2xl border border-border-light dark:border-border-dark shadow-glass-sm">
+            <p class="text-xs font-semibold uppercase tracking-wider text-text-secondary-light dark:text-text-secondary-dark">Menunggu</p>
+            <p class="mt-1 text-2xl font-bold text-warning-600 dark:text-warning-400">{{ $appointments->where('status', 'waiting')->count() }}</p>
+        </div>
+        <div class="bg-surface-light dark:bg-surface-dark p-5 rounded-2xl border border-border-light dark:border-border-dark shadow-glass-sm">
+            <p class="text-xs font-semibold uppercase tracking-wider text-text-secondary-light dark:text-text-secondary-dark">Sedang Diperiksa</p>
+            <p class="mt-1 text-2xl font-bold text-info-600 dark:text-info-400">{{ $appointments->where('status', 'in_progress')->count() }}</p>
+        </div>
+        <div class="bg-surface-light dark:bg-surface-dark p-5 rounded-2xl border border-border-light dark:border-border-dark shadow-glass-sm">
+            <p class="text-xs font-semibold uppercase tracking-wider text-text-secondary-light dark:text-text-secondary-dark">Selesai</p>
+            <p class="mt-1 text-2xl font-bold text-success-600 dark:text-success-400">{{ $appointments->where('status', 'completed')->count() }}</p>
+        </div>
+        <div class="bg-surface-light dark:bg-surface-dark p-5 rounded-2xl border border-border-light dark:border-border-dark shadow-glass-sm">
+            <p class="text-xs font-semibold uppercase tracking-wider text-text-secondary-light dark:text-text-secondary-dark">Total Pasien</p>
+            <p class="mt-1 text-2xl font-bold text-primary-600 dark:text-primary-400">{{ $appointments->count() }}</p>
+        </div>
+    </div>
+
     <div class="bg-surface-light dark:bg-surface-dark p-8 rounded-2xl border border-border-light dark:border-border-dark shadow-glass-sm">
         <x-table placeholder="Cari pasien / poli..." class="overflow-hidden">
             <x-slot name="head">
