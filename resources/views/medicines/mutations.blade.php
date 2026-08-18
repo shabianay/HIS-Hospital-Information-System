@@ -4,6 +4,9 @@
 <div class="space-y-6">
     <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <h2 class="text-2xl font-bold text-text-primary-light dark:text-text-primary-dark">Riwayat Mutasi Stok</h2>
+        <div class="flex items-center gap-2">
+            <a href="{{ route('medicines.mutations.csv', request()->query()) }}" class="inline-flex items-center justify-center px-4 py-2.5 border border-border-light dark:border-border-dark text-text-primary-light dark:text-text-primary-dark text-sm font-semibold rounded-xl hover:bg-secondary-50 dark:hover:bg-secondary-800 transition-all">Export CSV</a>
+        </div>
     </div>
 
     <div class="bg-surface-light dark:bg-surface-dark p-8 rounded-2xl border border-border-light dark:border-border-dark shadow-glass-sm">

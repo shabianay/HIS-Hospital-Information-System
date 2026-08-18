@@ -156,6 +156,49 @@ class MedicineController extends Controller
         return view('medicines.mutations', compact('mutations', 'medicines'));
     }
 
+    public function mutationsCsv(Request $request)
+    {
+        $this->authorize('viewAny', Medicine::class);
+
+        $query = StockMutation::with('medicine')->latest();
+
+        if ($request->filled('type')) {
+            $query->where('type', $request->type);
+        }
+
+        if ($request->filled('medicine_id')) {
+            $query->where('medicine_id', $request->medicine_id);
+        }
+
+        if ($request->filled('date')) {
+            $query->whereDate('created_at', $request->date);
+        }
+
+        $mutations = $query->get();
+
+        $filename = 'mutasi-stok-' . now()->format('Ymd-His') . '.csv';
+
+        return response()->streamDownload(function () use ($mutations) {
+            $handle = fopen('php://output', 'w');
+
+            fputcsv($handle, ['MUTASI STOK OBAT']);
+            fputcsv($handle, ['Waktu', 'Obat', 'Tipe', 'Jumlah', 'Referensi', 'Catatan']);
+
+            foreach ($mutations as $mutation) {
+                fputcsv($handle, [
+                    $mutation->created_at?->format('d/m/Y H:i'),
+                    $mutation->medicine?->name ?? '-',
+                    $mutation->type === 'in' ? 'Masuk' : 'Keluar',
+                    ($mutation->type === 'in' ? '+' : '-') . $mutation->quantity,
+                    $mutation->reference ?: '-',
+                    $mutation->notes ?: '-',
+                ]);
+            }
+
+            fclose($handle);
+        }, $filename, ['Content-Type' => 'text/csv']);
+    }
+
     public function reorder()
     {
         $this->authorize('viewAny', Medicine::class);

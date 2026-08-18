@@ -579,6 +579,17 @@ class ModuleSmokeTest extends TestCase
         $this->actingAs($pharmacist)->get(route('medicines.mutations'))->assertOk();
     }
 
+    public function test_pharmacist_can_export_stock_mutations_csv(): void
+    {
+        $this->seed(DatabaseSeeder::class);
+
+        $pharmacist = User::where('email', 'apoteker@his.local')->firstOrFail();
+
+        $this->actingAs($pharmacist)->get(route('medicines.mutations.csv'))
+            ->assertOk()
+            ->assertHeader('Content-Type', 'text/csv; charset=utf-8');
+    }
+
     public function test_stock_mutation_recorded_on_stock_in(): void
     {
         $user = $this->seedAdmin();

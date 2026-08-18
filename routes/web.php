@@ -91,6 +91,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::resource('medicines', MedicineController::class);
     Route::get('medicines-stock', [MedicineController::class, 'stock'])->name('medicines.stock');
     Route::get('medicine-mutations', [MedicineController::class, 'mutations'])->name('medicines.mutations');
+    Route::get('medicine-mutations/csv', [MedicineController::class, 'mutationsCsv'])->name('medicines.mutations.csv');
     Route::get('medicine-reorder', [MedicineController::class, 'reorder'])->name('medicines.reorder');
     Route::get('medicine-reorder/pdf', [MedicineController::class, 'reorderPdf'])->name('medicines.reorder.pdf');
     Route::get('medicine-expiring', [MedicineController::class, 'expiring'])->name('medicines.expiring');
