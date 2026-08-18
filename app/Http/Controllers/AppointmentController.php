@@ -8,6 +8,7 @@ use App\Models\Patient;
 use App\Models\Poli;
 use App\Models\Schedule;
 use App\Models\User;
+use App\Notifications\AppointmentCancelled;
 use App\Notifications\AppointmentCreated;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
@@ -125,6 +126,19 @@ class AppointmentController extends Controller
         $appointment->load('patient');
 
         $doctorUser->notify(new AppointmentCreated($appointment));
+    }
+
+    private function notifyDoctorOfCancellation(Appointment $appointment): void
+    {
+        $doctorUser = $appointment->doctor?->user;
+
+        if (! $doctorUser) {
+            return;
+        }
+
+        $appointment->load('patient');
+
+        $doctorUser->notify(new AppointmentCancelled($appointment));
     }
 
     public function show(Appointment $appointment)
@@ -261,6 +275,10 @@ class AppointmentController extends Controller
 
         Cache::forget(QueueDisplayController::cacheKey($appointment->appointment_date));
         Cache::forget('dashboard.' . $appointment->appointment_date->format('Y-m-d'));
+
+        if ($validated['status'] === 'cancelled') {
+            $this->notifyDoctorOfCancellation($appointment);
+        }
 
         if ($request->boolean('back') && $request->input('back') === 'queue') {
             return redirect()->route('appointments.queue')

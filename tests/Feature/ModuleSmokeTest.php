@@ -483,6 +483,25 @@ class ModuleSmokeTest extends TestCase
             ->assertHeader('Content-Type', 'text/csv; charset=utf-8');
     }
 
+    public function test_cancelling_appointment_notifies_doctor(): void
+    {
+        $user = $this->seedAdmin();
+
+        $appointment = Appointment::first();
+        $doctorUser = \App\Models\Doctor::find($appointment->doctor_id)?->user;
+
+        if (! $doctorUser) {
+            $this->assertTrue(true);
+            return;
+        }
+
+        $this->actingAs($user)->patch(route('appointments.status.update', $appointment), [
+            'status' => 'cancelled',
+        ])->assertSessionHasNoErrors();
+
+        $this->assertGreaterThan(0, $doctorUser->notifications()->where('type', \App\Notifications\AppointmentCancelled::class)->count());
+    }
+
     public function test_lab_queue_display_accessible_to_authenticated_users(): void
     {
         $user = $this->seedAdmin();
