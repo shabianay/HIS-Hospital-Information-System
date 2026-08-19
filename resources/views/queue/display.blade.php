@@ -51,9 +51,9 @@
         </header>
 
         {{-- Main Grid --}}
-        <main class="my-6 grid flex-1 grid-cols-12 gap-6">
+        <main class="my-6 grid flex-1 grid-cols-1 lg:grid-cols-12 gap-6">
             {{-- Left: Active Calling Queue --}}
-            <div class="col-span-8 flex flex-col items-center justify-between rounded-2xl border border-border-dark/50 bg-surface-dark p-8 text-center">
+            <div class="lg:col-span-8 flex flex-col items-center justify-between rounded-2xl border border-border-dark/50 bg-surface-dark p-8 text-center">
                 <div>
                     <span class="text-xl font-semibold uppercase tracking-wider text-primary-400">Panggilan Antrian Utama</span>
                     <div class="mt-4 font-mono text-9xl font-black text-white" x-text="activeCall ? activeCall.queue_number : '-'">-</div>
@@ -66,7 +66,7 @@
             </div>
 
             {{-- Right: Poli queues --}}
-            <div class="col-span-4 flex flex-col gap-4">
+            <div class="lg:col-span-4 flex flex-col gap-4">
                 <template x-for="queue in queues" :key="queue.poli_id">
                     <div class="rounded-2xl border border-border-dark/50 bg-surface-dark p-5" :class="{ 'border-primary-500/50': queue.in_progress.length > 0 }">
                         <div class="flex items-center justify-between">

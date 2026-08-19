@@ -25,9 +25,9 @@
         </header>
 
         {{-- Main --}}
-        <main class="my-6 grid flex-1 grid-cols-12 gap-6">
+        <main class="my-6 grid flex-1 grid-cols-1 lg:grid-cols-12 gap-6">
             {{-- Left: Current Sample --}}
-            <div class="col-span-8 flex flex-col items-center justify-between rounded-2xl border border-border-dark/50 bg-surface-dark p-8 text-center">
+            <div class="lg:col-span-8 flex flex-col items-center justify-between rounded-2xl border border-border-dark/50 bg-surface-dark p-8 text-center">
                 <div>
                     <span class="text-xl font-semibold uppercase tracking-wider text-primary-400">Pemeriksaan Sedang Berlangsung</span>
                     <div class="mt-4 text-5xl font-extrabold text-white" x-text="current ? current.patient_name : '-'">-</div>
@@ -47,7 +47,7 @@
             </div>
 
             {{-- Right: Waiting list --}}
-            <div class="col-span-4 flex flex-col gap-4">
+            <div class="lg:col-span-4 flex flex-col gap-4">
                 <div class="rounded-2xl border border-border-dark/50 bg-surface-dark p-5">
                     <div class="flex items-center justify-between">
                         <h3 class="text-lg font-bold text-secondary-300">Antrean Menunggu</h3>

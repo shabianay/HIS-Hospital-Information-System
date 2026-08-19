@@ -53,6 +53,8 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('appointments/queue', [AppointmentController::class, 'queue'])->name('appointments.queue');
     Route::get('appointments/queue/csv', [AppointmentController::class, 'queueCsv'])->name('appointments.queue.csv');
     Route::get('appointments/my-patients', [AppointmentController::class, 'myPatients'])->name('appointments.my-patients');
+    Route::get('appointments/doctors-by-poli', [AppointmentController::class, 'doctorsByPoli'])->name('appointments.doctors-by-poli');
+    Route::get('appointments/schedules-by-lookup', [AppointmentController::class, 'schedulesByLookup'])->name('appointments.schedules-by-lookup');
     Route::resource('appointments', AppointmentController::class)->except(['edit', 'update']);
     Route::get('appointments/index/csv', [AppointmentController::class, 'indexCsv'])->name('appointments.index.csv');
     Route::patch('appointments/{appointment}/status', [AppointmentController::class, 'updateStatus'])->name('appointments.status.update');

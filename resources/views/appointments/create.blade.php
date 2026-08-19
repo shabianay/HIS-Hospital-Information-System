@@ -38,10 +38,10 @@
     {{-- Filter Jadwal --}}
     <div class="bg-surface-light dark:bg-surface-dark p-8 rounded-2xl border border-border-light dark:border-border-dark shadow-glass-sm">
         <h2 class="text-xl font-bold text-text-primary-light dark:text-text-primary-dark mb-6">Pilih Dokter, Poli & Tanggal</h2>
-        <form method="GET" action="{{ route('appointments.create') }}" class="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
             <div>
-                <x-input-label for="poli_id" value="Poli" />
-                <select name="poli_id" onchange="this.form.submit()" class="w-full border border-border-light bg-surface-light px-4 py-3 text-sm text-text-primary-light focus:border-primary-500 focus:ring-2 focus:ring-primary-500/20 focus:outline-none rounded-xl shadow-glass-sm transition-all duration-200 dark:border-border-dark dark:bg-surface-dark dark:text-text-primary-dark">
+                <x-input-label for="filter_poli_id" value="Poli" />
+                <select id="filter_poli_id" class="w-full border border-border-light bg-surface-light px-4 py-3 text-sm text-text-primary-light focus:border-primary-500 focus:ring-2 focus:ring-primary-500/20 focus:outline-none rounded-xl shadow-glass-sm transition-all duration-200 dark:border-border-dark dark:bg-surface-dark dark:text-text-primary-dark">
                     <option value="">Pilih Poli</option>
                     @foreach($polis as $poli)
                         <option value="{{ $poli->id }}" {{ request('poli_id') == $poli->id ? 'selected' : '' }}>{{ $poli->name }}</option>
@@ -49,8 +49,8 @@
                 </select>
             </div>
             <div>
-                <x-input-label for="doctor_id" value="Dokter" />
-                <select name="doctor_id" onchange="this.form.submit()" class="w-full border border-border-light bg-surface-light px-4 py-3 text-sm text-text-primary-light focus:border-primary-500 focus:ring-2 focus:ring-primary-500/20 focus:outline-none rounded-xl shadow-glass-sm transition-all duration-200 dark:border-border-dark dark:bg-surface-dark dark:text-text-primary-dark">
+                <x-input-label for="filter_doctor_id" value="Dokter" />
+                <select id="filter_doctor_id" class="w-full border border-border-light bg-surface-light px-4 py-3 text-sm text-text-primary-light focus:border-primary-500 focus:ring-2 focus:ring-primary-500/20 focus:outline-none rounded-xl shadow-glass-sm transition-all duration-200 dark:border-border-dark dark:bg-surface-dark dark:text-text-primary-dark">
                     @if(! request('poli_id'))
                         <option value="">Pilih Poli terlebih dahulu</option>
                     @else
@@ -62,13 +62,11 @@
                 </select>
             </div>
             <div>
-                <x-input-label for="appointment_date" value="Tanggal Kunjungan" />
-                <x-text-input type="date" name="appointment_date" value="{{ request('appointment_date') }}" min="{{ date('Y-m-d') }}" onchange="this.form.submit()" />
+                <x-input-label for="filter_appointment_date" value="Tanggal Kunjungan" />
+                <x-text-input type="date" id="filter_appointment_date" value="{{ request('appointment_date') }}" min="{{ date('Y-m-d') }}" />
             </div>
-            <div class="md:col-span-3 flex justify-end">
-                <x-primary-button type="submit">Cari Jadwal Tersedia</x-primary-button>
-            </div>
-        </form>
+        </div>
+        <p class="mt-4 text-sm text-text-secondary-light dark:text-text-secondary-dark">Daftar dokter dan jadwal diperbarui otomatis tanpa me-refresh halaman.</p>
     </div>
 
     {{-- Form Pendaftaran --}}
@@ -91,7 +89,7 @@
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div>
                         <x-input-label for="poli_id" value="Poli" />
-                        <select name="poli_id" class="w-full border border-border-light bg-surface-light px-4 py-3 text-sm text-text-primary-light focus:border-primary-500 focus:ring-2 focus:ring-primary-500/20 focus:outline-none rounded-xl shadow-glass-sm transition-all duration-200 dark:border-border-dark dark:bg-surface-dark dark:text-text-primary-dark" required>
+                        <select name="poli_id" id="reg_poli_id" class="w-full border border-border-light bg-surface-light px-4 py-3 text-sm text-text-primary-light focus:border-primary-500 focus:ring-2 focus:ring-primary-500/20 focus:outline-none rounded-xl shadow-glass-sm transition-all duration-200 dark:border-border-dark dark:bg-surface-dark dark:text-text-primary-dark" required>
                             <option value="">Pilih Poli</option>
                             @foreach($polis as $poli)
                                 <option value="{{ $poli->id }}" {{ (old('poli_id') ?? request('poli_id')) == $poli->id ? 'selected' : '' }}>{{ $poli->name }}</option>
@@ -101,7 +99,7 @@
                     </div>
                     <div>
                         <x-input-label for="doctor_id" value="Dokter" />
-                        <select name="doctor_id" class="w-full border border-border-light bg-surface-light px-4 py-3 text-sm text-text-primary-light focus:border-primary-500 focus:ring-2 focus:ring-primary-500/20 focus:outline-none rounded-xl shadow-glass-sm transition-all duration-200 dark:border-border-dark dark:bg-surface-dark dark:text-text-primary-dark" required>
+                        <select name="doctor_id" id="reg_doctor_id" class="w-full border border-border-light bg-surface-light px-4 py-3 text-sm text-text-primary-light focus:border-primary-500 focus:ring-2 focus:ring-primary-500/20 focus:outline-none rounded-xl shadow-glass-sm transition-all duration-200 dark:border-border-dark dark:bg-surface-dark dark:text-text-primary-dark" required>
                             @if(! request('poli_id'))
                                 <option value="">Pilih Poli terlebih dahulu</option>
                             @else
@@ -117,7 +115,7 @@
 
                 <div>
                     <x-input-label for="schedule_id" value="Jadwal (hari sesuai tanggal yang dipilih)" />
-                    <select name="schedule_id" class="w-full border border-border-light bg-surface-light px-4 py-3 text-sm text-text-primary-light focus:border-primary-500 focus:ring-2 focus:ring-primary-500/20 focus:outline-none rounded-xl shadow-glass-sm transition-all duration-200 dark:border-border-dark dark:bg-surface-dark dark:text-text-primary-dark" required>
+                    <select name="schedule_id" id="reg_schedule_id" class="w-full border border-border-light bg-surface-light px-4 py-3 text-sm text-text-primary-light focus:border-primary-500 focus:ring-2 focus:ring-primary-500/20 focus:outline-none rounded-xl shadow-glass-sm transition-all duration-200 dark:border-border-dark dark:bg-surface-dark dark:text-text-primary-dark" required>
                         <option value="">Pilih Jadwal</option>
                         @forelse($schedules as $schedule)
                             <option value="{{ $schedule->id }}" {{ old('schedule_id') == $schedule->id ? 'selected' : '' }}>
@@ -133,7 +131,7 @@
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div>
                         <x-input-label for="appointment_date" value="Tanggal Kunjungan" />
-                        <x-text-input type="date" name="appointment_date" value="{{ old('appointment_date') ?? request('appointment_date') }}" min="{{ date('Y-m-d') }}" required />
+                        <x-text-input type="date" name="appointment_date" id="reg_appointment_date" value="{{ old('appointment_date') ?? request('appointment_date') }}" min="{{ date('Y-m-d') }}" required />
                         <x-input-error :messages="$errors->get('appointment_date')" />
                     </div>
                     <div>
@@ -157,3 +155,101 @@
     </div>
 </div>
 @endsection
+
+@push('scripts')
+<script>
+    (function () {
+        const filterPoli = document.getElementById('filter_poli_id');
+        const filterDoctor = document.getElementById('filter_doctor_id');
+        const filterDate = document.getElementById('filter_appointment_date');
+        const regPoli = document.getElementById('reg_poli_id');
+        const regDoctor = document.getElementById('reg_doctor_id');
+        const regSchedule = document.getElementById('reg_schedule_id');
+        const regDate = document.getElementById('reg_appointment_date');
+
+        function syncSelect(from, to) {
+            if (!from || !to) return;
+            to.value = from.value;
+        }
+
+        function fetchDoctors(poliId, preserveDoctorId) {
+            if (!poliId) {
+                [filterDoctor, regDoctor].forEach(sel => {
+                    if (sel) sel.innerHTML = '<option value="">Pilih Poli terlebih dahulu</option>';
+                });
+                return;
+            }
+            fetch('{{ route('appointments.doctors-by-poli') }}?poli_id=' + encodeURIComponent(poliId))
+                .then(r => r.json())
+                .then(data => {
+                    const options = ['<option value="">Pilih Dokter</option>'];
+                    (data.doctors || []).forEach(d => {
+                        options.push('<option value="' + d.id + '">' + d.name.replace(/</g, '&lt;') + '</option>');
+                    });
+                    [filterDoctor, regDoctor].forEach(sel => {
+                        if (!sel) return;
+                        sel.innerHTML = options.join('');
+                        if (preserveDoctorId) sel.value = preserveDoctorId;
+                    });
+                })
+                .catch(() => {});
+        }
+
+        function fetchSchedules() {
+            const poliId = (filterPoli && filterPoli.value) || (regPoli && regPoli.value);
+            const doctorId = (filterDoctor && filterDoctor.value) || (regDoctor && regDoctor.value);
+            const date = (filterDate && filterDate.value) || (regDate && regDate.value);
+            if (!poliId || !doctorId || !date) {
+                if (regSchedule) regSchedule.innerHTML = '<option value="">Pilih Jadwal</option>';
+                return;
+            }
+            const qs = '?poli_id=' + encodeURIComponent(poliId)
+                + '&doctor_id=' + encodeURIComponent(doctorId)
+                + '&appointment_date=' + encodeURIComponent(date);
+            fetch('{{ route('appointments.schedules-by-lookup') }}' + qs)
+                .then(r => r.json())
+                .then(data => {
+                    if (!regSchedule) return;
+                    if (!data.schedules || data.schedules.length === 0) {
+                        regSchedule.innerHTML = '<option value="">Pilih Jadwal</option><option value="" disabled>Tidak ada jadwal tersedia pada hari tersebut</option>';
+                    } else {
+                        const options = ['<option value="">Pilih Jadwal</option>'];
+                        data.schedules.forEach(s => {
+                            options.push('<option value="' + s.id + '">' + s.label.replace(/</g, '&lt;') + '</option>');
+                        });
+                        regSchedule.innerHTML = options.join('');
+                    }
+                })
+                .catch(() => {});
+        }
+
+        function handlePoliChange() {
+            syncSelect(filterPoli, regPoli);
+            syncSelect(regPoli, filterPoli);
+            const poliId = (filterPoli && filterPoli.value) || (regPoli && regPoli.value);
+            const preserved = (filterDoctor && filterDoctor.value) || (regDoctor && regDoctor.value);
+            fetchDoctors(poliId, poliId ? preserved : null);
+            if (regSchedule) regSchedule.innerHTML = '<option value="">Pilih Jadwal</option>';
+        }
+
+        function handleDoctorChange() {
+            syncSelect(filterDoctor, regDoctor);
+            syncSelect(regDoctor, filterDoctor);
+            fetchSchedules();
+        }
+
+        function handleDateChange() {
+            syncSelect(filterDate, regDate);
+            syncSelect(regDate, filterDate);
+            fetchSchedules();
+        }
+
+        if (filterPoli) filterPoli.addEventListener('change', handlePoliChange);
+        if (regPoli) regPoli.addEventListener('change', handlePoliChange);
+        if (filterDoctor) filterDoctor.addEventListener('change', handleDoctorChange);
+        if (regDoctor) regDoctor.addEventListener('change', handleDoctorChange);
+        if (filterDate) filterDate.addEventListener('change', handleDateChange);
+        if (regDate) regDate.addEventListener('change', handleDateChange);
+    })();
+</script>
+@endpush

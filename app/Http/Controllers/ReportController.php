@@ -234,8 +234,8 @@ class ReportController extends Controller
 
         $lowStockCount = DB::table('medicines as m')
             ->leftJoin('medicine_stocks as ms', 'm.id', '=', 'ms.medicine_id')
-            ->select('m.id', DB::raw('COALESCE(SUM(ms.quantity), 0) as total'))
-            ->groupBy('m.id')
+            ->select('m.id', 'm.minimum_stock', DB::raw('COALESCE(SUM(ms.quantity), 0) as total'))
+            ->groupBy('m.id', 'm.minimum_stock')
             ->havingRaw('COALESCE(SUM(ms.quantity), 0) <= m.minimum_stock')
             ->get()
             ->count();

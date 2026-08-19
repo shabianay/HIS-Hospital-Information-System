@@ -27,7 +27,7 @@
         </div>
         @endif
 
-        <div class="bg-surface-light dark:bg-surface-dark p-8 rounded-2xl border border-border-light dark:border-border-dark shadow-glass-sm">
+        <div class="mt-8 bg-surface-light dark:bg-surface-dark p-8 rounded-2xl border border-border-light dark:border-border-dark shadow-glass-sm">
             <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-4">
                 <h3 class="text-lg font-bold text-text-primary-light dark:text-text-primary-dark">Pilih Pemeriksaan</h3>
                 <label class="flex items-center gap-2 text-sm font-medium text-text-primary-light dark:text-text-primary-dark">

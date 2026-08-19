@@ -3,12 +3,24 @@
 namespace Tests\Feature;
 
 use App\Models\Appointment;
+use App\Models\Diagnosis;
+use App\Models\Doctor;
+use App\Models\LabRequest;
+use App\Models\LabTest;
 use App\Models\MedicalRecord;
 use App\Models\Medicine;
 use App\Models\MedicineStock;
 use App\Models\Patient;
+use App\Models\Prescription;
 use App\Models\Schedule;
+use App\Models\ShiftReconciliation;
+use App\Models\Tariff;
 use App\Models\User;
+use App\Notifications\AppointmentCancelled;
+use App\Notifications\AppointmentCreated;
+use App\Notifications\AppointmentReminder;
+use App\Notifications\PatientCalled;
+use Carbon\Carbon;
 use Database\Seeders\DatabaseSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
@@ -143,10 +155,10 @@ class ModuleSmokeTest extends TestCase
             'appointment_date' => now()->toDateString(),
         ])->assertSessionHasNoErrors();
 
-        $doctorUser = \App\Models\Doctor::find($appointment->doctor_id)->user;
+        $doctorUser = Doctor::find($appointment->doctor_id)->user;
 
         if ($doctorUser) {
-            $this->assertGreaterThan(0, $doctorUser->notifications()->where('type', \App\Notifications\AppointmentCreated::class)->count());
+            $this->assertGreaterThan(0, $doctorUser->notifications()->where('type', AppointmentCreated::class)->count());
         } else {
             $this->assertTrue(true);
         }
@@ -333,7 +345,7 @@ class ModuleSmokeTest extends TestCase
             'transaction_count' => 1,
         ]);
 
-        $reconciliation = \App\Models\ShiftReconciliation::where('shift', $shift)->first();
+        $reconciliation = ShiftReconciliation::where('shift', $shift)->first();
         $this->assertNotNull($reconciliation);
         $this->assertEquals($today, $reconciliation->reconciliation_date->format('Y-m-d'));
 
@@ -508,14 +520,14 @@ class ModuleSmokeTest extends TestCase
     {
         $user = $this->seedAdmin();
 
-        $medicine = \App\Models\Medicine::firstOrFail();
+        $medicine = Medicine::firstOrFail();
         $oldName = $medicine->name;
 
-        $this->actingAs($user)->patch(route('medicines.update', $medicine), array_merge($medicine->toArray(), ['name' => $oldName . ' (Revisi)']))
+        $this->actingAs($user)->patch(route('medicines.update', $medicine), array_merge($medicine->toArray(), ['name' => $oldName.' (Revisi)']))
             ->assertRedirect();
 
         $this->assertDatabaseHas('audit_logs', [
-            'auditable_type' => \App\Models\Medicine::class,
+            'auditable_type' => Medicine::class,
             'auditable_id' => $medicine->id,
             'action' => 'updated',
         ]);
@@ -599,7 +611,7 @@ class ModuleSmokeTest extends TestCase
         $user = $this->seedAdmin();
 
         $appointment = Appointment::first();
-        $test = \App\Models\LabTest::firstOrFail();
+        $test = LabTest::firstOrFail();
 
         $this->actingAs($user)->post(route('lab.requests.store'), [
             'appointment_id' => $appointment->id,
@@ -608,7 +620,7 @@ class ModuleSmokeTest extends TestCase
             'lab_test_ids' => [$test->id],
         ])->assertSessionHasNoErrors();
 
-        $labRequest = \App\Models\LabRequest::where('appointment_id', $appointment->id)->firstOrFail();
+        $labRequest = LabRequest::where('appointment_id', $appointment->id)->firstOrFail();
 
         $this->actingAs($user)->get(route('lab.requests.pdf', $labRequest))->assertOk();
     }
@@ -649,7 +661,7 @@ class ModuleSmokeTest extends TestCase
     {
         $user = $this->seedAdmin();
 
-        $medicine = \App\Models\Medicine::firstOrFail();
+        $medicine = Medicine::firstOrFail();
         $medicine->update(['minimum_stock' => 9999]);
 
         $this->actingAs($user)->get(route('medicines.reorder'))
@@ -661,7 +673,7 @@ class ModuleSmokeTest extends TestCase
     {
         $user = $this->seedAdmin();
 
-        $medicine = \App\Models\Medicine::firstOrFail();
+        $medicine = Medicine::firstOrFail();
         $medicine->update(['minimum_stock' => 9999]);
 
         $this->actingAs($user)->get(route('medicines.reorder.pdf'))->assertOk();
@@ -671,7 +683,7 @@ class ModuleSmokeTest extends TestCase
     {
         $user = $this->seedAdmin();
 
-        $medicine = \App\Models\Medicine::firstOrFail();
+        $medicine = Medicine::firstOrFail();
 
         $this->actingAs($user)->post(route('medicine-stocks.store'), [
             'medicine_id' => $medicine->id,
@@ -690,8 +702,8 @@ class ModuleSmokeTest extends TestCase
     {
         $user = $this->seedAdmin();
 
-        $medicine = \App\Models\Medicine::firstOrFail();
-        \App\Models\MedicineStock::create([
+        $medicine = Medicine::firstOrFail();
+        MedicineStock::create([
             'medicine_id' => $medicine->id,
             'batch_number' => 'EXP-001',
             'quantity' => 5,
@@ -731,10 +743,11 @@ class ModuleSmokeTest extends TestCase
         $user = $this->seedAdmin();
 
         $appointment = Appointment::first();
-        $doctorUser = \App\Models\Doctor::find($appointment->doctor_id)?->user;
+        $doctorUser = Doctor::find($appointment->doctor_id)?->user;
 
         if (! $doctorUser) {
             $this->assertTrue(true);
+
             return;
         }
 
@@ -742,7 +755,7 @@ class ModuleSmokeTest extends TestCase
             'status' => 'cancelled',
         ])->assertSessionHasNoErrors();
 
-        $this->assertGreaterThan(0, $doctorUser->notifications()->where('type', \App\Notifications\AppointmentCancelled::class)->count());
+        $this->assertGreaterThan(0, $doctorUser->notifications()->where('type', AppointmentCancelled::class)->count());
     }
 
     public function test_calling_patient_notifies_doctor(): void
@@ -750,10 +763,11 @@ class ModuleSmokeTest extends TestCase
         $user = $this->seedAdmin();
 
         $appointment = Appointment::first();
-        $doctorUser = \App\Models\Doctor::find($appointment->doctor_id)?->user;
+        $doctorUser = Doctor::find($appointment->doctor_id)?->user;
 
         if (! $doctorUser) {
             $this->assertTrue(true);
+
             return;
         }
 
@@ -761,7 +775,7 @@ class ModuleSmokeTest extends TestCase
             'status' => 'in_progress',
         ])->assertSessionHasNoErrors();
 
-        $this->assertGreaterThan(0, $doctorUser->notifications()->where('type', \App\Notifications\PatientCalled::class)->count());
+        $this->assertGreaterThan(0, $doctorUser->notifications()->where('type', PatientCalled::class)->count());
     }
 
     public function test_appointment_reminder_command_notifies_doctor(): void
@@ -774,11 +788,12 @@ class ModuleSmokeTest extends TestCase
 
         if (! $schedule || ! $patient) {
             $this->assertTrue(true);
+
             return;
         }
 
         $appointment = Appointment::create([
-            'queue_number' => 'QUMU-' . str_replace('-', '', $tomorrow) . '-001',
+            'queue_number' => 'QUMU-'.str_replace('-', '', $tomorrow).'-001',
             'patient_id' => $patient->id,
             'doctor_id' => $schedule->doctor_id,
             'poli_id' => $schedule->poli_id,
@@ -792,12 +807,13 @@ class ModuleSmokeTest extends TestCase
 
         if (! $doctorUser) {
             $this->assertTrue(true);
+
             return;
         }
 
         $this->artisan('appointments:remind')->assertSuccessful();
 
-        $this->assertGreaterThan(0, $doctorUser->notifications()->where('type', \App\Notifications\AppointmentReminder::class)->count());
+        $this->assertGreaterThan(0, $doctorUser->notifications()->where('type', AppointmentReminder::class)->count());
     }
 
     public function test_stock_digest_command_notifies_pharmacist(): void
@@ -923,7 +939,7 @@ class ModuleSmokeTest extends TestCase
         $user = $this->seedAdmin();
 
         $appointment = Appointment::first();
-        $test = \App\Models\LabTest::firstOrFail();
+        $test = LabTest::firstOrFail();
 
         $this->actingAs($user)->post(route('lab.requests.store'), [
             'appointment_id' => $appointment->id,
@@ -943,7 +959,7 @@ class ModuleSmokeTest extends TestCase
         $user = $this->seedAdmin();
 
         $appointment = Appointment::first();
-        $medicine = \App\Models\Medicine::firstOrFail();
+        $medicine = Medicine::firstOrFail();
 
         $this->actingAs($user)->post(route('medical-records.store', $appointment), [
             'chief_complaint' => 'Demam',
@@ -1152,7 +1168,7 @@ class ModuleSmokeTest extends TestCase
         $user = $this->seedAdmin();
 
         $appointment = Appointment::first();
-        $test = \App\Models\LabTest::firstOrFail();
+        $test = LabTest::firstOrFail();
 
         $this->actingAs($user)->post(route('lab.requests.store'), [
             'appointment_id' => $appointment->id,
@@ -1161,7 +1177,7 @@ class ModuleSmokeTest extends TestCase
             'lab_test_ids' => [$test->id],
         ])->assertSessionHasNoErrors();
 
-        $labRequest = \App\Models\LabRequest::where('appointment_id', $appointment->id)->firstOrFail();
+        $labRequest = LabRequest::where('appointment_id', $appointment->id)->firstOrFail();
 
         $this->assertEquals($appointment->doctor_id, $labRequest->doctor_id);
         $this->assertDatabaseHas('doctors', ['id' => $labRequest->doctor_id]);
@@ -1294,7 +1310,7 @@ class ModuleSmokeTest extends TestCase
         $user = $this->seedAdmin();
 
         $appointment = Appointment::first();
-        $test = \App\Models\LabTest::firstOrFail();
+        $test = LabTest::firstOrFail();
 
         $this->actingAs($user)->post(route('lab.requests.store'), [
             'appointment_id' => $appointment->id,
@@ -1303,7 +1319,7 @@ class ModuleSmokeTest extends TestCase
             'lab_test_ids' => [$test->id],
         ])->assertSessionHasNoErrors();
 
-        $labRequest = \App\Models\LabRequest::where('appointment_id', $appointment->id)->firstOrFail();
+        $labRequest = LabRequest::where('appointment_id', $appointment->id)->firstOrFail();
         $labTotal = $labRequest->items()->sum('price');
 
         $this->actingAs($user)->get(route('billings.create', $appointment))
@@ -1332,7 +1348,7 @@ class ModuleSmokeTest extends TestCase
         $user = $this->seedAdmin();
 
         $appointment = Appointment::first();
-        $tariff = \App\Models\Tariff::where('type', 'tindakan')->firstOrFail();
+        $tariff = Tariff::where('type', 'tindakan')->firstOrFail();
 
         $this->actingAs($user)->get(route('billings.create', $appointment))
             ->assertOk()
@@ -1446,7 +1462,7 @@ class ModuleSmokeTest extends TestCase
         $user = $this->seedAdmin();
 
         $appointment = Appointment::first();
-        $test = \App\Models\LabTest::firstOrFail();
+        $test = LabTest::firstOrFail();
 
         $this->actingAs($user)->post(route('lab.requests.store'), [
             'appointment_id' => $appointment->id,
@@ -1455,7 +1471,7 @@ class ModuleSmokeTest extends TestCase
             'lab_test_ids' => [$test->id],
         ])->assertSessionHasNoErrors();
 
-        $labRequest = \App\Models\LabRequest::where('appointment_id', $appointment->id)->firstOrFail();
+        $labRequest = LabRequest::where('appointment_id', $appointment->id)->firstOrFail();
 
         $doctorUser = User::where('email', 'dokter@his.local')->firstOrFail();
         $this->actingAs($doctorUser)->get(route('appointments.my-patients'))
@@ -1491,7 +1507,7 @@ class ModuleSmokeTest extends TestCase
 
         $doctorUser = User::factory()->create();
         $doctorUser->assignRole('doctor');
-        $doctor = \App\Models\Doctor::where('license_number', 'SIP/002/A/2026')->firstOrFail();
+        $doctor = Doctor::where('license_number', 'SIP/002/A/2026')->firstOrFail();
 
         $this->actingAs($user)->put(route('doctors.update', $doctor), [
             'name' => $doctor->name,
@@ -1509,7 +1525,7 @@ class ModuleSmokeTest extends TestCase
         $user = $this->seedAdmin();
 
         $doctorUser = User::where('email', 'dokter@his.local')->firstOrFail();
-        $doctors = \App\Models\Doctor::orderBy('id')->get();
+        $doctors = Doctor::orderBy('id')->get();
 
         $this->actingAs($user)->put(route('doctors.update', $doctors[0]), [
             'name' => $doctors[0]->name,
@@ -1531,7 +1547,7 @@ class ModuleSmokeTest extends TestCase
         $user = $this->seedAdmin();
 
         $appointment = Appointment::first();
-        $test = \App\Models\LabTest::firstOrFail();
+        $test = LabTest::firstOrFail();
 
         $this->actingAs($user)->post(route('lab.requests.store'), [
             'appointment_id' => $appointment->id,
@@ -1540,7 +1556,7 @@ class ModuleSmokeTest extends TestCase
             'lab_test_ids' => [$test->id],
         ])->assertSessionHasNoErrors();
 
-        $labRequest = \App\Models\LabRequest::where('appointment_id', $appointment->id)->firstOrFail();
+        $labRequest = LabRequest::where('appointment_id', $appointment->id)->firstOrFail();
 
         $items = $labRequest->items->mapWithKeys(function ($item) {
             return [$item->id => [
@@ -1563,7 +1579,7 @@ class ModuleSmokeTest extends TestCase
         $user = $this->seedAdmin();
 
         $appointment = Appointment::first();
-        $test = \App\Models\LabTest::firstOrFail();
+        $test = LabTest::firstOrFail();
 
         $this->actingAs($user)->post(route('lab.requests.store'), [
             'appointment_id' => $appointment->id,
@@ -1572,7 +1588,7 @@ class ModuleSmokeTest extends TestCase
             'lab_test_ids' => [$test->id],
         ])->assertSessionHasNoErrors();
 
-        $labRequest = \App\Models\LabRequest::where('appointment_id', $appointment->id)->firstOrFail();
+        $labRequest = LabRequest::where('appointment_id', $appointment->id)->firstOrFail();
         $items = $labRequest->items->mapWithKeys(function ($item) {
             return [$item->id => ['result_value' => 'Negatif', 'result_status' => 'normal']];
         })->all();
@@ -1595,7 +1611,7 @@ class ModuleSmokeTest extends TestCase
         $user = $this->seedAdmin();
 
         $appointment = Appointment::first();
-        $test = \App\Models\LabTest::firstOrFail();
+        $test = LabTest::firstOrFail();
 
         $this->actingAs($user)->post(route('lab.requests.store'), [
             'appointment_id' => $appointment->id,
@@ -1604,7 +1620,7 @@ class ModuleSmokeTest extends TestCase
             'lab_test_ids' => [$test->id],
         ])->assertSessionHasNoErrors();
 
-        $labRequest = \App\Models\LabRequest::where('appointment_id', $appointment->id)->firstOrFail();
+        $labRequest = LabRequest::where('appointment_id', $appointment->id)->firstOrFail();
 
         $items = $labRequest->items->mapWithKeys(function ($item) {
             return [$item->id => ['result_value' => 'Positif', 'result_status' => 'abnormal']];
@@ -1662,7 +1678,7 @@ class ModuleSmokeTest extends TestCase
             'status' => 'finalized',
         ]);
 
-        \App\Models\Diagnosis::create([
+        Diagnosis::create([
             'medical_record_id' => $medicalRecord->id,
             'icd_code' => 'A90',
             'description' => 'Dengue',
@@ -1696,7 +1712,7 @@ class ModuleSmokeTest extends TestCase
             'status' => 'finalized',
         ]);
 
-        $prescription = \App\Models\Prescription::create([
+        $prescription = Prescription::create([
             'medical_record_id' => $medicalRecord->id,
             'medicine_id' => $medicine->id,
             'quantity' => 10,
@@ -1734,7 +1750,7 @@ class ModuleSmokeTest extends TestCase
             'status' => 'finalized',
         ]);
 
-        \App\Models\Diagnosis::create([
+        Diagnosis::create([
             'medical_record_id' => $medicalRecord->id,
             'icd_code' => 'A90',
             'description' => 'Dengue',
@@ -1897,6 +1913,35 @@ class ModuleSmokeTest extends TestCase
         $this->actingAs($cashier)->get(route('billings.index'))->assertSee('Piutang');
         $this->actingAs($registration)->get(route('appointments.create'))->assertOk();
         $this->actingAs($registration)->get(route('appointments.create'))->assertSee('Antrian Hari Ini');
+    }
+
+    public function test_appointment_create_json_lookups_return_filtered_data(): void
+    {
+        $user = $this->seedAdmin();
+        $registration = User::role('registration')->firstOrFail();
+        $doctor = Doctor::whereHas('schedules', fn ($q) => $q->where('is_active', true))->firstOrFail();
+        $schedule = $doctor->schedules()->where('is_active', true)->firstOrFail();
+
+        $doctors = $this->actingAs($registration)
+            ->getJson(route('appointments.doctors-by-poli', ['poli_id' => $schedule->poli_id]))
+            ->assertOk()
+            ->json('doctors');
+
+        $this->assertContains($doctor->id, array_column($doctors, 'id'));
+
+        $dayMap = [1 => 'senin', 2 => 'selasa', 3 => 'rabu', 4 => 'kamis', 5 => 'jumat', 6 => 'sabtu', 0 => 'minggu'];
+        $day = $dayMap[Carbon::parse('2026-08-18')->dayOfWeek];
+
+        $schedules = $this->actingAs($registration)
+            ->getJson(route('appointments.schedules-by-lookup', [
+                'poli_id' => $schedule->poli_id,
+                'doctor_id' => $doctor->id,
+                'appointment_date' => '2026-08-18',
+            ]))
+            ->assertOk()
+            ->json('schedules');
+
+        $this->assertNotEmpty($schedules);
     }
 
     public function test_dashboard_shows_reminder_counts(): void

@@ -14,11 +14,13 @@
     <div class="bg-surface-light dark:bg-surface-dark p-8 rounded-2xl border border-border-light dark:border-border-dark shadow-glass-sm">
         <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8 pb-6 border-b border-border-light dark:border-border-dark">
             <h3 class="text-lg font-bold text-text-primary-light dark:text-text-primary-dark">Laporan Harian Billing</h3>
-            <form method="GET" action="{{ route('billings.daily-report') }}" class="flex items-center gap-3">
-                <input type="date" name="date" value="{{ $date }}" class="w-full border border-border-light bg-surface-light px-4 py-3 text-sm text-text-primary-light focus:border-primary-500 focus:ring-2 focus:ring-primary-500/20 focus:outline-none rounded-xl shadow-glass-sm transition-all duration-200 dark:border-border-dark dark:bg-surface-dark dark:text-text-primary-dark">
-                <x-primary-button type="submit">Tampilkan</x-primary-button>
-                <a href="{{ route('billings.daily-report.pdf', ['date' => $date]) }}" class="inline-flex items-center px-4 py-2 text-sm font-semibold rounded-xl border border-border-light bg-surface-light text-text-primary-light hover:bg-primary-50 dark:border-border-dark dark:bg-surface-dark dark:text-text-primary-dark dark:hover:bg-primary-900/10 transition-colors">PDF</a>
-                <a href="{{ route('billings.daily-report.csv', ['date' => $date]) }}" class="inline-flex items-center px-4 py-2 text-sm font-semibold rounded-xl border border-border-light bg-surface-light text-text-primary-light hover:bg-primary-50 dark:border-border-dark dark:bg-surface-dark dark:text-text-primary-dark dark:hover:bg-primary-900/10 transition-colors">CSV</a>
+            <form method="GET" action="{{ route('billings.daily-report') }}" class="flex w-full flex-col gap-3 sm:w-auto sm:flex-row sm:items-center">
+                <input type="date" name="date" value="{{ $date }}" class="w-full sm:w-auto border border-border-light bg-surface-light px-4 py-3 text-sm text-text-primary-light focus:border-primary-500 focus:ring-2 focus:ring-primary-500/20 focus:outline-none rounded-xl shadow-glass-sm transition-all duration-200 dark:border-border-dark dark:bg-surface-dark dark:text-text-primary-dark">
+                <div class="flex items-center gap-3">
+                    <x-primary-button type="submit">Tampilkan</x-primary-button>
+                    <a href="{{ route('billings.daily-report.pdf', ['date' => $date]) }}" class="inline-flex items-center px-4 py-2 text-sm font-semibold rounded-xl border border-border-light bg-surface-light text-text-primary-light hover:bg-primary-50 dark:border-border-dark dark:bg-surface-dark dark:text-text-primary-dark dark:hover:bg-primary-900/10 transition-colors">PDF</a>
+                    <a href="{{ route('billings.daily-report.csv', ['date' => $date]) }}" class="inline-flex items-center px-4 py-2 text-sm font-semibold rounded-xl border border-border-light bg-surface-light text-text-primary-light hover:bg-primary-50 dark:border-border-dark dark:bg-surface-dark dark:text-text-primary-dark dark:hover:bg-primary-900/10 transition-colors">CSV</a>
+                </div>
             </form>
         </div>
 

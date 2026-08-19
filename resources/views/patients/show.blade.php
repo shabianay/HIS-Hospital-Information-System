@@ -13,7 +13,7 @@
     <div class="bg-surface-light dark:bg-surface-dark p-8 rounded-2xl border border-border-light dark:border-border-dark shadow-glass-sm">
         <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6 pb-6 border-b border-border-light dark:border-border-dark">
             <h2 class="text-2xl font-bold text-text-primary-light dark:text-text-primary-dark">Profil Pasien</h2>
-            <div class="flex gap-2">
+            <div class="flex flex-wrap gap-2">
                 <a href="{{ route('patients.medical-history', $patient) }}" class="inline-flex items-center justify-center px-4 py-2 bg-surface-light dark:bg-surface-dark border border-border-light dark:border-border-dark text-sm font-medium text-text-primary-light dark:text-text-primary-dark hover:bg-secondary-50 dark:hover:bg-secondary-800 transition-all">Riwayat Medis</a>
                 <a href="{{ route('patients.medical-history.pdf', $patient) }}" class="inline-flex items-center justify-center px-4 py-2 bg-surface-light dark:bg-surface-dark border border-border-light dark:border-border-dark text-sm font-medium text-text-primary-light dark:text-text-primary-dark hover:bg-secondary-50 dark:hover:bg-secondary-800 transition-all">Riwayat Medis PDF</a>
                 <a href="{{ route('patients.card', $patient) }}" class="inline-flex items-center justify-center px-4 py-2 bg-surface-light dark:bg-surface-dark border border-border-light dark:border-border-dark text-sm font-medium text-text-primary-light dark:text-text-primary-dark hover:bg-secondary-50 dark:hover:bg-secondary-800 transition-all">Kartu Berobat</a>

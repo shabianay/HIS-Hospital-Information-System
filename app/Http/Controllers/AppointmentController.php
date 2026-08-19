@@ -7,7 +7,6 @@ use App\Models\Doctor;
 use App\Models\Patient;
 use App\Models\Poli;
 use App\Models\Schedule;
-use App\Models\User;
 use App\Notifications\AppointmentCancelled;
 use App\Notifications\AppointmentCreated;
 use App\Notifications\PatientCalled;
@@ -76,12 +75,12 @@ class AppointmentController extends Controller
             'cancelled' => 'Dibatalkan',
         ];
 
-        $filename = 'daftar-janji-' . Carbon::parse($date)->format('Ymd') . '.csv';
+        $filename = 'daftar-janji-'.Carbon::parse($date)->format('Ymd').'.csv';
 
         return response()->streamDownload(function () use ($appointments, $statusLabels, $date) {
             $handle = fopen('php://output', 'w');
 
-            fputcsv($handle, ['DAFTAR JANJI TEMU ' . Carbon::parse($date)->format('d/m/Y')]);
+            fputcsv($handle, ['DAFTAR JANJI TEMU '.Carbon::parse($date)->format('d/m/Y')]);
             fputcsv($handle, ['No. Antrian', 'Pasien', 'NIK', 'Poli', 'Dokter', 'Status', 'Jadwal']);
 
             foreach ($appointments as $appointment) {
@@ -142,6 +141,56 @@ class AppointmentController extends Controller
         return view('appointments.create', compact('patients', 'doctors', 'polis', 'schedules', 'queueSummary'));
     }
 
+    public function doctorsByPoli(Request $request)
+    {
+        $this->authorize('create', Appointment::class);
+
+        $poliId = $request->integer('poli_id');
+
+        if (! $poliId) {
+            return response()->json(['doctors' => []]);
+        }
+
+        $doctors = Doctor::where('is_active', true)
+            ->whereHas('schedules', fn ($q) => $q->where('poli_id', $poliId)->where('is_active', true))
+            ->orderBy('name')
+            ->get(['id', 'name']);
+
+        return response()->json(['doctors' => $doctors]);
+    }
+
+    public function schedulesByLookup(Request $request)
+    {
+        $this->authorize('create', Appointment::class);
+
+        $poliId = $request->integer('poli_id');
+        $doctorId = $request->integer('doctor_id');
+        $date = $request->input('appointment_date');
+
+        if (! $poliId || ! $doctorId || ! $date) {
+            return response()->json(['schedules' => []]);
+        }
+
+        $dayMap = [
+            1 => 'senin', 2 => 'selasa', 3 => 'rabu', 4 => 'kamis',
+            5 => 'jumat', 6 => 'sabtu', 0 => 'minggu',
+        ];
+        $day = Carbon::parse($date)->dayOfWeek;
+
+        $schedules = Schedule::where('doctor_id', $doctorId)
+            ->where('poli_id', $poliId)
+            ->where('day_of_week', $dayMap[$day] ?? '')
+            ->where('is_active', true)
+            ->get(['id', 'day_of_week', 'start_time', 'end_time', 'daily_quota']);
+
+        return response()->json([
+            'schedules' => $schedules->map(fn ($s) => [
+                'id' => $s->id,
+                'label' => ucfirst($s->day_of_week).', '.$s->start_time->format('H:i').' - '.$s->end_time->format('H:i')." (Kuota: {$s->daily_quota})",
+            ]),
+        ]);
+    }
+
     public function store(Request $request)
     {
         $this->authorize('create', Appointment::class);
@@ -159,7 +208,7 @@ class AppointmentController extends Controller
         $validated['consultation_fee'] = $schedule->consultation_fee;
 
         $appointment = DB::transaction(function () use ($validated, $schedule) {
-            $lockName = 'queue_' . $validated['poli_id'] . '_' . $validated['appointment_date'];
+            $lockName = 'queue_'.$validated['poli_id'].'_'.$validated['appointment_date'];
             $this->acquireLock($lockName);
 
             try {
@@ -180,7 +229,7 @@ class AppointmentController extends Controller
         });
 
         Cache::forget(QueueDisplayController::cacheKey(Carbon::parse($validated['appointment_date'])));
-        Cache::forget('dashboard.' . Carbon::parse($validated['appointment_date'])->format('Y-m-d'));
+        Cache::forget('dashboard.'.Carbon::parse($validated['appointment_date'])->format('Y-m-d'));
 
         $this->notifyDoctorOfNewAppointment($appointment);
 
@@ -287,12 +336,12 @@ class AppointmentController extends Controller
             'cancelled' => 'Dibatalkan',
         ];
 
-        $filename = 'antrian-' . Carbon::parse($date)->format('Ymd') . '.csv';
+        $filename = 'antrian-'.Carbon::parse($date)->format('Ymd').'.csv';
 
         return response()->streamDownload(function () use ($appointments, $date, $statusLabels) {
             $handle = fopen('php://output', 'w');
 
-            fputcsv($handle, ['ANTRIAN PASIEN ' . Carbon::parse($date)->format('d/m/Y')]);
+            fputcsv($handle, ['ANTRIAN PASIEN '.Carbon::parse($date)->format('d/m/Y')]);
             fputcsv($handle, ['No. Antrian', 'Pasien', 'NIK', 'Poli', 'Dokter', 'Status']);
 
             foreach ($appointments as $appointment) {
@@ -360,7 +409,7 @@ class AppointmentController extends Controller
         $appointment->update($validated);
 
         Cache::forget(QueueDisplayController::cacheKey($appointment->appointment_date));
-        Cache::forget('dashboard.' . $appointment->appointment_date->format('Y-m-d'));
+        Cache::forget('dashboard.'.$appointment->appointment_date->format('Y-m-d'));
 
         if ($validated['status'] === 'cancelled') {
             $this->notifyDoctorOfCancellation($appointment);
