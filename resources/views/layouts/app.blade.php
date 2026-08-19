@@ -131,7 +131,7 @@
                     setInterval(() => this.refresh(), 30000);
                 },
                 refresh() {
-                    fetch('{{ route('notifications.unread-count') }}')
+                    fetch('{{ route('notifications.unread-count') }}', { headers: { 'Accept': 'application/json' } })
                         .then(r => r.json())
                         .then(d => {
                             this.count = d.count || 0;

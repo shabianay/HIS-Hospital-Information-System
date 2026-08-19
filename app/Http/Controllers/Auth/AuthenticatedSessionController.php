@@ -28,6 +28,8 @@ class AuthenticatedSessionController extends Controller
 
         $request->session()->regenerate();
 
+        $request->session()->forget('url.intended');
+
         $user = $request->user();
 
         $landing = match (true) {
@@ -39,7 +41,7 @@ class AuthenticatedSessionController extends Controller
             default => route('dashboard'),
         };
 
-        return redirect()->intended($landing);
+        return redirect($landing);
     }
 
     /**

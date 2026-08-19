@@ -30,6 +30,22 @@ class AuthenticationTest extends TestCase
         $response->assertRedirect(route('dashboard', absolute: false));
     }
 
+    public function test_login_always_redirects_to_dashboard_even_with_stale_intended_url(): void
+    {
+        $user = User::factory()->create();
+
+        session(['url.intended' => route('notifications.unread-count')]);
+
+        $response = $this->post('/login', [
+            'email' => $user->email,
+            'password' => 'password',
+        ]);
+
+        $this->assertAuthenticated();
+        $response->assertRedirect(route('dashboard', absolute: false));
+        $this->assertNotSame(route('notifications.unread-count'), session('url.intended'));
+    }
+
     public function test_users_can_not_authenticate_with_invalid_password(): void
     {
         $user = User::factory()->create();
