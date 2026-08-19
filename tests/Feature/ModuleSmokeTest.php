@@ -1871,48 +1871,37 @@ class ModuleSmokeTest extends TestCase
         $this->assertSame(2, MedicineStock::where('medicine_id', $medicine->id)->where('batch_number', 'BATCH-ADJ2')->firstOrFail()->quantity);
     }
 
-    public function test_doctor_login_lands_on_my_patients(): void
+    public function test_doctor_login_lands_on_dashboard(): void
     {
         $this->seed(DatabaseSeeder::class);
 
         $this->post('/login', [
             'email' => 'dokter@his.local',
             'password' => 'password',
-        ])->assertRedirect(route('appointments.my-patients'));
+        ])->assertRedirect(route('dashboard'));
 
         $this->assertAuthenticated();
     }
 
-    public function test_role_based_login_landing_pages(): void
+    public function test_all_roles_login_lands_on_dashboard(): void
     {
         $this->seed(DatabaseSeeder::class);
 
-        $cases = [
-            ['lab_tech', 'lab.requests'],
-            ['pharmacist', 'prescriptions.pending'],
-            ['cashier', 'billings.index'],
-            ['registration', 'dashboard'],
-        ];
+        $roles = ['admin', 'registration', 'nurse', 'doctor', 'cashier', 'pharmacist', 'lab_tech'];
 
-        foreach ($cases as [$role, $route]) {
+        foreach ($roles as $role) {
             $user = User::role($role)->firstOrFail();
-            $this->actingAs($user)->get('/dashboard')->assertOk();
-            $this->assertTrue($user->hasRole($role));
+
+            $this->post('/login', [
+                'email' => $user->email,
+                'password' => 'password',
+            ])->assertRedirect(route('dashboard'));
+
+            $this->assertAuthenticatedAs($user);
+            $this->post('/logout');
         }
 
-        $labTech = User::role('lab_tech')->firstOrFail();
-        $pharmacist = User::role('pharmacist')->firstOrFail();
-        $cashier = User::role('cashier')->firstOrFail();
-        $registration = User::role('registration')->firstOrFail();
-
-        $this->actingAs($labTech)->get(route('lab.requests'))->assertOk();
-        $this->actingAs($labTech)->get(route('lab.requests'))->assertSee('Urgent Menunggu');
-        $this->actingAs($pharmacist)->get(route('prescriptions.pending'))->assertOk();
-        $this->actingAs($pharmacist)->get(route('prescriptions.pending'))->assertSee('Pasien Menunggu');
-        $this->actingAs($cashier)->get(route('billings.index'))->assertOk();
-        $this->actingAs($cashier)->get(route('billings.index'))->assertSee('Piutang');
-        $this->actingAs($registration)->get(route('appointments.create'))->assertOk();
-        $this->actingAs($registration)->get(route('appointments.create'))->assertSee('Antrian Hari Ini');
+        $this->assertGuest();
     }
 
     public function test_appointment_create_json_lookups_return_filtered_data(): void

@@ -30,18 +30,7 @@ class AuthenticatedSessionController extends Controller
 
         $request->session()->forget('url.intended');
 
-        $user = $request->user();
-
-        $landing = match (true) {
-            (bool) $user->doctor => route('appointments.my-patients'),
-            $user->hasRole('lab_tech') => route('lab.requests'),
-            $user->hasRole('pharmacist') => route('prescriptions.pending'),
-            $user->hasRole('cashier') => route('billings.index'),
-            $user->hasRole('registration') => route('dashboard'),
-            default => route('dashboard'),
-        };
-
-        return redirect($landing);
+        return redirect()->route('dashboard');
     }
 
     /**
