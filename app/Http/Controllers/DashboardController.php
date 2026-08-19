@@ -44,6 +44,10 @@ class DashboardController extends Controller
                 ->whereIn('status', ['unpaid', 'partial'])
                 ->count();
 
+            $activeInpatientsCount = DB::table('admissions')
+                ->where('status', 'admitted')
+                ->count();
+
             $revenueToday = DB::table('billings')
                 ->whereBetween('created_at', [$dayStart, $dayEnd])
                 ->where('status', 'paid')
@@ -91,6 +95,7 @@ class DashboardController extends Controller
                 'pendingLabCount',
                 'pendingPrescriptionsCount',
                 'unpaidBillsCount',
+                'activeInpatientsCount',
                 'revenueToday',
                 'topDiagnoses',
                 'recentAppointments',

@@ -1,0 +1,115 @@
+@extends('layouts.app')
+@section('title', 'Permintaan Radiologi #' . str_pad($radiologyRequest->id, 4, '0', STR_PAD_LEFT))
+@section('content')
+<div class="space-y-6">
+    @php
+        $badges = [
+            'pending' => 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-400 border border-yellow-200 dark:border-yellow-800',
+            'in_progress' => 'bg-primary-100 text-primary-800 dark:bg-primary-900/30 dark:text-primary-400 border border-primary-200 dark:border-primary-800',
+            'completed' => 'bg-success-100 text-success-800 dark:bg-success-900/30 dark:text-success-400 border border-success-200 dark:border-success-800',
+            'cancelled' => 'bg-secondary-100 text-secondary-800 dark:bg-secondary-900/30 dark:text-secondary-400 border border-secondary-200 dark:border-secondary-800',
+        ];
+        $labels = ['pending' => 'Menunggu', 'in_progress' => 'Dikerjakan', 'completed' => 'Selesai', 'cancelled' => 'Dibatalkan'];
+    @endphp
+
+    <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
+        <div class="flex flex-wrap items-center gap-3">
+            <h2 class="text-2xl font-bold text-text-primary-light dark:text-text-primary-dark">Permintaan Radiologi #{{ str_pad($radiologyRequest->id, 4, '0', STR_PAD_LEFT) }}</h2>
+            <span class="inline-flex items-center rounded-full px-3 py-1 text-xs font-semibold {{ $badges[$radiologyRequest->status] }}">{{ $labels[$radiologyRequest->status] }}</span>
+            @if($radiologyRequest->is_urgent)<span class="inline-flex items-center rounded-full px-3 py-1 text-xs font-bold bg-danger-100 text-danger-800 dark:bg-danger-900/30 dark:text-danger-400">PRIORITAS</span>@endif
+        </div>
+        <div class="flex flex-wrap items-center gap-3">
+            <a href="{{ route('radiology.requests.pdf', $radiologyRequest) }}" class="inline-flex items-center gap-2 rounded-xl border border-primary-300 dark:border-primary-700 bg-primary-50 dark:bg-primary-900/20 px-5 py-2.5 text-sm font-semibold text-primary-700 dark:text-primary-300 hover:bg-primary-100 dark:hover:bg-primary-900/40 transition-all duration-200">Cetak PDF</a>
+            @can('create', App\Models\Billing::class)
+                @if($radiologyRequest->appointment && ! $radiologyRequest->appointment->billing)
+                <a href="{{ route('billings.create', $radiologyRequest->appointment) }}" class="inline-flex items-center gap-2 rounded-xl bg-primary-600 hover:bg-primary-700 text-white px-5 py-2.5 text-sm font-semibold shadow-glass-sm hover:shadow-glass-md transition-all duration-200">Buat Tagihan</a>
+                @endif
+            @endcan
+            <a href="{{ route('radiology.requests') }}" class="inline-flex items-center rounded-xl border border-border-light dark:border-border-dark px-5 py-2.5 text-sm font-semibold text-text-secondary-light dark:text-text-secondary-dark hover:bg-secondary-50 dark:hover:bg-secondary-800/50 transition-all duration-200">← Kembali</a>
+        </div>
+    </div>
+
+    <div class="bg-surface-light dark:bg-surface-dark p-8 rounded-2xl border border-border-light dark:border-border-dark shadow-glass-sm">
+        <h3 class="mb-4 text-lg font-bold text-text-primary-light dark:text-text-primary-dark">Informasi Pasien</h3>
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-5 text-sm">
+            <div><span class="text-text-secondary-light dark:text-text-secondary-dark">Pasien:</span> <strong class="text-text-primary-light dark:text-text-primary-dark">{{ $radiologyRequest->patient?->name }}</strong></div>
+            <div><span class="text-text-secondary-light dark:text-text-secondary-dark">Antrian:</span> <strong class="font-mono text-text-primary-light dark:text-text-primary-dark">{{ $radiologyRequest->appointment?->queue_number ?? '-' }}</strong></div>
+            <div><span class="text-text-secondary-light dark:text-text-secondary-dark">Perujuk:</span> <strong class="text-text-primary-light dark:text-text-primary-dark">{{ $radiologyRequest->doctor?->name ?? '-' }}</strong></div>
+            <div><span class="text-text-secondary-light dark:text-text-secondary-dark">Dibuat:</span> <strong class="text-text-primary-light dark:text-text-primary-dark">{{ $radiologyRequest->created_at?->format('d/m/Y H:i') }}</strong></div>
+        </div>
+        @if($radiologyRequest->clinical_notes)
+        <div class="mt-4 rounded-xl bg-primary-50 dark:bg-primary-900/10 border border-primary-200 dark:border-primary-800 px-4 py-3 text-sm text-text-primary-light dark:text-text-primary-dark">
+            <strong>Catatan Klinis:</strong> {{ $radiologyRequest->clinical_notes }}
+        </div>
+        @endif
+    </div>
+
+    <form action="{{ route('radiology.requests.process', $radiologyRequest) }}" method="POST">
+        @csrf
+        <div class="bg-surface-light dark:bg-surface-dark p-8 rounded-2xl border border-border-light dark:border-border-dark shadow-glass-sm">
+            <h3 class="mb-4 text-lg font-bold text-text-primary-light dark:text-text-primary-dark">Hasil Pemeriksaan</h3>
+
+            <x-table :searchable="false">
+                <x-slot name="head">
+                    <tr class="border-b border-border-light dark:border-border-dark text-xs uppercase tracking-wider text-text-secondary-light dark:text-text-secondary-dark">
+                        <th class="pb-4 px-4 font-semibold">Pemeriksaan</th>
+                        <th class="pb-4 px-4 font-semibold">Hasil / Temuan</th>
+                        <th class="pb-4 px-4 font-semibold">Kesimpulan</th>
+                        <th class="pb-4 px-4 font-semibold">Status</th>
+                    </tr>
+                </x-slot>
+                @forelse($radiologyRequest->items as $item)
+                <tr class="border-b border-border-light dark:border-border-dark hover:bg-primary-50/50 dark:hover:bg-primary-900/10 transition-colors">
+                    <td class="py-4 px-4">
+                        <div class="text-sm font-semibold text-text-primary-light dark:text-text-primary-dark">{{ $item->test_name }}</div>
+                        <div class="text-xs text-text-secondary-light dark:text-text-secondary-dark">{{ $item->reference_range ?? '' }}</div>
+                    </td>
+                    <td class="py-4 px-4">
+                        <textarea name="items[{{ $item->id }}][result_findings]" rows="2"
+                            class="w-full border border-border-light bg-surface-light px-3 py-2 text-sm text-text-primary-light focus:border-primary-500 focus:ring-2 focus:ring-primary-500/20 focus:outline-none rounded-lg dark:border-border-dark dark:bg-surface-dark dark:text-text-primary-dark"
+                            placeholder="Deskripsi temuan radiologi...">{{ $item->result_findings }}</textarea>
+                    </td>
+                    <td class="py-4 px-4">
+                        <textarea name="items[{{ $item->id }}][result_impression]" rows="2"
+                            class="w-full border border-border-light bg-surface-light px-3 py-2 text-sm text-text-primary-light focus:border-primary-500 focus:ring-2 focus:ring-primary-500/20 focus:outline-none rounded-lg dark:border-border-dark dark:bg-surface-dark dark:text-text-primary-dark"
+                            placeholder="Kesan / kesimpulan...">{{ $item->result_impression }}</textarea>
+                    </td>
+                    <td class="py-4 px-4">
+                        <select name="items[{{ $item->id }}][result_status]"
+                            class="border border-border-light bg-surface-light px-3 py-2 text-sm text-text-primary-light focus:border-primary-500 focus:ring-2 focus:ring-primary-500/20 focus:outline-none rounded-lg dark:border-border-dark dark:bg-surface-dark dark:text-text-primary-dark">
+                            @foreach(['pending' => 'Belum Dibaca', 'normal' => 'Normal', 'abnormal' => 'Abnormal'] as $val => $label)
+                                <option value="{{ $val }}" {{ $item->result_status == $val ? 'selected' : '' }}>{{ $label }}</option>
+                            @endforeach
+                        </select>
+                    </td>
+                </tr>
+                @empty
+                <tr><td colspan="4" class="py-6 text-center text-text-secondary-light dark:text-text-secondary-dark">Tidak ada item pemeriksaan.</td></tr>
+                @endforelse
+            </x-table>
+
+            <div class="mt-6 flex flex-col sm:flex-row items-center justify-between gap-4">
+                <div class="flex items-center gap-2">
+                    <x-input-label value="Status Permintaan:" />
+                    <select name="status" class="border border-border-light bg-surface-light px-3 py-2 text-sm text-text-primary-light focus:border-primary-500 focus:ring-2 focus:ring-primary-500/20 focus:outline-none rounded-lg dark:border-border-dark dark:bg-surface-dark dark:text-text-primary-dark">
+                        @foreach(['pending' => 'Menunggu', 'in_progress' => 'Dikerjakan', 'completed' => 'Selesai', 'cancelled' => 'Dibatalkan'] as $val => $label)
+                            <option value="{{ $val }}" {{ $radiologyRequest->status == $val ? 'selected' : '' }}>{{ $label }}</option>
+                        @endforeach
+                    </select>
+                </div>
+                <div class="flex gap-3">
+                    <x-primary-button type="submit">Simpan Hasil</x-primary-button>
+                </div>
+            </div>
+        </div>
+    </form>
+
+    <div class="flex justify-end">
+        <form method="POST" action="{{ route('radiology.requests.destroy', $radiologyRequest) }}" onsubmit="return confirm('Hapus permintaan ini?')" class="inline">
+            @csrf
+            @method('DELETE')
+            <button type="submit" class="px-5 py-2.5 border border-danger-200 dark:border-danger-800 text-danger-700 dark:text-danger-400 text-sm font-semibold rounded-xl hover:bg-danger-50 dark:hover:bg-danger-900/20 transition-all duration-200">Hapus Permintaan</button>
+        </form>
+    </div>
+</div>
+@endsection

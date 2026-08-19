@@ -5,9 +5,9 @@
     <div class="bg-surface-light dark:bg-surface-dark p-8 rounded-2xl border border-border-light dark:border-border-dark shadow-glass-sm">
         <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8 pb-6 border-b border-border-light dark:border-border-dark">
             <h3 class="text-lg font-bold text-text-primary-light dark:text-text-primary-dark">Rekonsiliasi Kas per Shift</h3>
-            <form method="GET" action="{{ route('billings.reconciliation') }}" class="flex items-center gap-3">
+            <form method="GET" action="{{ route('billings.reconciliation') }}" class="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 w-full sm:w-auto">
                 <input type="date" name="date" value="{{ $date }}" class="w-full border border-border-light bg-surface-light px-4 py-3 text-sm text-text-primary-light focus:border-primary-500 focus:ring-2 focus:ring-primary-500/20 focus:outline-none rounded-xl shadow-glass-sm transition-all duration-200 dark:border-border-dark dark:bg-surface-dark dark:text-text-primary-dark">
-                <x-primary-button type="submit">Tampilkan</x-primary-button>
+                <x-primary-button type="submit" class="shrink-0">Tampilkan</x-primary-button>
             </form>
         </div>
 

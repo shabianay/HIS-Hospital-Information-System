@@ -3,13 +3,18 @@
 namespace Database\Seeders;
 
 use App\Models\Appointment;
+use App\Models\Bed;
 use App\Models\Doctor;
 use App\Models\Icd10;
+use App\Models\Icd9Procedure;
 use App\Models\LabTest;
 use App\Models\Medicine;
 use App\Models\MedicineStock;
 use App\Models\Patient;
 use App\Models\Poli;
+use App\Models\RadiologyTest;
+use App\Models\Room;
+use App\Models\Supplier;
 use App\Models\Schedule;
 use App\Models\Tariff;
 use App\Models\User;
@@ -27,7 +32,8 @@ class DatabaseSeeder extends Seeder
             'manage-master-data', 'manage-patients', 'manage-appointments',
             'manage-emr', 'manage-pharmacy', 'manage-billing',
             'manage-users', 'view-dashboard', 'manage-lab',
-            'input-vital-signs',
+            'input-vital-signs', 'manage-inpatient', 'manage-radiology', 'manage-igd',
+            'manage-surgery', 'manage-purchasing', 'manage-finance', 'manage-immunization', 'manage-stock-opname', 'manage-death-certificate', 'manage-bpjs', 'manage-online-registration',
         ];
         foreach ($permissions as $permission) {
             Permission::firstOrCreate(['name' => $permission]);
@@ -44,12 +50,12 @@ class DatabaseSeeder extends Seeder
 
         // Assign module permissions to non-admin roles
         $rolePermissionMap = [
-            'registration' => ['manage-patients', 'manage-appointments', 'view-dashboard'],
-            'doctor' => ['manage-emr', 'view-dashboard'],
-            'nurse' => ['manage-emr', 'view-dashboard', 'input-vital-signs'],
-            'pharmacist' => ['manage-pharmacy', 'view-dashboard'],
-            'cashier' => ['manage-billing', 'view-dashboard'],
-            'lab_tech' => ['manage-lab', 'view-dashboard'],
+            'registration' => ['manage-patients', 'manage-appointments', 'view-dashboard', 'manage-inpatient', 'manage-death-certificate', 'manage-online-registration'],
+            'doctor' => ['manage-emr', 'view-dashboard', 'manage-surgery', 'manage-death-certificate'],
+            'nurse' => ['manage-emr', 'view-dashboard', 'input-vital-signs', 'manage-inpatient', 'manage-igd', 'manage-surgery', 'manage-immunization'],
+            'pharmacist' => ['manage-pharmacy', 'manage-purchasing', 'manage-stock-opname', 'view-dashboard'],
+            'cashier' => ['manage-billing', 'manage-finance', 'manage-bpjs', 'view-dashboard'],
+            'lab_tech' => ['manage-lab', 'manage-radiology', 'view-dashboard'],
         ];
         foreach ($rolePermissionMap as $roleName => $perms) {
             $roleObj = Role::where('name', $roleName)->first();
@@ -267,6 +273,23 @@ class DatabaseSeeder extends Seeder
             Icd10::firstOrCreate(['code' => $icd['code']], ['description' => $icd['description']]);
         }
 
+        // ICD-9-CM Procedures
+        $icd9Data = [
+            ['code' => '03.31', 'name' => 'Spinal Tap (Pungsi Lumbal)', 'category' => 'Diagnostik'],
+            ['code' => '34.22', 'name' => 'Thoracoscopy (Biopsi Pleura)', 'category' => 'Diagnostik'],
+            ['code' => '38.91', 'name' => 'Arterial Catheterization', 'category' => 'Kardiologi'],
+            ['code' => '39.95', 'name' => 'Hemodialysis', 'category' => 'Terapi'],
+            ['code' => '45.13', 'name' => 'Esophagogastroduodenoscopy (EGD)', 'category' => 'Diagnostik'],
+            ['code' => '47.09', 'name' => 'Appendectomy (Surgical)', 'category' => 'Bedah'],
+            ['code' => '51.23', 'name' => 'Laparoscopic Cholecystectomy', 'category' => 'Bedah'],
+            ['code' => '54.21', 'name' => 'Laparoscopy', 'category' => 'Diagnostik'],
+            ['code' => '87.44', 'name' => 'Routine Chest X-Ray', 'category' => 'Radiologi'],
+            ['code' => '88.72', 'name' => 'Diagnostic Ultrasound of Heart (Echocardiogram)', 'category' => 'Kardiologi'],
+        ];
+        foreach ($icd9Data as $proc) {
+            Icd9Procedure::firstOrCreate(['code' => $proc['code']], $proc);
+        }
+
         // Lab Tests
         $labTestsData = [
             ['name' => 'Hemoglobin (Hb)', 'category' => 'Hematologi', 'unit' => 'g/dL', 'reference_range' => '13.0 - 17.5', 'price' => 25000],
@@ -282,6 +305,33 @@ class DatabaseSeeder extends Seeder
         ];
         foreach ($labTestsData as $test) {
             LabTest::firstOrCreate(['name' => $test['name']], $test);
+        }
+
+        // Radiology Tests
+        $radiologyTestsData = [
+            ['name' => 'Foto Thorax PA', 'category' => 'Rontgen', 'unit' => 'proyeksi', 'reference_range' => 'Inspirasi optimal, tanpa kelainan', 'price' => 100000],
+            ['name' => 'Foto Thorax 3 Posisi', 'category' => 'Rontgen', 'unit' => 'proyeksi', 'reference_range' => 'PA, Lateral, Oblique', 'price' => 150000],
+            ['name' => 'Foto Ekstremitas', 'category' => 'Rontgen', 'unit' => 'proyeksi', 'reference_range' => 'Sesuai indikasi klinis', 'price' => 80000],
+            ['name' => 'USG Abdomen', 'category' => 'USG', 'unit' => 'sesi', 'reference_range' => 'Puasa 6 jam', 'price' => 250000],
+            ['name' => 'USG Obstetri', 'category' => 'USG', 'unit' => 'sesi', 'reference_range' => 'Kandung kemih penuh', 'price' => 200000],
+            ['name' => 'USG Payudara', 'category' => 'USG', 'unit' => 'sesi', 'reference_range' => '-', 'price' => 180000],
+            ['name' => 'CT Scan Kepala', 'category' => 'CT Scan', 'unit' => 'sesi', 'reference_range' => 'Tanpa kontras', 'price' => 900000],
+            ['name' => 'CT Scan Thorax', 'category' => 'CT Scan', 'unit' => 'sesi', 'reference_range' => '-', 'price' => 1100000],
+            ['name' => 'MRI Kepala', 'category' => 'MRI', 'unit' => 'sesi', 'reference_range' => 'Kontraindikasi alat logam', 'price' => 1800000],
+            ['name' => 'EKG (Rekam Jantung)', 'category' => 'Kardiologi', 'unit' => 'pemeriksaan', 'reference_range' => '-', 'price' => 125000],
+        ];
+        foreach ($radiologyTestsData as $test) {
+            RadiologyTest::firstOrCreate(['name' => $test['name']], $test);
+        }
+
+        // Suppliers
+        $suppliersData = [
+            ['name' => 'PT Kimia Farma Tbk', 'contact_person' => 'Bpk. Agus', 'phone' => '021-5550123', 'email' => 'sales@kimiafarma.co.id', 'address' => 'Jl. Kunir No. 15, Jakarta Pusat'],
+            ['name' => 'PT Indofarma Tbk', 'contact_person' => 'Ibu Ratna', 'phone' => '022-5550456', 'email' => 'sales@indofarma.co.id', 'address' => 'Jl. Soekarno Hatta No. 20, Bandung'],
+            ['name' => 'CV Sumber Sehat', 'contact_person' => 'Bpk. Hendra', 'phone' => '031-5550789', 'email' => 'cs@sumbersehat.co.id', 'address' => 'Jl. Raya Darmo No. 8, Surabaya'],
+        ];
+        foreach ($suppliersData as $supplier) {
+            Supplier::firstOrCreate(['name' => $supplier['name']], $supplier);
         }
 
         // Generate a sample appointment
@@ -302,6 +352,39 @@ class DatabaseSeeder extends Seeder
                     'notes' => 'Pemeriksaan rutin keluhan demam',
                 ]
             );
+        }
+
+        // Rooms & Beds (Rawat Inap)
+        $roomsData = [
+            ['code' => 'VIP-01', 'name' => 'Kamar VIP 1', 'room_type' => 'vip', 'price_per_day' => 750000, 'description' => 'Kamar VIP dengan fasilitas lengkap'],
+            ['code' => 'K1-01', 'name' => 'Kelas 1 - Ruang A', 'room_type' => 'class_1', 'price_per_day' => 400000, 'description' => 'Kelas 1 dengan 2 tempat tidur'],
+            ['code' => 'K2-01', 'name' => 'Kelas 2 - Ruang B', 'room_type' => 'class_2', 'price_per_day' => 250000, 'description' => 'Kelas 2 dengan 4 tempat tidur'],
+            ['code' => 'K3-01', 'name' => 'Kelas 3 - Ruang C', 'room_type' => 'class_3', 'price_per_day' => 150000, 'description' => 'Kelas 3 dengan 6 tempat tidur'],
+            ['code' => 'ICU-01', 'name' => 'ICU', 'room_type' => 'icu', 'price_per_day' => 1500000, 'description' => 'Intensive Care Unit'],
+        ];
+        $roomModels = [];
+        foreach ($roomsData as $r) {
+            $room = Room::firstOrCreate(['code' => $r['code']], $r);
+            $roomModels[$room->code] = $room;
+        }
+
+        $bedsData = [
+            'VIP-01' => ['01', '02'],
+            'K1-01' => ['01', '02'],
+            'K2-01' => ['01', '02', '03', '04'],
+            'K3-01' => ['01', '02', '03', '04', '05', '06'],
+            'ICU-01' => ['01', '02'],
+        ];
+        foreach ($bedsData as $roomCode => $bedNumbers) {
+            if (! isset($roomModels[$roomCode])) {
+                continue;
+            }
+            foreach ($bedNumbers as $num) {
+                Bed::firstOrCreate(
+                    ['room_id' => $roomModels[$roomCode]->id, 'bed_number' => $num],
+                    ['is_active' => true]
+                );
+            }
         }
     }
 }

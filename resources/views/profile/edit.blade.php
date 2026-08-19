@@ -7,19 +7,19 @@
     </div>
 
     <div class="bg-surface-light dark:bg-surface-dark p-8 rounded-2xl border border-border-light dark:border-border-dark shadow-glass-sm">
-        <div class="max-w-xl">
+        <div class="w-full">
             @include('profile.partials.update-profile-information-form')
         </div>
     </div>
 
     <div class="bg-surface-light dark:bg-surface-dark p-8 rounded-2xl border border-border-light dark:border-border-dark shadow-glass-sm">
-        <div class="max-w-xl">
+        <div class="w-full">
             @include('profile.partials.update-password-form')
         </div>
     </div>
 
     <div class="bg-surface-light dark:bg-surface-dark p-8 rounded-2xl border border-border-light dark:border-border-dark shadow-glass-sm">
-        <div class="max-w-xl">
+        <div class="w-full">
             @include('profile.partials.delete-user-form')
         </div>
     </div>

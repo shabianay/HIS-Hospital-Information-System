@@ -31,7 +31,7 @@
         </a>
     </div>
 
-    <div class="mt-8 grid grid-cols-1 gap-6 lg:grid-cols-4">
+    <div class="mt-8 grid grid-cols-1 gap-6 lg:grid-cols-5">
         <a href="{{ route('appointments.queue') }}"
             class="bg-surface-light dark:bg-surface-dark p-6 rounded-2xl border border-border-light dark:border-border-dark shadow-glass-sm hover:bg-secondary-50 dark:hover:bg-secondary-900/30 transition-colors flex items-center justify-between">
             <div>
@@ -39,6 +39,14 @@
                 <div class="mt-1 text-xs text-text-secondary-light dark:text-text-secondary-dark">Hari ini</div>
             </div>
             <span class="inline-flex items-center justify-center rounded-xl bg-warning-100 text-warning-800 dark:bg-warning-900/30 dark:text-warning-400 px-4 py-2 text-2xl font-bold">{{ $waitingQueueToday }}</span>
+        </a>
+        <a href="{{ route('admissions.index') }}"
+            class="bg-surface-light dark:bg-surface-dark p-6 rounded-2xl border border-border-light dark:border-border-dark shadow-glass-sm hover:bg-secondary-50 dark:hover:bg-secondary-900/30 transition-colors flex items-center justify-between">
+            <div>
+                <div class="text-sm font-semibold text-text-secondary-light dark:text-text-secondary-dark">Pasien Rawat Inap</div>
+                <div class="mt-1 text-xs text-text-secondary-light dark:text-text-secondary-dark">Sedang dirawat</div>
+            </div>
+            <span class="inline-flex items-center justify-center rounded-xl bg-success-100 text-success-800 dark:bg-success-900/30 dark:text-success-400 px-4 py-2 text-2xl font-bold">{{ $activeInpatientsCount }}</span>
         </a>
         <a href="{{ route('lab.requests') }}"
             class="bg-surface-light dark:bg-surface-dark p-6 rounded-2xl border border-border-light dark:border-border-dark shadow-glass-sm hover:bg-secondary-50 dark:hover:bg-secondary-900/30 transition-colors flex items-center justify-between">

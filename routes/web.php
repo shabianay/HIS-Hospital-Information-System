@@ -1,21 +1,36 @@
 <?php
 
+use App\Http\Controllers\AdmissionController;
 use App\Http\Controllers\AppointmentController;
 use App\Http\Controllers\AuditController;
+use App\Http\Controllers\BedController;
 use App\Http\Controllers\BillingController;
+use App\Http\Controllers\BpjsController;
 use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\DeathCertificateController;
 use App\Http\Controllers\DoctorController;
+use App\Http\Controllers\EmergencyController;
+use App\Http\Controllers\ExpenseController;
+use App\Http\Controllers\Icd9ProcedureController;
+use App\Http\Controllers\ImmunizationController;
 use App\Http\Controllers\LabController;
 use App\Http\Controllers\MedicalRecordController;
 use App\Http\Controllers\MedicineController;
 use App\Http\Controllers\NotificationController;
+use App\Http\Controllers\OnlineRegistrationController;
 use App\Http\Controllers\MedicineStockController;
 use App\Http\Controllers\PatientController;
 use App\Http\Controllers\PoliController;
 use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\PurchasingController;
+use App\Http\Controllers\RefundController;
 use App\Http\Controllers\QueueDisplayController;
+use App\Http\Controllers\RadiologyController;
 use App\Http\Controllers\ReportController;
+use App\Http\Controllers\RoomController;
 use App\Http\Controllers\ScheduleController;
+use App\Http\Controllers\StockOpnameController;
+use App\Http\Controllers\SurgeryController;
 use App\Http\Controllers\TariffController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\VitalSignController;
@@ -27,6 +42,12 @@ Route::get('/', fn () => redirect()->route('login'));
 // Public queue lookup (patient-facing)
 Route::get('/cek-antrian', [QueueDisplayController::class, 'lookupForm'])->name('queue.lookup');
 Route::post('/cek-antrian', [QueueDisplayController::class, 'lookup'])->name('queue.lookup.search');
+
+// Public portal (Antrian Online)
+Route::get('/portal', [OnlineRegistrationController::class, 'portal'])->name('portal.index');
+Route::get('/portal/status', [OnlineRegistrationController::class, 'lookup'])->name('portal.status');
+Route::post('/portal/book', [OnlineRegistrationController::class, 'book'])->name('portal.book');
+Route::post('/portal/cancel', [OnlineRegistrationController::class, 'cancel'])->name('portal.cancel');
 
 // Auth routes (from Breeze)
 require __DIR__.'/auth.php';
@@ -120,6 +141,18 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::post('prescriptions/{prescription}/dispense', [MedicineStockController::class, 'dispense'])->name('prescriptions.dispense');
     Route::get('pharmacy/pending', [MedicineStockController::class, 'pending'])->name('prescriptions.pending');
 
+    // Inpatient (Rawat Inap)
+    Route::resource('rooms', RoomController::class);
+    Route::get('rooms/index/csv', [RoomController::class, 'indexCsv'])->name('rooms.index.csv');
+    Route::resource('beds', BedController::class)->except(['show']);
+    Route::get('beds/index/csv', [BedController::class, 'indexCsv'])->name('beds.index.csv');
+    Route::get('inpatient-admissions', [AdmissionController::class, 'index'])->name('admissions.index');
+    Route::get('inpatient-admissions/csv', [AdmissionController::class, 'indexCsv'])->name('admissions.index.csv');
+    Route::get('inpatient-admissions/create', [AdmissionController::class, 'create'])->name('admissions.create');
+    Route::post('inpatient-admissions', [AdmissionController::class, 'store'])->name('admissions.store');
+    Route::get('inpatient-admissions/{admission}', [AdmissionController::class, 'show'])->name('admissions.show');
+    Route::patch('inpatient-admissions/{admission}/discharge', [AdmissionController::class, 'discharge'])->name('admissions.discharge');
+
     // Billing
     Route::get('billings', [BillingController::class, 'index'])->name('billings.index');
     Route::get('billings/create/{appointment}', [BillingController::class, 'create'])->name('billings.create');
@@ -154,6 +187,111 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('lab/requests/{labRequest}/pdf', [LabController::class, 'exportPdf'])->name('lab.requests.pdf');
     Route::post('lab/requests/{labRequest}/results', [LabController::class, 'processStore'])->name('lab.requests.process');
     Route::delete('lab/requests/{labRequest}', [LabController::class, 'destroy'])->name('lab.requests.destroy');
+
+    // Radiology
+    Route::get('radiology/tests', [RadiologyController::class, 'tests'])->name('radiology.tests');
+    Route::get('radiology/tests/csv', [RadiologyController::class, 'testsCsv'])->name('radiology.tests.csv');
+    Route::post('radiology/tests', [RadiologyController::class, 'testsStore'])->name('radiology.tests.store');
+    Route::put('radiology/tests/{radiologyTest}', [RadiologyController::class, 'testsUpdate'])->name('radiology.tests.update');
+    Route::delete('radiology/tests/{radiologyTest}', [RadiologyController::class, 'testsDestroy'])->name('radiology.tests.destroy');
+
+    Route::get('radiology/requests', [RadiologyController::class, 'index'])->name('radiology.requests');
+    Route::get('radiology/requests/csv', [RadiologyController::class, 'exportCsv'])->name('radiology.requests.csv');
+    Route::get('radiology/create', [RadiologyController::class, 'create'])->name('radiology.create');
+    Route::post('radiology/requests', [RadiologyController::class, 'store'])->name('radiology.requests.store');
+    Route::get('radiology/requests/{radiologyRequest}', [RadiologyController::class, 'show'])->name('radiology.requests.show');
+    Route::get('radiology/requests/{radiologyRequest}/pdf', [RadiologyController::class, 'exportPdf'])->name('radiology.requests.pdf');
+    Route::post('radiology/requests/{radiologyRequest}/results', [RadiologyController::class, 'processStore'])->name('radiology.requests.process');
+    Route::delete('radiology/requests/{radiologyRequest}', [RadiologyController::class, 'destroy'])->name('radiology.requests.destroy');
+
+    // Emergency (IGD)
+    Route::get('emergency', [EmergencyController::class, 'index'])->name('emergency.index');
+    Route::get('emergency/csv', [EmergencyController::class, 'exportCsv'])->name('emergency.csv');
+    Route::get('emergency/create', [EmergencyController::class, 'create'])->name('emergency.create');
+    Route::post('emergency', [EmergencyController::class, 'store'])->name('emergency.store');
+    Route::get('emergency/{emergencyVisit}', [EmergencyController::class, 'show'])->name('emergency.show');
+    Route::put('emergency/{emergencyVisit}', [EmergencyController::class, 'update'])->name('emergency.update');
+
+    // ICD-9-CM Master
+    Route::get('icd9', [Icd9ProcedureController::class, 'index'])->name('icd9.index');
+    Route::get('icd9/index/csv', [Icd9ProcedureController::class, 'indexCsv'])->name('icd9.csv');
+    Route::post('icd9', [Icd9ProcedureController::class, 'store'])->name('icd9.store');
+    Route::put('icd9/{icd9Procedure}', [Icd9ProcedureController::class, 'update'])->name('icd9.update');
+    Route::delete('icd9/{icd9Procedure}', [Icd9ProcedureController::class, 'destroy'])->name('icd9.destroy');
+
+    // Surgery (OK)
+    Route::get('surgeries', [SurgeryController::class, 'index'])->name('surgeries.index');
+    Route::get('surgeries/csv', [SurgeryController::class, 'exportCsv'])->name('surgeries.csv');
+    Route::get('surgeries/create', [SurgeryController::class, 'create'])->name('surgeries.create');
+    Route::post('surgeries', [SurgeryController::class, 'store'])->name('surgeries.store');
+    Route::get('surgeries/{surgery}', [SurgeryController::class, 'show'])->name('surgeries.show');
+    Route::patch('surgeries/{surgery}/status', [SurgeryController::class, 'updateStatus'])->name('surgeries.status');
+    Route::delete('surgeries/{surgery}', [SurgeryController::class, 'destroy'])->name('surgeries.destroy');
+
+    // Purchasing (Supplier & PO)
+    Route::get('purchasing/suppliers', [PurchasingController::class, 'suppliers'])->name('purchasing.suppliers');
+    Route::get('purchasing/suppliers/csv', [PurchasingController::class, 'suppliersCsv'])->name('purchasing.suppliers.csv');
+    Route::post('purchasing/suppliers', [PurchasingController::class, 'supplierStore'])->name('purchasing.suppliers.store');
+    Route::put('purchasing/suppliers/{supplier}', [PurchasingController::class, 'supplierUpdate'])->name('purchasing.suppliers.update');
+    Route::delete('purchasing/suppliers/{supplier}', [PurchasingController::class, 'supplierDestroy'])->name('purchasing.suppliers.destroy');
+
+    Route::get('purchasing/orders', [PurchasingController::class, 'orders'])->name('purchasing.orders');
+    Route::get('purchasing/orders/csv', [PurchasingController::class, 'ordersCsv'])->name('purchasing.orders.csv');
+    Route::get('purchasing/orders/create', [PurchasingController::class, 'ordersCreate'])->name('purchasing.orders.create');
+    Route::post('purchasing/orders', [PurchasingController::class, 'ordersStore'])->name('purchasing.orders.store');
+    Route::get('purchasing/orders/{purchaseOrder}', [PurchasingController::class, 'ordersShow'])->name('purchasing.orders.show');
+    Route::patch('purchasing/orders/{purchaseOrder}/status', [PurchasingController::class, 'ordersStatus'])->name('purchasing.orders.status');
+    Route::delete('purchasing/orders/{purchaseOrder}', [PurchasingController::class, 'ordersDestroy'])->name('purchasing.orders.destroy');
+
+    // Finance (Expense)
+    Route::get('expenses', [ExpenseController::class, 'index'])->name('expenses.index');
+    Route::get('expenses/csv', [ExpenseController::class, 'exportCsv'])->name('expenses.csv');
+    Route::post('expenses', [ExpenseController::class, 'store'])->name('expenses.store');
+    Route::delete('expenses/{expense}', [ExpenseController::class, 'destroy'])->name('expenses.destroy');
+
+    // Refund
+    Route::get('refunds', [RefundController::class, 'index'])->name('refunds.index');
+    Route::get('refunds/csv', [RefundController::class, 'exportCsv'])->name('refunds.csv');
+    Route::get('refunds/create', [RefundController::class, 'create'])->name('refunds.create');
+    Route::post('refunds', [RefundController::class, 'store'])->name('refunds.store');
+
+    // Immunization
+    Route::get('immunizations', [ImmunizationController::class, 'index'])->name('immunizations.index');
+    Route::get('immunizations/csv', [ImmunizationController::class, 'exportCsv'])->name('immunizations.csv');
+    Route::get('immunizations/create', [ImmunizationController::class, 'create'])->name('immunizations.create');
+    Route::post('immunizations', [ImmunizationController::class, 'store'])->name('immunizations.store');
+    Route::delete('immunizations/{immunization}', [ImmunizationController::class, 'destroy'])->name('immunizations.destroy');
+
+    // Stock Opname
+    Route::get('stock-opname', [StockOpnameController::class, 'index'])->name('stock-opname.index');
+    Route::get('stock-opname/create', [StockOpnameController::class, 'create'])->name('stock-opname.create');
+    Route::post('stock-opname', [StockOpnameController::class, 'store'])->name('stock-opname.store');
+    Route::get('stock-opname/{stockOpname}', [StockOpnameController::class, 'show'])->name('stock-opname.show');
+    Route::post('stock-opname/{stockOpname}/approve', [StockOpnameController::class, 'approve'])->name('stock-opname.approve');
+    Route::delete('stock-opname/{stockOpname}', [StockOpnameController::class, 'destroy'])->name('stock-opname.destroy');
+
+    // Death Certificates
+    Route::get('death-certificates', [DeathCertificateController::class, 'index'])->name('death-certificates.index');
+    Route::get('death-certificates/csv', [DeathCertificateController::class, 'exportCsv'])->name('death-certificates.csv');
+    Route::get('death-certificates/create', [DeathCertificateController::class, 'create'])->name('death-certificates.create');
+    Route::post('death-certificates', [DeathCertificateController::class, 'store'])->name('death-certificates.store');
+    Route::get('death-certificates/{deathCertificate}/pdf', [DeathCertificateController::class, 'show'])->name('death-certificates.pdf');
+    Route::delete('death-certificates/{deathCertificate}', [DeathCertificateController::class, 'destroy'])->name('death-certificates.destroy');
+
+    // BPJS
+    Route::get('bpjs', [BpjsController::class, 'index'])->name('bpjs.index');
+    Route::get('bpjs/csv', [BpjsController::class, 'exportCsv'])->name('bpjs.csv');
+    Route::post('bpjs/sep', [BpjsController::class, 'storeSep'])->name('bpjs.sep.store');
+    Route::post('bpjs/sep/{sepRecord}/cancel', [BpjsController::class, 'cancelSep'])->name('bpjs.sep.cancel');
+    Route::post('bpjs/claims', [BpjsController::class, 'storeClaim'])->name('bpjs.claim.store');
+    Route::post('bpjs/claims/{bpjsClaim}/status', [BpjsController::class, 'updateClaimStatus'])->name('bpjs.claim.status');
+
+    // Online Registrations (admin)
+    Route::get('online-registrations', [OnlineRegistrationController::class, 'index'])->name('online-registrations.index');
+    Route::get('online-registrations/portal', [OnlineRegistrationController::class, 'portal'])->name('online-registrations.portal');
+    Route::get('online-registrations/csv', [OnlineRegistrationController::class, 'exportCsv'])->name('online-registrations.csv');
+    Route::post('online-registrations/{onlineRegistration}/checkin', [OnlineRegistrationController::class, 'checkIn'])->name('online-registrations.checkin');
+    Route::post('online-registrations/{onlineRegistration}/complete', [OnlineRegistrationController::class, 'complete'])->name('online-registrations.complete');
 
     // Admin: User Management
     Route::resource('users', UserController::class);
