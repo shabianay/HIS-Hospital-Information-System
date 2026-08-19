@@ -165,7 +165,13 @@ class PatientController extends Controller
         $pdf = Pdf::loadView('patients.card', [
             'patient' => $patient,
             'generatedAt' => now()->format('d/m/Y H:i:s'),
-        ])->setPaper([0, 0, 210, 148], 'portrait');
+        ])->setPaper('a5', 'landscape')
+            ->setOptions([
+                'margin_top' => 0,
+                'margin_bottom' => 0,
+                'margin_left' => 0,
+                'margin_right' => 0,
+            ]);
 
         return $pdf->download('kartu-berobat-' . str_replace(['-', '/', ' '], '', $patient->rm_number) . '.pdf');
     }

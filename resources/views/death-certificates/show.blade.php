@@ -1,71 +1,109 @@
 @extends('layouts.print')
 @section('title', 'Surat Keterangan Kematian')
 @section('content')
-<div class="max-w-2xl mx-auto bg-white text-gray-900 p-10 border border-gray-300 rounded-lg">
-    <div class="text-center mb-8">
-        <h1 class="text-2xl font-bold tracking-wide">HEALTHPRO SEHAT SEJAHTERA</h1>
-        <p class="text-sm mt-1">Jl. Kesehatan No. 1, Jakarta · Telp. (021) 555-0001</p>
+<style>
+    body {
+        font-family: DejaVu Sans, sans-serif;
+        color: #1f2937;
+        font-size: 13px;
+        line-height: 1.6;
+    }
+    .sheet {
+        max-width: 640px;
+        margin: 0 auto;
+        border: 1px solid #d1d5db;
+        border-radius: 8px;
+        padding: 36px;
+        background: #ffffff;
+    }
+    .center { text-align: center; }
+    .hospital {
+        font-size: 20px;
+        font-weight: bold;
+        letter-spacing: 1px;
+        margin: 0 0 4px;
+    }
+    .address { font-size: 11px; color: #4b5563; margin: 0; }
+    .title {
+        font-size: 18px;
+        font-weight: bold;
+        text-decoration: underline;
+        margin: 20px 0 4px;
+    }
+    .number { font-size: 12px; margin: 0 0 18px; }
+    .para { margin: 12px 0; text-align: justify; }
+    table.info { width: 100%; border-collapse: collapse; margin: 12px 0; }
+    table.info td { padding: 3px 8px 3px 0; vertical-align: top; }
+    .label { width: 150px; }
+    .value { font-weight: bold; }
+    .sign { text-align: right; margin-top: 56px; }
+    .sign .who { font-weight: bold; text-decoration: underline; }
+    .sign .role { font-size: 11px; color: #4b5563; margin-top: 4px; }
+</style>
+
+<div class="sheet">
+    <div class="center">
+        <p class="hospital">HEALTHPRO SEHAT SEJAHTERA</p>
+        <p class="address">Jl. Kesehatan No. 1, Jakarta &middot; Telp. (021) 555-0001</p>
     </div>
 
-    <div class="text-center mb-8">
-        <h2 class="text-xl font-bold underline">SURAT KETERANGAN KEMATIAN</h2>
-        <p class="text-sm mt-1">Nomor: <span class="font-mono font-semibold">{{ $certificate->certificate_number }}</span></p>
+    <div class="center">
+        <p class="title">SURAT KETERANGAN KEMATIAN</p>
+        <p class="number">Nomor: <strong>{{ $certificate->certificate_number }}</strong></p>
     </div>
 
-    <p class="text-sm leading-relaxed mb-4">
+    <p class="para">
         Yang bertanda tangan di bawah ini, menerangkan bahwa:
     </p>
 
-    <table class="text-sm w-full mb-6">
+    <table class="info">
         <tr>
-            <td class="py-1 pr-4 w-40">Nama</td>
-            <td class="py-1">: <span class="font-semibold">{{ $certificate->patient?->name }}</span></td>
+            <td class="label">Nama</td>
+            <td>: <span class="value">{{ $certificate->patient?->name }}</span></td>
         </tr>
         <tr>
-            <td class="py-1 pr-4">No. Rekam Medis</td>
-            <td class="py-1">: {{ $certificate->patient?->rm_number }}</td>
+            <td class="label">No. Rekam Medis</td>
+            <td>: {{ $certificate->patient?->rm_number }}</td>
         </tr>
         <tr>
-            <td class="py-1 pr-4">NIK</td>
-            <td class="py-1">: {{ $certificate->patient?->nik }}</td>
+            <td class="label">NIK</td>
+            <td>: {{ $certificate->patient?->nik }}</td>
         </tr>
         <tr>
-            <td class="py-1 pr-4">Jenis Kelamin</td>
-            <td class="py-1">: {{ $certificate->patient?->gender == 'L' ? 'Laki-laki' : 'Perempuan' }}</td>
+            <td class="label">Jenis Kelamin</td>
+            <td>: {{ $certificate->patient?->gender == 'L' ? 'Laki-laki' : 'Perempuan' }}</td>
         </tr>
         <tr>
-            <td class="py-1 pr-4">Alamat</td>
-            <td class="py-1">: {{ $certificate->patient?->address ?? '-' }}</td>
+            <td class="label">Alamat</td>
+            <td>: {{ $certificate->patient?->address ?? '-' }}</td>
         </tr>
     </table>
 
-    <p class="text-sm leading-relaxed mb-4">
+    <p class="para">
         Telah meninggal dunia pada hari {{ $certificate->date_of_death?->isoFormat('dddd') }} tanggal {{ $certificate->date_of_death?->format('d F Y') }} pukul {{ $certificate->date_of_death?->format('H:i') }} WIB, di {{ $certificate->place_of_death }}.
     </p>
 
-    <p class="text-sm leading-relaxed mb-4">
-        Dengan penyebab kematian: <span class="font-semibold">{{ \App\Models\DeathCertificate::CAUSES[$certificate->cause_of_death] ?? $certificate->cause_of_death }}</span>
+    <p class="para">
+        Dengan penyebab kematian: <span class="value">{{ \App\Models\DeathCertificate::CAUSES[$certificate->cause_of_death] ?? $certificate->cause_of_death }}</span>
         @if($certificate->diagnosis)
             ({{ $certificate->diagnosis }})
         @endif
     </p>
 
     @if($certificate->deceased_relation)
-    <p class="text-sm leading-relaxed mb-4">
+    <p class="para">
         Surat keterangan ini dibuat berdasarkan keterangan dari: {{ $certificate->reporter_name }} ({{ $certificate->deceased_relation }}).
     </p>
     @endif
 
-    <p class="text-sm leading-relaxed mb-8">
+    <p class="para">
         Demikian surat keterangan ini dibuat untuk dipergunakan sebagaimana mestinya.
     </p>
 
-    <div class="flex justify-end text-center mt-16">
-        <div>
-            <p class="text-sm mb-12">Yang Menyatakan,</p>
-            <p class="text-sm font-semibold underline">{{ $certificate->doctor_name ?? $certificate->createdBy?->name ?? '....................' }}</p>
-            <p class="text-xs mt-1">Dokter / Petugas</p>
-        </div>
+    <div class="sign">
+        <p style="margin: 0 0 48px;">Yang Menyatakan,</p>
+        <p class="who">{{ $certificate->doctor_name ?? $certificate->createdBy?->name ?? '....................' }}</p>
+        <p class="role">Dokter / Petugas</p>
     </div>
 </div>
 @endsection

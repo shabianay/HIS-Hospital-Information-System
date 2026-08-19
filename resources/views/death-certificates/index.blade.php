@@ -37,12 +37,12 @@
                 <td class="py-4 px-4 text-sm text-text-primary-light dark:text-text-primary-dark">{{ \App\Models\DeathCertificate::CAUSES[$cert->cause_of_death] ?? $cert->cause_of_death }}</td>
                 <td class="py-4 px-4 text-sm text-text-primary-light dark:text-text-primary-dark">{{ $cert->doctor_name ?? '-' }}</td>
                 <td class="py-4 px-4">
-                    <div class="flex items-center gap-3">
-                        <a href="{{ route('death-certificates.pdf', $cert) }}" target="_blank" class="text-xs font-semibold text-primary-600 hover:text-primary-700 dark:text-primary-400">Cetak</a>
+                    <div class="flex items-center gap-2">
+                        <a href="{{ route('death-certificates.pdf', $cert) }}" target="_blank" class="inline-flex items-center justify-center px-3 py-1.5 border border-primary-300 dark:border-primary-700 bg-primary-50 dark:bg-primary-900/20 rounded-lg text-xs font-medium text-primary-700 dark:text-primary-300 hover:bg-primary-100 dark:hover:bg-primary-900/40 transition-all">Cetak</a>
                         <form method="POST" action="{{ route('death-certificates.destroy', $cert) }}" onsubmit="return confirm('Hapus surat kematian ini?')">
                             @csrf
                             @method('DELETE')
-                            <button type="submit" class="text-xs font-semibold text-danger-600 hover:text-red-700 dark:text-red-400">Hapus</button>
+                            <button type="submit" class="inline-flex items-center justify-center px-3 py-1.5 bg-danger-50 dark:bg-danger-900/30 border border-danger-200 dark:border-danger-800 rounded-lg text-xs font-medium text-danger-700 dark:text-danger-400 hover:bg-danger-100 dark:hover:bg-danger-800 transition-all">Hapus</button>
                         </form>
                     </div>
                 </td>
