@@ -1,7 +1,7 @@
 @extends('layouts.app')
 @section('title', 'Detail Rawat Inap')
 @section('content')
-<div class="w-full space-y-6">
+<div class="w-full space-y-6" x-data="{ dischargeModal: false }">
     <div class="bg-surface-light dark:bg-surface-dark p-8 rounded-2xl border border-border-light dark:border-border-dark shadow-glass-sm">
         <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6 pb-6 border-b border-border-light dark:border-border-dark">
             <div>
@@ -79,10 +79,9 @@
             </div>
         @endif
     </div>
-</div>
 
-@if($admission->status === 'admitted')
-<div x-data="{ dischargeModal: false }" x-cloak>
+    @if($admission->status === 'admitted')
+    <div x-cloak>
     <div x-show="dischargeModal" class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4" @keydown.window.escape="dischargeModal = false">
         <div class="w-full max-w-lg rounded-2xl bg-surface-light dark:bg-surface-dark p-6 border border-border-light dark:border-border-dark shadow-glass-md" @click.outside="dischargeModal = false">
             <h3 class="text-lg font-bold text-text-primary-light dark:text-text-primary-dark mb-4">Selesai Perawatan (Pulang)</h3>
@@ -120,5 +119,6 @@
         </div>
     </div>
 </div>
-@endif
+    @endif
+</div>
 @endsection
