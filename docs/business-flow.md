@@ -6,12 +6,12 @@ Diagram alur end-to-end sistem: dari pendaftaran pasien hingga laporan & audit, 
 flowchart TD
     subgraph P["1. Registrasi & Antrian"]
         A["Pasien datang"] --> P1["Daftar pasien<br/>(/patients/create)<br/>dapat No. RM"]
-        P1 --> C["Buat janji temu<br/>(/appointments/create)<br/>generate No. Antrian<br/>status: waiting"]
+        P1 --> C["Buat janji temu<br/>(/appointments/create)<br/>No. Antrian: Q{poliCode}-{Ymd}-{seq}<br/>status: waiting"]
         C --> D["TV Display:<br/>/queue-display (poli)<br/>/lab · /pharmacy"]
     end
 
     subgraph PO["2. Antrian Online (Portal Publik)"]
-        PO1["Pasien pesan via portal<br/>(/portal) tanpa login"] --> PO2["No. antrian per poli<br/>A-F + 001..<br/>reg: AQ-{Ymd}-{seq}<br/>status: registered"]
+        PO1["Pasien pesan via portal<br/>(/portal) tanpa login"] --> PO2["No. registrasi: AQ-{Ymd}-{seq}<br/>status: registered"]
         PO2 --> PO3["Check-in di loket<br/>status: checked_in"]
         PO3 --> PO4["Selesai dilayani<br/>status: completed"]
         PO2 -. batal .-> PO5["cancelled"]
@@ -160,8 +160,8 @@ flowchart TD
 
 ## Alur Singkat
 
-1. **Registrasi** — pasien didaftarkan (No. RM), janji temu dibuat dengan No. Antrian otomatis per poli.
-2. **Antrian Online** — pasien memesan via portal publik (tanpa login), mendapat No. antrian per poli (A–F), lalu check-in di loket (`registered → checked_in → completed/cancelled`).
+1. **Registrasi** — pasien didaftarkan (No. RM), janji temu dibuat dengan No. Antrian otomatis per poli (`Q{poliCode}-{Ymd}-{seq}`).
+2. **Antrian Online** — pasien memesan via portal publik (tanpa login), mendapat No. registrasi `AQ-{Ymd}-{seq}` (4 digit), lalu check-in di loket (`registered → checked_in → completed/cancelled`).
 3. **Antrian** — pasien dipanggil: `waiting → checked_in → in_progress → completed/cancelled`, ditampilkan di TV display.
 4. **Pemeriksaan** — perawat isi tanda vital, dokter buat EMR (draft→final) + resep/lab/radiologi/rujukan/surat sakit.
 5. **Imunisasi** — perawat mencatat imunisasi (13 jenis vaksin) dengan validasi tanggal berikutnya.
