@@ -64,47 +64,33 @@
                 </div>
             </div>
 
-            <form method="GET" action="{{ route('billings.index') }}"
-                class="mb-8 grid grid-cols-1 md:grid-cols-4 gap-6 p-6 bg-secondary-50 dark:bg-secondary-900/30 rounded-2xl border border-border-light dark:border-border-dark">
+            <x-filter-form action="{{ route('billings.index') }}">
                 <div>
-                    <x-input-label>Filter
+                    <x-input-label for="date">Filter
                         Tanggal</x-input-label>
-                    <input type="date" name="date" value="{{ request('date') }}"
-                        class="w-full border border-border-light bg-surface-light px-4 py-3 text-sm text-text-primary-light placeholder:text-text-secondary-light focus:border-primary-500 focus:ring-2 focus:ring-primary-500/20 focus:outline-none rounded-xl shadow-glass-sm transition-all duration-200 dark:border-border-dark dark:bg-surface-dark dark:text-text-primary-dark dark:placeholder:text-text-secondary-dark">
+                    <x-text-input type="date" name="date" id="date" value="{{ request('date') }}" />
                 </div>
                 <div>
-                    <x-input-label>Filter Status</x-input-label>
-                    <select name="status"
-                        class="w-full border border-border-light bg-surface-light px-4 py-3 text-sm text-text-primary-light focus:border-primary-500 focus:ring-2 focus:ring-primary-500/20 focus:outline-none rounded-xl shadow-glass-sm transition-all duration-200 dark:border-border-dark dark:bg-surface-dark dark:text-text-primary-dark">
+                    <x-input-label for="status">Filter Status</x-input-label>
+                    <x-select name="status" id="status">
                         <option value="">Semua Status</option>
                         @foreach ($statusBadge as $key => $st)
                             <option value="{{ $key }}" {{ request('status') === $key ? 'selected' : '' }}>
                                 {{ $st['label'] }}</option>
                         @endforeach
-                    </select>
+                    </x-select>
                 </div>
                 <div>
-                    <x-input-label>Metode Pembayaran</x-input-label>
-                    <select name="payment_method"
-                        class="w-full border border-border-light bg-surface-light px-4 py-3 text-sm text-text-primary-light focus:border-primary-500 focus:ring-2 focus:ring-primary-500/20 focus:outline-none rounded-xl shadow-glass-sm transition-all duration-200 dark:border-border-dark dark:bg-surface-dark dark:text-text-primary-dark">
+                    <x-input-label for="payment_method">Metode Pembayaran</x-input-label>
+                    <x-select name="payment_method" id="payment_method">
                         <option value="">Semua Metode</option>
                         @foreach ($paymentLabels as $key => $label)
                             <option value="{{ $key }}" {{ request('payment_method') === $key ? 'selected' : '' }}>
                                 {{ $label }}</option>
                         @endforeach
-                    </select>
+                    </x-select>
                 </div>
-                <div class="flex items-end">
-                    <button type="submit"
-                        class="w-full px-6 py-3 bg-primary-500 hover:bg-primary-600 text-white font-semibold text-sm rounded-xl transition-colors shadow-glass-sm">
-                        Terapkan Filter
-                    </button>
-                    <a href="{{ route('billings.index') }}"
-                        class="ml-2 px-6 py-3 bg-surface-light dark:bg-surface-dark border border-border-light dark:border-border-dark text-text-primary-light dark:text-text-primary-dark font-semibold text-sm rounded-xl hover:bg-secondary-50 dark:hover:bg-secondary-700 transition-colors shadow-glass-sm">
-                        Reset
-                    </a>
-                </div>
-            </form>
+            </x-filter-form>
 
             <x-table placeholder="Cari no. tagihan / pasien..." class="overflow-hidden">
                 <x-slot name="head">
@@ -143,11 +129,9 @@
                         </td>
                         <td class="py-4 px-4 text-sm text-text-primary-light dark:text-text-primary-dark">
                             <div class="flex items-center gap-2">
-                                <a href="{{ route('billings.show', $billing) }}"
-                                    class="inline-flex items-center justify-center px-3 py-1.5 border border-border-light dark:border-border-dark rounded-lg text-xs font-medium text-text-primary-light dark:text-text-primary-dark hover:bg-secondary-100 dark:hover:bg-secondary-800 transition-all">Detail</a>
+                                <x-action-link href="{{ route('billings.show', $billing) }}">Detail</x-action-link>
                                 @if ($billing->status === 'paid')
-                                    <a href="{{ route('billings.receipt', $billing) }}"
-                                        class="inline-flex items-center justify-center px-3 py-1.5 border border-border-light dark:border-border-dark rounded-lg text-xs font-medium text-text-primary-light dark:text-text-primary-dark hover:bg-secondary-100 dark:hover:bg-secondary-800 transition-all">Kuitansi</a>
+                                    <x-action-link href="{{ route('billings.receipt', $billing) }}">Kuitansi</x-action-link>
                                 @endif
                             </div>
                         </td>

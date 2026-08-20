@@ -96,25 +96,25 @@
                                 @csrf
                                 @method('PATCH')
                                 <input type="hidden" name="status" value="in_progress">
-                                <button type="submit" class="inline-flex items-center justify-center px-3 py-1.5 bg-info-600 hover:bg-info-700 text-white text-xs font-semibold rounded-lg shadow-glass-sm transition-all duration-200">Periksa</button>
+                                <x-action-link type="submit" variant="info-solid">Periksa</x-action-link>
                             </form>
                         @elseif($appointment->status === 'in_progress')
                             <form action="{{ route('appointments.status.update', $appointment) }}" method="POST">
                                 @csrf
                                 @method('PATCH')
                                 <input type="hidden" name="status" value="completed">
-                                <button type="submit" class="inline-flex items-center justify-center px-3 py-1.5 bg-success-600 hover:bg-success-700 text-white text-xs font-semibold rounded-lg shadow-glass-sm transition-all duration-200">Selesai</button>
+                                <x-action-link type="submit" variant="success-solid">Selesai</x-action-link>
                             </form>
                         @endif
                         @if($appointment->medicalRecord)
-                            <a href="{{ route('medical-records.show', $appointment->medicalRecord) }}" class="inline-flex items-center justify-center px-3 py-1.5 border border-border-light dark:border-border-dark rounded-lg text-xs font-medium text-text-primary-light dark:text-text-primary-dark hover:bg-secondary-100 dark:hover:bg-secondary-800 transition-all">Rekam Medis</a>
+                            <x-action-link href="{{ route('medical-records.show', $appointment->medicalRecord) }}">Rekam Medis</x-action-link>
                         @elseif(in_array($appointment->status, ['waiting', 'in_progress']))
-                            <a href="{{ route('medical-records.create', $appointment) }}" class="inline-flex items-center justify-center px-3 py-1.5 bg-primary-600 hover:bg-primary-700 text-white text-xs font-semibold rounded-lg shadow-glass-sm transition-all duration-200">Buat Rekam Medis</a>
+                            <x-action-link href="{{ route('medical-records.create', $appointment) }}" variant="primary-solid">Buat Rekam Medis</x-action-link>
                         @endif
                         @can('create', App\Models\LabRequest::class)
-                            <a href="{{ route('lab.create', ['appointment_id' => $appointment->id]) }}" class="inline-flex items-center justify-center px-3 py-1.5 border border-border-light dark:border-border-dark rounded-lg text-xs font-medium text-text-primary-light dark:text-text-primary-dark hover:bg-secondary-100 dark:hover:bg-secondary-800 transition-all">Rujuk Lab</a>
+                            <x-action-link href="{{ route('lab.create', ['appointment_id' => $appointment->id]) }}">Rujuk Lab</x-action-link>
                         @endcan
-                        <a href="{{ route('appointments.show', $appointment) }}" class="inline-flex items-center justify-center px-3 py-1.5 border border-border-light dark:border-border-dark rounded-lg text-xs font-medium text-text-primary-light dark:text-text-primary-dark hover:bg-secondary-100 dark:hover:bg-secondary-800 transition-all">Detail</a>
+                        <x-action-link href="{{ route('appointments.show', $appointment) }}">Detail</x-action-link>
                     </div>
                 </td>
             </tr>

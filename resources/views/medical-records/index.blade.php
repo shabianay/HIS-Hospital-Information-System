@@ -34,13 +34,13 @@
                         <span class="inline-flex items-center rounded-full px-3 py-1 text-xs font-semibold {{ $badge['class'] }}">{{ $badge['label'] }}</span>
                     </td>
                     <td class="py-3">
-                        <div class="flex items-center gap-3">
-                            <a href="{{ route('medical-records.show', $record) }}" class="text-sm font-medium text-primary-600 hover:text-primary-800 dark:text-primary-400 dark:hover:text-primary-300">Detail</a>
+                        <div class="flex items-center gap-2">
+                            <x-action-link href="{{ route('medical-records.show', $record) }}">Detail</x-action-link>
                             @if($record->status === 'draft')
-                                <a href="{{ route('medical-records.edit', $record) }}" class="text-sm font-medium text-yellow-600 hover:text-yellow-800 dark:text-yellow-400 dark:hover:text-yellow-300">Edit</a>
+                                <x-action-link href="{{ route('medical-records.edit', $record) }}" variant="warning">Edit</x-action-link>
                             @endif
                             @if($record->appointment)
-                                <a href="{{ route('patients.medical-history', $record->appointment->patient_id) }}" class="text-sm font-medium text-success-600 hover:text-success-800 dark:text-success-400 dark:hover:text-success-300">Riwayat</a>
+                                <x-action-link href="{{ route('patients.medical-history', $record->appointment->patient_id) }}" variant="success">Riwayat</x-action-link>
                             @endif
                         </div>
                     </td>

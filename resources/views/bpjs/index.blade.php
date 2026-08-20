@@ -70,7 +70,7 @@
                             @if($sep->status === 'aktif')
                                 <form method="POST" action="{{ route('bpjs.sep.cancel', $sep) }}" onsubmit="return confirm('Batalkan SEP ini?')">
                                     @csrf
-                                    <button type="submit" class="text-xs font-semibold text-danger-600 hover:text-red-700 dark:text-red-400">Batalkan</button>
+                                    <x-action-link type="submit" variant="danger">Batalkan</x-action-link>
                                 </form>
                             @else
                                 <span class="text-xs text-text-secondary-light dark:text-text-secondary-dark">-</span>
@@ -127,7 +127,7 @@
                                     @endforeach
                                 </select>
                                 <input type="number" name="approved_amount" min="0" step="0.01" placeholder="Rp disetujui" class="w-28 text-xs border border-border-light bg-surface-light px-2 py-1 rounded-lg dark:border-border-dark dark:bg-surface-dark" />
-                                <button type="submit" class="text-xs font-semibold text-primary-600 hover:text-primary-700 dark:text-primary-400">Update</button>
+                                <x-action-link type="submit">Update</x-action-link>
                             </form>
                             @else
                                 <span class="text-xs text-text-secondary-light dark:text-text-secondary-dark">-</span>

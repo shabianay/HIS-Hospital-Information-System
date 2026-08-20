@@ -28,19 +28,21 @@
         </div>
     </div>
 
-    <form method="GET" action="{{ route('admissions.index') }}" class="mb-6 flex w-full flex-col gap-3 sm:w-auto sm:flex-row sm:items-center">
-        <select name="status" class="w-full sm:w-auto border border-border-light bg-surface-light px-4 py-2.5 text-sm text-text-primary-light focus:border-primary-500 focus:ring-2 focus:ring-primary-500/20 focus:outline-none rounded-xl shadow-glass-sm transition-all duration-200 dark:border-border-dark dark:bg-surface-dark dark:text-text-primary-dark">
-            <option value="">Semua Status</option>
-            @foreach(\App\Models\Admission::STATUSES as $key => $label)
-                <option value="{{ $key }}" {{ request('status') == $key ? 'selected' : '' }}>{{ $label }}</option>
-            @endforeach
-        </select>
-        <input type="date" name="date" value="{{ request('date') }}" class="w-full sm:w-auto border border-border-light bg-surface-light px-4 py-2.5 text-sm text-text-primary-light focus:border-primary-500 focus:ring-2 focus:ring-primary-500/20 focus:outline-none rounded-xl shadow-glass-sm transition-all duration-200 dark:border-border-dark dark:bg-surface-dark dark:text-text-primary-dark">
-        <button type="submit" class="inline-flex items-center justify-center px-4 py-2.5 bg-primary-600 hover:bg-primary-700 text-white text-sm font-semibold rounded-xl transition-all duration-200">Filter</button>
-        @if(request('status') || request('date'))
-            <a href="{{ route('admissions.index') }}" class="inline-flex items-center justify-center px-4 py-2.5 border border-border-light dark:border-border-dark text-sm font-semibold text-text-primary-light dark:text-text-primary-dark rounded-xl transition-all duration-200">Reset</a>
-        @endif
-    </form>
+    <x-filter-form action="{{ route('admissions.index') }}" cols="3">
+            <div>
+                <x-input-label for="status">Status</x-input-label>
+                <x-select name="status" id="status">
+                    <option value="">Semua Status</option>
+                    @foreach(\App\Models\Admission::STATUSES as $key => $label)
+                        <option value="{{ $key }}" {{ request('status') == $key ? 'selected' : '' }}>{{ $label }}</option>
+                    @endforeach
+                </x-select>
+            </div>
+            <div>
+                <x-input-label for="date">Tanggal</x-input-label>
+                <x-text-input type="date" name="date" id="date" value="{{ request('date') }}" />
+            </div>
+        </x-filter-form>
 
     <x-table placeholder="Cari pasien / no. registrasi..." class="overflow-hidden">
             <x-slot name="head">
@@ -72,7 +74,7 @@
                         <span class="inline-flex items-center rounded-full px-3 py-1 text-xs font-semibold {{ $statusClass }}">{{ \App\Models\Admission::STATUSES[$admission->status] ?? $admission->status }}</span>
                     </td>
                     <td class="py-4 px-4 text-sm text-text-primary-light dark:text-text-primary-dark">
-                        <a href="{{ route('admissions.show', $admission) }}" class="inline-flex items-center justify-center px-3 py-1.5 border border-border-light dark:border-border-dark rounded-lg text-xs font-medium text-text-primary-light dark:text-text-primary-dark hover:bg-secondary-100 dark:hover:bg-secondary-800 transition-all">Lihat</a>
+                        <x-action-link href="{{ route('admissions.show', $admission) }}">Lihat</x-action-link>
                     </td>
                 </tr>
                 @empty

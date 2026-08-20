@@ -11,12 +11,16 @@
     </div>
 
     <div class="bg-surface-light dark:bg-surface-dark p-8 rounded-2xl border border-border-light dark:border-border-dark shadow-glass-sm">
-        <form method="GET" action="{{ route('death-certificates.index') }}" class="mb-6 flex flex-col sm:flex-row gap-3">
-            <input type="date" name="date_from" value="{{ request('date_from') }}" class="border border-border-light bg-surface-light px-4 py-3 text-sm text-text-primary-light focus:border-primary-500 focus:ring-2 focus:ring-primary-500/20 focus:outline-none rounded-xl shadow-glass-sm dark:border-border-dark dark:bg-surface-dark dark:text-text-primary-dark">
-            <span class="self-center text-sm text-text-secondary-light dark:text-text-secondary-dark">s/d</span>
-            <input type="date" name="date_to" value="{{ request('date_to') }}" class="border border-border-light bg-surface-light px-4 py-3 text-sm text-text-primary-light focus:border-primary-500 focus:ring-2 focus:ring-primary-500/20 focus:outline-none rounded-xl shadow-glass-sm dark:border-border-dark dark:bg-surface-dark dark:text-text-primary-dark">
-            <x-primary-button type="submit">Filter</x-primary-button>
-        </form>
+        <x-filter-form action="{{ route('death-certificates.index') }}" applyLabel="Filter" cols="3">
+            <div>
+                <x-input-label for="date_from">Dari Tanggal</x-input-label>
+                <x-text-input type="date" name="date_from" id="date_from" value="{{ request('date_from') }}" />
+            </div>
+            <div>
+                <x-input-label for="date_to">Sampai Tanggal</x-input-label>
+                <x-text-input type="date" name="date_to" id="date_to" value="{{ request('date_to') }}" />
+            </div>
+        </x-filter-form>
 
         <x-table placeholder="Cari no. surat / pasien...">
             <x-slot name="head">
@@ -38,12 +42,8 @@
                 <td class="py-4 px-4 text-sm text-text-primary-light dark:text-text-primary-dark">{{ $cert->doctor_name ?? '-' }}</td>
                 <td class="py-4 px-4">
                     <div class="flex items-center gap-2">
-                        <a href="{{ route('death-certificates.pdf', $cert) }}" target="_blank" class="inline-flex items-center justify-center px-3 py-1.5 border border-primary-300 dark:border-primary-700 bg-primary-50 dark:bg-primary-900/20 rounded-lg text-xs font-medium text-primary-700 dark:text-primary-300 hover:bg-primary-100 dark:hover:bg-primary-900/40 transition-all">Cetak</a>
-                        <form method="POST" action="{{ route('death-certificates.destroy', $cert) }}" onsubmit="return confirm('Hapus surat kematian ini?')">
-                            @csrf
-                            @method('DELETE')
-                            <button type="submit" class="inline-flex items-center justify-center px-3 py-1.5 bg-danger-50 dark:bg-danger-900/30 border border-danger-200 dark:border-danger-800 rounded-lg text-xs font-medium text-danger-700 dark:text-danger-400 hover:bg-danger-100 dark:hover:bg-danger-800 transition-all">Hapus</button>
-                        </form>
+                        <x-action-link href="{{ route('death-certificates.pdf', $cert) }}" target="_blank" variant="primary">Cetak</x-action-link>
+                        <x-action-delete action="{{ route('death-certificates.destroy', $cert) }}" confirm="Hapus surat kematian ini?">Hapus</x-action-delete>
                     </div>
                 </td>
             </tr>

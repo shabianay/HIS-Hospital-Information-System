@@ -26,16 +26,21 @@
     </div>
 
     <div class="bg-surface-light dark:bg-surface-dark p-8 rounded-2xl border border-border-light dark:border-border-dark shadow-glass-sm">
-        <form method="GET" action="{{ route('online-registrations.index') }}" class="mb-6 flex flex-col sm:flex-row gap-3">
-            <select name="status" class="w-full sm:w-56 border border-border-light bg-surface-light px-4 py-3 text-sm text-text-primary-light focus:border-primary-500 focus:ring-2 focus:ring-primary-500/20 focus:outline-none rounded-xl shadow-glass-sm dark:border-border-dark dark:bg-surface-dark dark:text-text-primary-dark">
-                <option value="">Semua Status</option>
-                @foreach(\App\Models\OnlineRegistration::STATUSES as $val => $label)
-                    <option value="{{ $val }}" {{ request('status') == $val ? 'selected' : '' }}>{{ $label }}</option>
-                @endforeach
-            </select>
-            <input type="date" name="registration_date" value="{{ request('registration_date') }}" class="border border-border-light bg-surface-light px-4 py-3 text-sm text-text-primary-light focus:border-primary-500 focus:ring-2 focus:ring-primary-500/20 focus:outline-none rounded-xl shadow-glass-sm dark:border-border-dark dark:bg-surface-dark dark:text-text-primary-dark">
-            <x-primary-button type="submit">Filter</x-primary-button>
-        </form>
+        <x-filter-form action="{{ route('online-registrations.index') }}" applyLabel="Filter" cols="3">
+            <div>
+                <x-input-label for="status">Status</x-input-label>
+                <x-select name="status" id="status">
+                    <option value="">Semua Status</option>
+                    @foreach(\App\Models\OnlineRegistration::STATUSES as $val => $label)
+                        <option value="{{ $val }}" {{ request('status') == $val ? 'selected' : '' }}>{{ $label }}</option>
+                    @endforeach
+                </x-select>
+            </div>
+            <div>
+                <x-input-label for="registration_date">Tanggal Registrasi</x-input-label>
+                <x-text-input type="date" name="registration_date" id="registration_date" value="{{ request('registration_date') }}" />
+            </div>
+        </x-filter-form>
 
         <x-table placeholder="Cari no. registrasi / pasien...">
             <x-slot name="head">
@@ -66,17 +71,17 @@
                     </span>
                 </td>
                 <td class="py-4 px-4">
-                    <div class="flex items-center gap-3">
+                    <div class="flex items-center gap-2">
                         @if($reg->status === 'registered')
                             <form method="POST" action="{{ route('online-registrations.checkin', $reg) }}">
                                 @csrf
-                                <button type="submit" class="text-xs font-semibold text-primary-600 hover:text-primary-700 dark:text-primary-400">Konfirmasi Datang</button>
+                                <x-action-link type="submit" variant="primary">Konfirmasi Datang</x-action-link>
                             </form>
                         @endif
                         @if(in_array($reg->status, ['registered', 'checked_in']))
                             <form method="POST" action="{{ route('online-registrations.complete', $reg) }}">
                                 @csrf
-                                <button type="submit" class="text-xs font-semibold text-emerald-600 hover:text-emerald-700 dark:text-emerald-400">Selesai</button>
+                                <x-action-link type="submit" variant="success">Selesai</x-action-link>
                             </form>
                         @endif
                     </div>

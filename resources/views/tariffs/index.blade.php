@@ -41,13 +41,9 @@
                     </td>
                     <td class="py-4 px-4 text-sm text-text-primary-light dark:text-text-primary-dark">
                         <div class="flex items-center gap-2">
-                            <a href="{{ route('tariffs.show', $tariff) }}" class="inline-flex items-center justify-center px-3 py-1.5 border border-border-light dark:border-border-dark rounded-lg text-xs font-medium text-text-primary-light dark:text-text-primary-dark hover:bg-secondary-100 dark:hover:bg-secondary-800 transition-all">Lihat</a>
-                            <a href="{{ route('tariffs.edit', $tariff) }}" class="inline-flex items-center justify-center px-3 py-1.5 bg-warning-50 dark:bg-warning-900/30 border border-warning-200 dark:border-warning-800 rounded-lg text-xs font-medium text-warning-700 dark:text-warning-400 hover:bg-warning-100 dark:hover:bg-warning-800 transition-all">Edit</a>
-                            <form action="{{ route('tariffs.destroy', $tariff) }}" method="POST" onsubmit="return confirm('Hapus tarif ini?')">
-                                @csrf
-                                @method('DELETE')
-                                <button type="submit" class="inline-flex items-center justify-center px-3 py-1.5 bg-danger-50 dark:bg-danger-900/30 border border-danger-200 dark:border-danger-800 rounded-lg text-xs font-medium text-danger-700 dark:text-danger-400 hover:bg-danger-100 dark:hover:bg-danger-800 transition-all">Hapus</button>
-                            </form>
+                            <x-action-link href="{{ route('tariffs.show', $tariff) }}">Lihat</x-action-link>
+                            <x-action-link href="{{ route('tariffs.edit', $tariff) }}" variant="warning">Edit</x-action-link>
+                            <x-action-delete action="{{ route('tariffs.destroy', $tariff) }}" confirm="Hapus tarif ini?">Hapus</x-action-delete>
                         </div>
                     </td>
                 </tr>

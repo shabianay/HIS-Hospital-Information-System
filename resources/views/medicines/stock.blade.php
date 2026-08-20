@@ -197,7 +197,7 @@
                             @endforelse
                         </td>
                         <td class="py-4 px-4 text-sm text-text-primary-light dark:text-text-primary-dark">
-                            <a href="{{ route('medicines.show', $medicine) }}" class="inline-flex items-center justify-center px-3 py-1.5 border border-border-light dark:border-border-dark rounded-lg text-xs font-medium text-text-primary-light dark:text-text-primary-dark hover:bg-secondary-100 dark:hover:bg-secondary-800 transition-all">Detail</a>
+                            <x-action-link href="{{ route('medicines.show', $medicine) }}">Detail</x-action-link>
                         </td>
                     </tr>
                     @empty

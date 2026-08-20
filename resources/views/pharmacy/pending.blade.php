@@ -64,9 +64,7 @@
                 <td class="py-4 px-4 text-right">
                     <form action="{{ route('prescriptions.dispense', $prescription) }}" method="POST" onsubmit="return confirm('Dispensasi resep {{ $prescription->medicine?->name }} dan kurangi stok?')">
                         @csrf
-                        <button type="submit" class="inline-flex items-center justify-center px-4 py-2 bg-primary-600 hover:bg-primary-700 text-white text-xs font-semibold rounded-lg shadow-glass-sm transition-all duration-200">
-                            Dispensasi
-                        </button>
+                        <x-action-link type="submit" variant="primary-solid">Dispensasi</x-action-link>
                     </form>
                 </td>
             </tr>

@@ -15,38 +15,46 @@
     </div>
 
     <div class="bg-surface-light dark:bg-surface-dark p-8 rounded-2xl border border-border-light dark:border-border-dark shadow-glass-sm">
-        <form method="GET" action="{{ route('audit.index') }}" class="mb-6 flex flex-col sm:flex-row gap-3">
-            <select name="action" class="w-full sm:w-44 border border-border-light bg-surface-light px-4 py-3 text-sm text-text-primary-light focus:border-primary-500 focus:ring-2 focus:ring-primary-500/20 focus:outline-none rounded-xl shadow-glass-sm dark:border-border-dark dark:bg-surface-dark dark:text-text-primary-dark">
-                <option value="">Semua Aksi</option>
-                @foreach(['created' => 'Dibuat', 'updated' => 'Diubah', 'deleted' => 'Dihapus'] as $val => $label)
-                    <option value="{{ $val }}" {{ request('action') == $val ? 'selected' : '' }}>{{ $label }}</option>
-                @endforeach
-            </select>
-            <select name="auditable_type" class="w-full sm:w-56 border border-border-light bg-surface-light px-4 py-3 text-sm text-text-primary-light focus:border-primary-500 focus:ring-2 focus:ring-primary-500/20 focus:outline-none rounded-xl shadow-glass-sm dark:border-border-dark dark:bg-surface-dark dark:text-text-primary-dark">
-                <option value="">Semua Modul</option>
-                @foreach([
-                    'App\Models\Patient' => 'Pasien',
-                    'App\Models\Appointment' => 'Pendaftaran',
-                    'App\Models\MedicalRecord' => 'Rekam Medis',
-                    'App\Models\Billing' => 'Billing',
-                    'App\Models\BillingItem' => 'Item Tagihan',
-                    'App\Models\Doctor' => 'Dokter',
-                    'App\Models\Poli' => 'Poli',
-                    'App\Models\Schedule' => 'Jadwal',
-                    'App\Models\Medicine' => 'Obat',
-                    'App\Models\MedicineStock' => 'Stok Obat',
-                    'App\Models\StockMutation' => 'Mutasi Stok',
-                    'App\Models\LabRequest' => 'Permintaan Lab',
-                    'App\Models\LabTest' => 'Tes Lab',
-                    'App\Models\Tariff' => 'Tarif',
-                    'App\Models\User' => 'User',
-                ] as $val => $label)
-                    <option value="{{ $val }}" {{ request('auditable_type') == $val ? 'selected' : '' }}>{{ $label }}</option>
-                @endforeach
-            </select>
-            <input type="date" name="date" value="{{ request('date') }}" class="border border-border-light bg-surface-light px-4 py-3 text-sm text-text-primary-light focus:border-primary-500 focus:ring-2 focus:ring-primary-500/20 focus:outline-none rounded-xl shadow-glass-sm dark:border-border-dark dark:bg-surface-dark dark:text-text-primary-dark">
-            <x-primary-button type="submit">Filter</x-primary-button>
-        </form>
+        <x-filter-form action="{{ route('audit.index') }}" applyLabel="Filter">
+            <div>
+                <x-input-label for="action">Aksi</x-input-label>
+                <x-select name="action" id="action">
+                    <option value="">Semua Aksi</option>
+                    @foreach(['created' => 'Dibuat', 'updated' => 'Diubah', 'deleted' => 'Dihapus'] as $val => $label)
+                        <option value="{{ $val }}" {{ request('action') == $val ? 'selected' : '' }}>{{ $label }}</option>
+                    @endforeach
+                </x-select>
+            </div>
+            <div>
+                <x-input-label for="auditable_type">Modul</x-input-label>
+                <x-select name="auditable_type" id="auditable_type">
+                    <option value="">Semua Modul</option>
+                    @foreach([
+                        'App\Models\Patient' => 'Pasien',
+                        'App\Models\Appointment' => 'Pendaftaran',
+                        'App\Models\MedicalRecord' => 'Rekam Medis',
+                        'App\Models\Billing' => 'Billing',
+                        'App\Models\BillingItem' => 'Item Tagihan',
+                        'App\Models\Doctor' => 'Dokter',
+                        'App\Models\Poli' => 'Poli',
+                        'App\Models\Schedule' => 'Jadwal',
+                        'App\Models\Medicine' => 'Obat',
+                        'App\Models\MedicineStock' => 'Stok Obat',
+                        'App\Models\StockMutation' => 'Mutasi Stok',
+                        'App\Models\LabRequest' => 'Permintaan Lab',
+                        'App\Models\LabTest' => 'Tes Lab',
+                        'App\Models\Tariff' => 'Tarif',
+                        'App\Models\User' => 'User',
+                    ] as $val => $label)
+                        <option value="{{ $val }}" {{ request('auditable_type') == $val ? 'selected' : '' }}>{{ $label }}</option>
+                    @endforeach
+                </x-select>
+            </div>
+            <div>
+                <x-input-label for="date">Tanggal</x-input-label>
+                <x-text-input type="date" name="date" id="date" value="{{ request('date') }}" />
+            </div>
+        </x-filter-form>
 
         <x-table placeholder="Cari admin / modul...">
             <x-slot name="head">

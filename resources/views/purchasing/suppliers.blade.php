@@ -71,12 +71,8 @@
                 </td>
                 <td class="py-4 px-4">
                     <div class="flex items-center gap-2">
-                        <button type="button" @click="$refs.editForm{{ $supplier->id }}.showModal()" class="text-xs font-semibold text-primary-600 hover:text-primary-800 dark:text-primary-400 dark:hover:text-primary-300">Edit</button>
-                        <form method="POST" action="{{ route('purchasing.suppliers.destroy', $supplier) }}" onsubmit="return confirm('Hapus supplier ini?')">
-                            @csrf
-                            @method('DELETE')
-                            <button type="submit" class="text-xs font-semibold text-danger-600 hover:text-red-700 dark:text-red-400">Hapus</button>
-                        </form>
+                        <x-action-link @click="$refs.editForm{{ $supplier->id }}.showModal()" variant="warning">Edit</x-action-link>
+                        <x-action-delete action="{{ route('purchasing.suppliers.destroy', $supplier) }}" confirm="Hapus supplier ini?">Hapus</x-action-delete>
                     </div>
                 </td>
             </tr>

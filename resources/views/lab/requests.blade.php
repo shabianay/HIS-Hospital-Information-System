@@ -30,16 +30,21 @@
     </div>
 
     <div class="bg-surface-light dark:bg-surface-dark p-8 rounded-2xl border border-border-light dark:border-border-dark shadow-glass-sm">
-        <form method="GET" action="{{ route('lab.requests') }}" class="mb-6 flex flex-col sm:flex-row gap-3">
-            <select name="status" class="w-full sm:w-56 border border-border-light bg-surface-light px-4 py-3 text-sm text-text-primary-light focus:border-primary-500 focus:ring-2 focus:ring-primary-500/20 focus:outline-none rounded-xl shadow-glass-sm dark:border-border-dark dark:bg-surface-dark dark:text-text-primary-dark">
-                <option value="">Semua Status</option>
-                @foreach(['pending' => 'Menunggu', 'in_progress' => 'Dikerjakan', 'completed' => 'Selesai', 'cancelled' => 'Dibatalkan'] as $val => $label)
-                    <option value="{{ $val }}" {{ request('status') == $val ? 'selected' : '' }}>{{ $label }}</option>
-                @endforeach
-            </select>
-            <input type="date" name="date" value="{{ request('date') }}" class="border border-border-light bg-surface-light px-4 py-3 text-sm text-text-primary-light focus:border-primary-500 focus:ring-2 focus:ring-primary-500/20 focus:outline-none rounded-xl shadow-glass-sm dark:border-border-dark dark:bg-surface-dark dark:text-text-primary-dark">
-            <x-primary-button type="submit">Filter</x-primary-button>
-        </form>
+        <x-filter-form action="{{ route('lab.requests') }}" applyLabel="Filter" cols="3">
+            <div>
+                <x-input-label for="status">Status</x-input-label>
+                <x-select name="status" id="status">
+                    <option value="">Semua Status</option>
+                    @foreach(['pending' => 'Menunggu', 'in_progress' => 'Dikerjakan', 'completed' => 'Selesai', 'cancelled' => 'Dibatalkan'] as $val => $label)
+                        <option value="{{ $val }}" {{ request('status') == $val ? 'selected' : '' }}>{{ $label }}</option>
+                    @endforeach
+                </x-select>
+            </div>
+            <div>
+                <x-input-label for="date">Tanggal</x-input-label>
+                <x-text-input type="date" name="date" id="date" value="{{ request('date') }}" />
+            </div>
+        </x-filter-form>
 
         <x-table placeholder="Cari pasien / no. antrian...">
             <x-slot name="head">
@@ -75,7 +80,7 @@
                     <span class="inline-flex items-center rounded-full px-3 py-1 text-xs font-semibold {{ $badges[$req->status] }}">{{ $labels[$req->status] }}</span>
                 </td>
                 <td class="py-4 px-4">
-                    <a href="{{ route('lab.requests.show', $req) }}" class="text-sm font-semibold text-primary-600 hover:text-primary-800 dark:text-primary-400 dark:hover:text-primary-300">Proses</a>
+                    <x-action-link href="{{ route('lab.requests.show', $req) }}" variant="primary">Proses</x-action-link>
                 </td>
             </tr>
             @empty

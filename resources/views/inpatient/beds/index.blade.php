@@ -36,12 +36,8 @@
                     </td>
                     <td class="py-4 px-4 text-sm text-text-primary-light dark:text-text-primary-dark">
                         <div class="flex items-center gap-2">
-                            <a href="{{ route('beds.edit', $bed) }}" class="inline-flex items-center justify-center px-3 py-1.5 bg-warning-50 dark:bg-warning-900/30 border border-warning-200 dark:border-warning-800 rounded-lg text-xs font-medium text-warning-700 dark:text-warning-400 hover:bg-warning-100 dark:hover:bg-warning-800 transition-all">Edit</a>
-                            <form action="{{ route('beds.destroy', $bed) }}" method="POST" onsubmit="return confirm('Hapus tempat tidur ini?')">
-                                @csrf
-                                @method('DELETE')
-                                <button type="submit" class="inline-flex items-center justify-center px-3 py-1.5 bg-danger-50 dark:bg-danger-900/30 border border-danger-200 dark:border-danger-800 rounded-lg text-xs font-medium text-danger-700 dark:text-danger-400 hover:bg-danger-100 dark:hover:bg-danger-800 transition-all">Hapus</button>
-                            </form>
+                            <x-action-link href="{{ route('beds.edit', $bed) }}" variant="warning">Edit</x-action-link>
+                            <x-action-delete action="{{ route('beds.destroy', $bed) }}" confirm="Hapus tempat tidur ini?">Hapus</x-action-delete>
                         </div>
                     </td>
                 </tr>

@@ -68,23 +68,15 @@
         </div>
 
         <div class="info-panel">
-            <table class="info">
-                <tr>
-                    <td><span class="k">Nama Lengkap</span><span class="v">{{ $patient->name }}</span></td>
-                    <td><span class="k">NIK</span><span class="v">{{ $patient->nik }}</span></td>
-                </tr>
-                <tr>
-                    <td><span class="k">Jenis Kelamin</span><span class="v">{{ $patient->gender === 'L' ? 'Laki-laki' : 'Perempuan' }}</span></td>
-                    <td><span class="k">Tanggal Lahir</span><span class="v">{{ $patient->date_of_birth?->format('d/m/Y') }}</span></td>
-                </tr>
-                <tr>
-                    <td><span class="k">No. Telepon</span><span class="v">{{ $patient->phone_number ?: '-' }}</span></td>
-                    <td><span class="k">Asuransi / BPJS</span><span class="v">{{ $patient->insurance_provider ?: '-' }} @if($patient->insurance_provider && $patient->insurance_number)({{ $patient->insurance_number }}) @endif</span></td>
-                </tr>
-                <tr>
-                    <td colspan="2"><span class="k">Alamat</span><span class="v">{{ $patient->address ?: '-' }}</span></td>
-                </tr>
-            </table>
+            <div class="info-grid">
+                <div class="info-item"><span class="k">Nama Lengkap</span><span class="v">{{ $patient->name }}</span></div>
+                <div class="info-item"><span class="k">NIK</span><span class="v">{{ $patient->nik }}</span></div>
+                <div class="info-item"><span class="k">Jenis Kelamin</span><span class="v">{{ $patient->gender === 'L' ? 'Laki-laki' : 'Perempuan' }}</span></div>
+                <div class="info-item"><span class="k">Tanggal Lahir</span><span class="v">{{ $patient->date_of_birth?->format('d/m/Y') }}</span></div>
+                <div class="info-item"><span class="k">No. Telepon</span><span class="v">{{ $patient->phone_number ?: '-' }}</span></div>
+                <div class="info-item"><span class="k">Asuransi / BPJS</span><span class="v">{{ $patient->insurance_provider ?: '-' }} @if($patient->insurance_provider && $patient->insurance_number)({{ $patient->insurance_number }}) @endif</span></div>
+                <div class="info-item" style="grid-column: span 2;"><span class="k">Alamat</span><span class="v">{{ $patient->address ?: '-' }}</span></div>
+            </div>
         </div>
 
         <div class="note">Kartu ini wajib dibawa setiap kali berobat. Jika hilang, hubungi loket pendaftaran. Dicetak {{ $generatedAt }}.</div>

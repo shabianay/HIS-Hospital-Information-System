@@ -142,7 +142,7 @@
                             <span class="inline-flex items-center rounded-full px-3 py-1 text-xs font-semibold {{ $badge['color'] }}">{{ $badge['label'] }}</span>
                         </td>
                         <td class="py-3 px-4">
-                            <a href="{{ route('appointments.show', $visit) }}" class="inline-flex items-center justify-center px-3 py-1.5 border border-border-light dark:border-border-dark rounded-lg text-xs font-medium text-text-primary-light dark:text-text-primary-dark hover:bg-secondary-100 dark:hover:bg-secondary-800 transition-all">Detail</a>
+                            <x-action-link href="{{ route('appointments.show', $visit) }}">Detail</x-action-link>
                         </td>
                     </tr>
                     @empty

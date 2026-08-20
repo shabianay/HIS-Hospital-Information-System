@@ -76,14 +76,9 @@
                         <form method="POST" action="{{ route('radiology.tests.update', $test) }}">
                             @csrf
                             @method('PUT')
-                            <button type="submit" name="is_active" value="{{ $test->is_active ? 0 : 1 }}"
-                                class="text-xs font-semibold text-primary-600 hover:text-primary-800 dark:text-primary-400 dark:hover:text-primary-300">{{ $test->is_active ? 'Nonaktifkan' : 'Aktifkan' }}</button>
+                            <x-action-link type="submit" name="is_active" value="{{ $test->is_active ? 0 : 1 }}">{{ $test->is_active ? 'Nonaktifkan' : 'Aktifkan' }}</x-action-link>
                         </form>
-                        <form method="POST" action="{{ route('radiology.tests.destroy', $test) }}" onsubmit="return confirm('Hapus pemeriksaan ini?')">
-                            @csrf
-                            @method('DELETE')
-                            <button type="submit" class="text-xs font-semibold text-danger-600 hover:text-red-700 dark:text-red-400">Hapus</button>
-                        </form>
+                        <x-action-delete action="{{ route('radiology.tests.destroy', $test) }}" confirm="Hapus pemeriksaan ini?">Hapus</x-action-delete>
                     </div>
                 </td>
             </tr>

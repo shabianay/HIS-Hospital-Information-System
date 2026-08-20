@@ -10,22 +10,30 @@
     </div>
 
     <div class="bg-surface-light dark:bg-surface-dark p-8 rounded-2xl border border-border-light dark:border-border-dark shadow-glass-sm">
-        <form method="GET" action="{{ route('medicines.mutations') }}" class="mb-6 flex flex-col sm:flex-row gap-3">
-            <select name="type" class="w-full sm:w-40 border border-border-light bg-surface-light px-4 py-3 text-sm text-text-primary-light focus:border-primary-500 focus:ring-2 focus:ring-primary-500/20 focus:outline-none rounded-xl shadow-glass-sm dark:border-border-dark dark:bg-surface-dark dark:text-text-primary-dark">
-                <option value="">Semua Tipe</option>
-                <option value="in" {{ request('type') === 'in' ? 'selected' : '' }}>Stok Masuk</option>
-                <option value="out" {{ request('type') === 'out' ? 'selected' : '' }}>Stok Keluar</option>
-                <option value="return" {{ request('type') === 'return' ? 'selected' : '' }}>Retur / Pengembalian</option>
-            </select>
-            <select name="medicine_id" class="w-full sm:w-56 border border-border-light bg-surface-light px-4 py-3 text-sm text-text-primary-light focus:border-primary-500 focus:ring-2 focus:ring-primary-500/20 focus:outline-none rounded-xl shadow-glass-sm dark:border-border-dark dark:bg-surface-dark dark:text-text-primary-dark">
-                <option value="">Semua Obat</option>
-                @foreach($medicines as $medicine)
-                    <option value="{{ $medicine->id }}" {{ request('medicine_id') == $medicine->id ? 'selected' : '' }}>{{ $medicine->name }}</option>
-                @endforeach
-            </select>
-            <input type="date" name="date" value="{{ request('date') }}" class="border border-border-light bg-surface-light px-4 py-3 text-sm text-text-primary-light focus:border-primary-500 focus:ring-2 focus:ring-primary-500/20 focus:outline-none rounded-xl shadow-glass-sm dark:border-border-dark dark:bg-surface-dark dark:text-text-primary-dark">
-            <x-primary-button type="submit">Filter</x-primary-button>
-        </form>
+        <x-filter-form action="{{ route('medicines.mutations') }}" applyLabel="Filter" cols="4">
+            <div>
+                <x-input-label for="type">Tipe</x-input-label>
+                <x-select name="type" id="type">
+                    <option value="">Semua Tipe</option>
+                    <option value="in" {{ request('type') === 'in' ? 'selected' : '' }}>Stok Masuk</option>
+                    <option value="out" {{ request('type') === 'out' ? 'selected' : '' }}>Stok Keluar</option>
+                    <option value="return" {{ request('type') === 'return' ? 'selected' : '' }}>Retur / Pengembalian</option>
+                </x-select>
+            </div>
+            <div>
+                <x-input-label for="medicine_id">Obat</x-input-label>
+                <x-select name="medicine_id" id="medicine_id">
+                    <option value="">Semua Obat</option>
+                    @foreach($medicines as $medicine)
+                        <option value="{{ $medicine->id }}" {{ request('medicine_id') == $medicine->id ? 'selected' : '' }}>{{ $medicine->name }}</option>
+                    @endforeach
+                </x-select>
+            </div>
+            <div>
+                <x-input-label for="date">Tanggal</x-input-label>
+                <x-text-input type="date" name="date" id="date" value="{{ request('date') }}" />
+            </div>
+        </x-filter-form>
 
         <x-table placeholder="Cari obat / referensi...">
             <x-slot name="head">

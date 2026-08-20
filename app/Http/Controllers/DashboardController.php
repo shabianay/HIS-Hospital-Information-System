@@ -103,7 +103,18 @@ class DashboardController extends Controller
             ) + ['lowStockCount' => $lowStockCount->count()];
         });
 
-        return view('dashboard.index', $stats);
+        $user = auth()->user();
+
+        return view('dashboard.index', $stats + [
+            'canManagePatients' => $user->can('manage-patients'),
+            'canManageAppointments' => $user->can('manage-appointments'),
+            'canManageBilling' => $user->can('manage-billing'),
+            'canManagePharmacy' => $user->can('manage-pharmacy'),
+            'canManageInpatient' => $user->can('manage-inpatient'),
+            'canManageLab' => $user->can('manage-lab'),
+            'canManageEmr' => $user->can('manage-emr'),
+            'canViewTrends' => $user->can('manage-appointments') || $user->can('manage-billing'),
+        ]);
     }
 
     private function buildChartData(Carbon $today)

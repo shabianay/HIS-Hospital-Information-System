@@ -46,7 +46,7 @@
                 <td class="py-4 px-4 text-sm font-mono {{ $opname->total_difference != 0 ? 'text-danger-600 dark:text-danger-400' : 'text-text-secondary-light dark:text-text-secondary-dark' }}">{{ $opname->total_difference }}</td>
                 <td class="py-4 px-4 text-sm text-text-primary-light dark:text-text-primary-dark">{{ $opname->created_by_name ?? $opname->createdBy?->name ?? '-' }}</td>
                 <td class="py-4 px-4">
-                    <a href="{{ route('stock-opname.show', $opname) }}" class="text-xs font-semibold text-primary-600 hover:text-primary-700 dark:text-primary-400">Detail</a>
+                    <x-action-link href="{{ route('stock-opname.show', $opname) }}">Detail</x-action-link>
                 </td>
             </tr>
             @empty

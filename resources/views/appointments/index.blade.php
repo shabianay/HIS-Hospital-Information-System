@@ -76,45 +76,32 @@
             </div>
         </div>
 
-        <form method="GET" action="{{ route('appointments.index') }}"
-            class="grid grid-cols-1 md:grid-cols-4 gap-6 p-6 bg-secondary-50 dark:bg-secondary-900/30 rounded-2xl border border-border-light dark:border-border-dark shadow-glass-sm">
+        <x-filter-form action="{{ route('appointments.index') }}">
             <div>
                 <x-input-label for="date" value="Filter Tanggal" />
                 <x-text-input type="date" name="date" id="date" value="{{ request('date', now()->toDateString()) }}" />
             </div>
             <div>
                 <x-input-label for="poli_id" value="Filter Poli" />
-                <select name="poli_id" id="poli_id"
-                    class="w-full border border-border-light bg-surface-light px-4 py-3 text-sm text-text-primary-light focus:border-primary-500 focus:ring-2 focus:ring-primary-500/20 focus:outline-none rounded-xl shadow-glass-sm transition-all duration-200 dark:border-border-dark dark:bg-surface-dark dark:text-text-primary-dark">
+                <x-select name="poli_id" id="poli_id">
                     <option value="">Semua Poli</option>
                     @foreach ($polis as $poli)
                         <option value="{{ $poli->id }}" {{ request('poli_id') == $poli->id ? 'selected' : '' }}>
                             {{ $poli->name }}</option>
                     @endforeach
-                </select>
+                </x-select>
             </div>
             <div>
                 <x-input-label for="status" value="Filter Status" />
-                <select name="status" id="status"
-                    class="w-full border border-border-light bg-surface-light px-4 py-3 text-sm text-text-primary-light focus:border-primary-500 focus:ring-2 focus:ring-primary-500/20 focus:outline-none rounded-xl shadow-glass-sm transition-all duration-200 dark:border-border-dark dark:bg-surface-dark dark:text-text-primary-dark">
+                <x-select name="status" id="status">
                     <option value="">Semua Status</option>
                     @foreach ($statuses as $key => $st)
                         <option value="{{ $key }}" {{ request('status') == $key ? 'selected' : '' }}>
                             {{ $st['label'] }}</option>
                     @endforeach
-                </select>
+                </x-select>
             </div>
-            <div class="flex items-end">
-                <button type="submit"
-                    class="w-full px-6 py-3 bg-primary-500 hover:bg-primary-600 text-white font-semibold text-sm rounded-xl transition-colors shadow-glass-sm">
-                    Terapkan Filter
-                </button>
-                <a href="{{ route('appointments.index') }}"
-                    class="ml-2 px-6 py-3 bg-surface-light dark:bg-surface-dark border border-border-light dark:border-border-dark text-text-primary-light dark:text-text-primary-dark font-semibold text-sm rounded-xl hover:bg-secondary-50 dark:hover:bg-secondary-700 transition-colors shadow-glass-sm">
-                    Reset
-                </a>
-            </div>
-        </form>
+        </x-filter-form>
 
         <div
             class="bg-surface-light dark:bg-surface-dark p-6 md:p-8 border border-border-light dark:border-border-dark rounded-2xl shadow-glass-sm">
@@ -151,8 +138,7 @@
                                 class="inline-flex items-center rounded-full px-3 py-1 text-xs font-semibold {{ $st['color'] }}">{{ $st['label'] }}</span>
                         </td>
                         <td class="py-4 px-4 text-right whitespace-nowrap">
-                            <a href="{{ route('appointments.show', $appointment) }}"
-                                class="inline-flex items-center justify-center px-3 py-1.5 border border-border-light dark:border-border-dark rounded-lg text-xs font-medium text-text-primary-light dark:text-text-primary-dark hover:bg-secondary-100 dark:hover:bg-secondary-800 transition-all">Detail</a>
+                            <x-action-link href="{{ route('appointments.show', $appointment) }}">Detail</x-action-link>
                         </td>
                     </tr>
                 @empty

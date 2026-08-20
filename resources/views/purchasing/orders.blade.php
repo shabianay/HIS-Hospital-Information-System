@@ -30,15 +30,17 @@
     </div>
 
     <div class="bg-surface-light dark:bg-surface-dark p-8 rounded-2xl border border-border-light dark:border-border-dark shadow-glass-sm">
-        <form method="GET" action="{{ route('purchasing.orders') }}" class="mb-6 flex flex-col sm:flex-row gap-3">
-            <select name="status" class="w-full sm:w-56 border border-border-light bg-surface-light px-4 py-3 text-sm text-text-primary-light focus:border-primary-500 focus:ring-2 focus:ring-primary-500/20 focus:outline-none rounded-xl shadow-glass-sm dark:border-border-dark dark:bg-surface-dark dark:text-text-primary-dark">
-                <option value="">Semua Status</option>
-                @foreach(\App\Models\PurchaseOrder::STATUSES as $val => $label)
-                    <option value="{{ $val }}" {{ request('status') == $val ? 'selected' : '' }}>{{ $label }}</option>
-                @endforeach
-            </select>
-            <x-primary-button type="submit">Filter</x-primary-button>
-        </form>
+        <x-filter-form action="{{ route('purchasing.orders') }}" applyLabel="Filter" cols="2">
+            <div>
+                <x-input-label for="status">Status</x-input-label>
+                <x-select name="status" id="status">
+                    <option value="">Semua Status</option>
+                    @foreach(\App\Models\PurchaseOrder::STATUSES as $val => $label)
+                        <option value="{{ $val }}" {{ request('status') == $val ? 'selected' : '' }}>{{ $label }}</option>
+                    @endforeach
+                </x-select>
+            </div>
+        </x-filter-form>
 
         <x-table placeholder="Cari no. PO / supplier...">
             <x-slot name="head">
@@ -69,7 +71,7 @@
                     <span class="inline-flex items-center rounded-full px-3 py-1 text-xs font-semibold {{ $badges[$order->status] }}">{{ \App\Models\PurchaseOrder::STATUSES[$order->status] ?? $order->status }}</span>
                 </td>
                 <td class="py-4 px-4">
-                    <a href="{{ route('purchasing.orders.show', $order) }}" class="text-sm font-semibold text-primary-600 hover:text-primary-800 dark:text-primary-400 dark:hover:text-primary-300">Detail</a>
+                    <x-action-link href="{{ route('purchasing.orders.show', $order) }}">Detail</x-action-link>
                 </td>
             </tr>
             @empty

@@ -76,7 +76,7 @@
                             <span class="inline-flex items-center rounded-full px-3 py-1 text-xs font-semibold {{ $badge['class'] }}">{{ $badge['label'] }}</span>
                         </td>
                         <td class="py-3">
-                            <a href="{{ route('medical-records.show', $record) }}" class="text-sm font-medium text-primary-600 hover:text-primary-800 dark:text-primary-400 dark:hover:text-primary-300">Detail EMR</a>
+                            <x-action-link href="{{ route('medical-records.show', $record) }}" variant="primary">Detail EMR</x-action-link>
                         </td>
                     </tr>
                     @empty

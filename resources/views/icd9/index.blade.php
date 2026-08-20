@@ -67,12 +67,8 @@
                 </td>
                 <td class="py-4 px-4">
                     <div class="flex items-center gap-2">
-                        <button type="button" @click="$refs.editForm{{ $proc->id }}.showModal()" class="text-xs font-semibold text-primary-600 hover:text-primary-800 dark:text-primary-400 dark:hover:text-primary-300">Edit</button>
-                        <form method="POST" action="{{ route('icd9.destroy', $proc) }}" onsubmit="return confirm('Hapus prosedur ini?')">
-                            @csrf
-                            @method('DELETE')
-                            <button type="submit" class="text-xs font-semibold text-danger-600 hover:text-red-700 dark:text-red-400">Hapus</button>
-                        </form>
+                        <x-action-link @click="$refs.editForm{{ $proc->id }}.showModal()" variant="warning">Edit</x-action-link>
+                        <x-action-delete action="{{ route('icd9.destroy', $proc) }}" confirm="Hapus prosedur ini?">Hapus</x-action-delete>
                     </div>
                 </td>
             </tr>

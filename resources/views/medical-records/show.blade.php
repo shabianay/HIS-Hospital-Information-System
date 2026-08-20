@@ -216,7 +216,7 @@
                             @if(!$prescription->is_dispensed)
                                 <form action="{{ route('prescriptions.dispense', $prescription) }}" method="POST" onsubmit="return confirm('Dispensasi resep ini dan kurangi stok?')">
                                     @csrf
-                                    <button type="submit" class="inline-flex items-center gap-2 rounded-xl bg-primary-600 px-4 py-1.5 text-xs font-semibold text-white shadow hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 transition-all duration-200">Dispensasi</button>
+                                    <x-action-link type="submit" variant="primary-solid">Dispensasi</x-action-link>
                                 </form>
                             @else
                                 <span class="text-xs text-text-secondary-light dark:text-text-secondary-dark">-</span>
